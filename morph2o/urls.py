@@ -25,7 +25,7 @@ urlpatterns = [
    url(r'^$', views.index, name='index'),
    url(r'^admin/', include(admin.site.urls)),
     url(r'^visualizer/', views.index, name='index1'),
-    url(r'^accounts/login/$', auth_views.login, {'authentication_form': ANAuthenticationForm, 'extra_context':{'next': '/'}}),
+    url(r'^accounts/login/$', auth_views.login, {'authentication_form': ANAuthenticationForm, 'extra_context':{'next': '/'}}, name='login'),
    url(r'^log_out/',auth_views.logout, {'next_page': 'index'}, name="log_out" ),
    url(r'^test/', get_records.get_widget, name="get_widget"),
    url(r'^gis/', views.gis_view, name="gis_view"),
