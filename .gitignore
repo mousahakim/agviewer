@@ -1,0 +1,8 @@
+*.pyc
+*~
+*.log
+*.txt
+*.pid
+settings.py
+db.sqlite3
+visualizer/migrations/*
