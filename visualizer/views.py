@@ -26,7 +26,8 @@ def index(request):
 	dg_stations = Stations.objects.filter(user=request.user, database='dg')
 	dashboards = Dashboard.objects.filter(user=request.user)
 	dash = request.GET.get('dashboard')
-	print dash
+	app_user = AppUser.objects.get(user=request.user)
+	print app_user.access_chart_settings
 	if dash is None:
 		try:
 			activedash = Dashboard.objects.get(user=request.user, active=True)
@@ -41,7 +42,8 @@ def index(request):
 			'stat_widgets': stat_widgets, 
 			'fc_stations': fc_stations,
 			'dg_stations': dg_stations, 
-			'dashboards': dashboards
+			'dashboards': dashboards, 
+			'app_user': app_user
 			# 'data_sensors': data_sensors
 
 		})
@@ -80,7 +82,8 @@ def index(request):
 		'stat_widgets': stat_widgets, 
 		'fc_stations': fc_stations,
 		'dg_stations': dg_stations, 
-		'dashboards': dashboards
+		'dashboards': dashboards,
+		'app_user': app_user
 		# 'data_sensors': data_sensors
 
 		})	
