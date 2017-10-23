@@ -641,7 +641,10 @@
                                 <a href="javascript:;" class="daterange fa fa-calendar"></a>
                                 <a href="javascript:;" class="fa fa-expand expandable"></a>
                                 <a href="javascript:;" class="fa fa-chevron-down"></a>
-                                <a href="#main-chart-modal" data-toggle="modal" class="fa fa-wrench"></a>
+                                {% if app_user.access_chart_settings is True %}
+                                  <a href="#main-chart-modal" data-toggle="modal" class="fa fa-wrench"></a>
+                                {% endif %}
+
                                 <a href="javascript:;" class="fa fa-times"></a>
                             </span>
                           </header>

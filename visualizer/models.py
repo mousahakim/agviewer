@@ -54,6 +54,7 @@ class AppUser(models.Model):
 	dg_password = models.CharField(max_length=100)
 	pub_key = models.CharField(max_length=100)
 	prv_key = models.CharField(max_length=100)
+	access_chart_settings = models.BooleanField(default=True)
 
 
 class Station_Data(models.Model):
