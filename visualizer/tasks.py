@@ -464,7 +464,6 @@ def get_data_fc(station,min_date=None, max_date=None):
 				dt_from = parse_date(minmax_date['max_date']) - timedelta(weeks=47)
 			else:
 				dt_from = parse_date(minmax_date['min_date'])
-			print 'downloading data since: ', dt_from
 			dt_from = calendar.timegm(dt_from.timetuple())
 		else:
 			print 'cannot retrieve min/max data available.'
@@ -474,6 +473,7 @@ def get_data_fc(station,min_date=None, max_date=None):
 	if min_date is not None:
 		dt_from = calendar.timegm(min_date.timetuple())
 
+	print 'downloading data since: ', datetime.fromtimestamp(dt_from).strftime('%Y-%m-%d %H:%M:%S')
 	if max_date is not None:
 		dt_to = calendar.timegm(max_date.timetuple())
 		path = '/data/'+station+'/raw/from/'+str(dt_from)+'/to/'+str(dt_to)
