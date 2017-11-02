@@ -107,6 +107,15 @@ def convert_sca(value, code, extract, unit=None):
 				return (value - 400) / 10 #
 			elif value > 900:
 				return ((900 + 5 * (value - 900)) - 400 ) / 10 #
+				
+	elif code == '108':
+		if extract == 'wp': # water potential
+			return 10**(0.0001*value) / -10.20408 #
+		elif extract == 'temp':
+			if value <= 900:
+				return (value - 400) / 10 #
+			elif value > 900:
+				return ((900 + 5 * (value - 900)) - 400 ) / 10 #
 
 	elif code == '122':
 		value = int(value)
@@ -278,6 +287,16 @@ def convert(value, code):
 		else: 
 			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
 		return {'MPS-2 Water Ptl.':10**(0.0001*wp_raw) / -10.20408, 'MPS-2 Temp': temp}
+
+	elif code == '108':
+		value = int(value)
+		wp_raw = value & 65535#
+		t_raw = rshift(value, 10) & 1023
+		if t_raw <= 900:
+			temp = (t_raw - 400) / 10
+		else: 
+			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
+		return {'MPS-6 Water Ptl.':10**(0.0001*wp_raw) / -10.20408, 'MPS-6 Temp': temp}
 
 	elif code == '122':
 		value = int(value)
