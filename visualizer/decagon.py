@@ -292,7 +292,7 @@ def convert(value, code):
 			temp = (t_raw - 400) / 10
 		else: 
 			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
-		return {'MPS-2 Water Ptl.':10**(0.0001*wp_raw) / -10.20408, 'MPS-2 Temp': temp}
+		return {'MPS-2 Water Potential':10**(0.0001*wp_raw) / -10.20408, 'MPS-2 Temp': temp}
 
 	elif code == '108':
 		value = int(value)
@@ -302,7 +302,7 @@ def convert(value, code):
 			temp = (t_raw - 400) / 10
 		else: 
 			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
-		return {'MPS-6 Water Ptl.':(10**(0.0001*wp_raw)) / -10.20408, 'MPS-6 Temp': temp}
+		return {'MPS-6 Water Potential':(10**(0.0001*wp_raw)) / -10.20408, 'MPS-6 Temp': temp}
 
 	elif code == '122':
 		value = int(value)
