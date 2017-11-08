@@ -2065,7 +2065,7 @@ function populateVoltageForm(voltageFormValues){
         <label for="voltage-equation-'+voltageFormValues[i].inputID+'" class="control-label">Equation</label>\
       </div>\
       <div class="col-lg-10 col-md-10 col-sm-10">\
-        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageFormValues[i].inputID+'" placeholder="">\
+        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageFormValues[i].inputID+'" placeholder="i.e. x^2+3*x+1">\
       </div>\
       <div class="col-lg-2 col-md-2 col-sm-2 top-buffer-5">\
         <label for="voltage-label-'+voltageFormValues[i].inputID+'" class="control-label">Label </label>\
@@ -2471,7 +2471,7 @@ $(function(){
         <label for="voltage-equation-'+voltageGraphCount+'" class="control-label">Equation</label>\
       </div>\
       <div class="col-lg-10 col-md-10 col-sm-10">\
-        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageGraphCount+'" placeholder="">\
+        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageGraphCount+'" placeholder="i.e. x^2+3*x+1">\
       </div>\
       <div class="col-lg-2 col-md-2 col-sm-2 top-buffer-5">\
         <label for="voltage-label-'+voltageGraphCount+'" class="control-label">Label </label>\
