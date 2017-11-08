@@ -1138,6 +1138,21 @@ AmCharts.checkEmptyData = function(chart) {
   }
   return false;
 }
+//set opacity of chart line
+function setLineThickness(graph, lineThickness) {
+  var className = "amcharts-graph-" + graph.id;
+  var items = document.getElementsByClassName( className );
+  if ( undefined === items )
+    return;
+  for ( var x in items ) {
+    if ( "object" !== typeof items[x] )
+      continue;
+    var path = items[x].getElementsByTagName( "path" )[ 0 ];
+    if ( undefined !== path ){
+      $(path).attr('stroke-width', lineThickness);
+    }
+  }
+}
 
 function render_chart(widget){
 console.log(widget);
@@ -1246,6 +1261,16 @@ console.log(widget);
 	
 	chart.dataDateFormat = "YYYY-MM-DD JJ:NN";
 	chart.categoryField = "date";
+
+  //add highlight on hover
+  //add chart event listener
+  chart.timeout;
+  chart.addListener( "rollOverGraph", function( event ) {
+    setLineThickness( event.graph, 3 );
+  } );
+  chart.addListener( "rollOutGraph", function( event ) {
+    setLineThickness( event.graph, 2 );
+  } );
 
 	var categoryAxis = chart.categoryAxis;
 	var axisSet = false;
@@ -1685,7 +1710,15 @@ console.log(widget);
 		
 		chart.validateData();	
 	};
-
+  //Add hover events to legend as well
+  chart.legend.addListener("rollOverItem", function (event) {
+    console.log('legened hovered');
+    setLineThickness( event.chart.graphs[event.dataItem.index], 3 );
+  });
+  
+  chart.legend.addListener("rollOutItem", function (event) {
+    setLineThickness( event.chart.graphs[event.dataItem.index], 2 );
+  });
 };
 
 
