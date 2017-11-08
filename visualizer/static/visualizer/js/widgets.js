@@ -1271,15 +1271,6 @@ console.log(widget);
   chart.addListener( "rollOutGraph", function( event ) {
     setLineThickness( event.graph, 2 );
   } );
-  //Add hover events to legend as well
-  chart.legend.addListener("rollOverItem", function (event) {
-    console.log('legened hovered');
-    setLineThickness( event.chart.graphs[event.dataItem.index], 3 );
-  });
-  
-  chart.legend.addListener("rollOutItem", function (event) {
-    setLineThickness( event.chart.graphs[event.dataItem.index], 2 );
-  });
 
 	var categoryAxis = chart.categoryAxis;
 	var axisSet = false;
@@ -1719,7 +1710,15 @@ console.log(widget);
 		
 		chart.validateData();	
 	};
-
+  //Add hover events to legend as well
+  chart.legend.addListener("rollOverItem", function (event) {
+    console.log('legened hovered');
+    setLineThickness( event.chart.graphs[event.dataItem.index], 3 );
+  });
+  
+  chart.legend.addListener("rollOutItem", function (event) {
+    setLineThickness( event.chart.graphs[event.dataItem.index], 2 );
+  });
 };
 
 
