@@ -7,6 +7,7 @@ var $date_to;
 var all_widgets = {};
 var $pawFields = {};
 var satExECLst = [];
+var voltageSensors=[], voltageLst=[], voltageCheckbox, voltageAxes = {};
 var $sat_ex_ec_sensors = [];
 var $options;
 var selects = {};
@@ -437,7 +438,7 @@ function addDashboard(name){
     dataType: 'json'
   }).done(function(data){
     var uid = data.uid;
-    console.log(uid);
+    // console.log(uid);
     $('#sidebar .sidebar-menu .sub-menu .sub').append('\
       <li class="sub-menu">\
         <a class="dashboard-item" id="'+uid+'"  href="/?dashboard='+uid+'">\
@@ -492,7 +493,6 @@ $(function() {
     if (moment($date_to).hour() == 0) {
     	$date_to = end.format('YYYY-MM-DD') + ' ' + '00:00';	
     };
-    console.log($date_to);
      
     $('#reportrange span').html($date_from + ' - ' + $date_to);
   }
@@ -539,7 +539,6 @@ $(function() {
     invoker.parent().parent().parent().children('div').append('<div class="curtain">\
       <span><i class="fa fa-spin fa-spinner"></i> Loading...</span>\
       </div>');
-    console.log(chartID);
     var params = {
       widgetID: chartID,
       dateFrom: $date_from, 
@@ -553,7 +552,6 @@ $(function() {
     }).done(function (data){
       render_chart(data.widget);
     }).fail(function (message){
-      console.log(message);
       notify_auto('danger', 5, message.message);
     });
   });
@@ -569,7 +567,6 @@ $(function() {
     if (moment(stat_dt_end).hour() == 0) {
       stat_dt_end = end.format('YYYY-MM-DD') + ' ' + '00:00';  
     };
-    console.log(stat_dt_end);
      
     $('#statdaterange span').html(stat_dt_start + ' - ' + stat_dt_end);
   }
@@ -618,7 +615,6 @@ $(function() {
   //add dashboard
   $('#add-dashboard-modal button.submit').on('click', function(e){
     var dashboardName = $('#add-dashboard-modal input.dashboard-name').val()
-    console.log(dashboardName);
 
     addDashboard(dashboardName);
     $('#add-dashboard-modal').modal('hide');
@@ -761,7 +757,6 @@ $(function() {
           </section>  \
         </div>');  
         }else{
-          console.log(data.id);
           $('div#'+data.id+' div.weather-bg').attr('style', 'background:#'+data.color+';');
           $('div#'+data.id+' span.title').html(data.name);
 
@@ -773,8 +768,6 @@ $(function() {
     }).fail(function(msg){
       notify_auto('danger', 10, 'Operation Failed.');
     });
-
-    console.log(params);
 
     $('#add-stat-widget-modal').modal('hide');
 
@@ -811,7 +804,6 @@ $(function() {
       }).done(function(data) {
         if (data.success){
           //populate modal fields
-          console.log(data, $(this));
           $('#stat-data-select option:selected').removeAttr('selected');
           $('#stat-sensor-select option:selected').removeAttr('selected');
           $('#stat-chart-select option:selected').removeAttr('selected');
@@ -860,7 +852,6 @@ $(function() {
 
   //sensor and chart selects of stat-data-modal disable each other
   $('#stat-sensor-select').on('change', function(e){
-    console.log('changed.');
     if ($(this).data('kendoMultiSelect').value().length > 0){
       $('#add-stat-data-modal select#stat-chart-select').data('kendoMultiSelect').enable(false);
     }else{
@@ -869,7 +860,6 @@ $(function() {
   });
 
   $('#stat-chart-select').on('change', function(e){
-    console.log('changed.');
     if ($(this).data('kendoMultiSelect').value().length > 0){
       $('#stat-sensor-select').data('kendoMultiSelect').enable(false);
     }else{
@@ -1053,7 +1043,7 @@ function makeData (widget) {
 		if (val.value.length == 0)
 			return true;
 		// if multi-graph option
-		if (['raw_sensors', 'paw', 'ex_ec'].indexOf(key) != -1) {
+		if (['raw_sensors', 'paw', 'ex_ec', 'voltage'].indexOf(key) != -1) {
 
 			for (var i = 0; i < val.value.length; i++) {
 				for (var j = 0; j < val.value[i].length; j++) {
@@ -1266,6 +1256,7 @@ console.log(widget);
 	var position = 'left';
 	if (data.length > 0) {
 		var prop_lst = Object.keys(data[0]);
+    console.log(prop_lst);
 		for (var i = 0; i < prop_lst.length; i++){
 			if (prop_lst[i] == 'date' || prop_lst[i] == 'lineColor'){
 				continue;
@@ -1491,6 +1482,66 @@ console.log(widget);
 				
 			};
 
+      if (prop_lst[i].split("-")[0] == 'voltage'){
+        graph.title = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].name;
+        graph.balloonText = "[[title]]<br/><b style='font-size: 100%'>[[value]]</b>"
+        factor = Math.ceil(chart.valueAxes.length / 2) -1;
+        graph.lineColor = getRandomColor();
+        graph.lineThickness = 2;
+        // if (widget.data.voltage.value[prop_lst[i].split('-')[1]][0].lineColor != '') {
+        //   graph.lineColor = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].lineColor;
+        // };
+        axisSet = false;
+
+        for (var j=0;j< chart.valueAxes.length;j++){
+          if (chart.valueAxes[j].id == widget.data.voltage.value[prop_lst[i].split('-')[1]][0].sensor) {
+            axisSet = true;
+            axisId = chart.valueAxes[j].id;
+          };
+        };
+        if (chart.valueAxes.length % 2 == 0) {
+          position = 'right';
+        }else{
+          position = 'left';
+        };
+        var valueAxis = new AmCharts.ValueAxis();
+        if (!axisSet) {
+          if (widget.data.voltage.params.axes != null) {
+            min = parseInt(widget.data.voltage.params.axes.min);
+            max = parseInt(widget.data.voltage.params.axes.max);
+            valueAxis.id = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].sensor;
+            valueAxis.title = 'Voltage';
+            valueAxis.position = position;
+            valueAxis.offset = 60*factor;
+            valueAxis.minimum = min;
+            valueAxis.maximum = max;
+            valueAxis.strictMinMax =true;
+            valueAxis.gridAlpha = 0;
+            valueAxis.axisAlpha = 1;
+            valueAxis.axisColor = graph.lineColor;
+            chart.addValueAxis(valueAxis);
+            graph.valueAxis = valueAxis.id;
+          }else{
+            valueAxis.id = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].sensor;
+            valueAxis.title = 'Voltage';
+            valueAxis.position = position;
+            valueAxis.offset = 60*factor;
+            valueAxis.gridAlpha = 0;
+            valueAxis.axisAlpha = 1;
+            valueAxis.axisColor = graph.lineColor;
+            chart.addValueAxis(valueAxis); 
+            graph.valueAxis = valueAxis.id;
+          };    
+        }else{
+          graph.valueAxis = axisId;
+        };
+        
+        if (graph.type == 'column'){
+          graph.fillAlphas = 1;
+          graph.behindColumns = true;
+          graph.clustered = true;
+        };        
+      };
 
 			if (prop_lst[i].split("-")[0] === 'paw'){
 				var paw_sensor = widget.data.paw.value[prop_lst[i].split('-')[1]][0].sensor;
@@ -1504,16 +1555,13 @@ console.log(widget);
 				};
 
 				if (!widget.data.paw.params.avg){
-					console.log(widget.data.paw.params.paw_avg);
 					var graph_title = widget.data.paw.params.pawFields[paw_sensor].label;
 					var line_color = widget.data.paw.params.pawFields[paw_sensor].color;
 					if (graph_title != undefined) {
 						graph.title = graph_title
-						console.log('graph_title: ', graph_title);
 					}
 					if (line_color != undefined){
 						graph.lineColor = '#'+line_color
-						console.log('line_color: ', line_color);
 					}
 				}
 
@@ -1884,7 +1932,6 @@ $('#statmodal').on('show.bs.modal', function (e) {
 	
 	$sensor = $('#statmodal select.station').val();
 	// $sensor = s_stat_sensor.value()[0];
-	console.log($sensor);
 	$station_id = $('#statmodal select.station option:selected').attr('station');
 	$station_name = $($invoker).text();
 	$db = $('#statmodal select.station option').attr('db');
@@ -1923,7 +1970,6 @@ $('#statmodal').on('show.bs.modal', function (e) {
 								'sensor':$sensor,
 								'data':$stat_data}, 'value':null}}
 		widget = new Widget($invoker.parent().parent().attr('id'), '99', 'stat', 'stat', 'None', data);
-		console.log(widget);
 		ajax_request(render_stat, widget, elem);
 
 		$('#statmodal').modal('hide');
@@ -1955,8 +2001,7 @@ $('#statmodal').on('show.bs.modal', function (e) {
 	return;
 });
 
-//saturation ex ec 
-
+//saturation ex ec populate form 
 function populateExEC(exECParams) {
 	$('#ex-ec-ctn').remove();
 	var container = $('<div id="ex-ec-ctn"></div>');
@@ -1995,8 +2040,58 @@ function populateExEC(exECParams) {
 		$('#ex-ec-label-'+exECParams[i].inputID).val(exECParams[i].label);
 	}
 }
-
-
+//populate voltage calc form
+function populateVoltageForm(voltageFormValues){
+  $('#voltage-ctn').remove();
+  var voltageCtn = $('<div id="voltage-ctn"></div>');
+  $('#btn-voltage-ctn').before(voltageCtn);
+  // voltageSensors = voltageFormValues;
+  for(var i = 0; i < voltageFormValues.length; i++){
+    // $('#btn-voltage-ctn').before(voltageCtn);
+    if(voltageLst.indexOf(voltageFormValues[i].inputID) ===-1)
+      voltageLst.push(voltageFormValues[i].inputID);
+    var voltageHTML = '\
+      <div class="col-md-2 col-sm-2 col-lg-2 top-buffer">\
+        <label class="control-label">\
+          <input class="voltage" name="voltage-checkbox" id="voltage-checkbox-'+voltageFormValues[i].inputID+'" value="1" type="checkbox"/>\
+            Sensor\
+        <label/>\
+      </div>\
+      <div class="col-md-10 col-sm-10 col-lg-10 top-buffer">\
+        <select class="form-control voltage input-sm m-bot5" id="ms-voltage-'+voltageFormValues[i].inputID+'">\
+        </select>\
+      </div>\
+      <div class="col-lg-2 col-md-2 col-sm-2">\
+        <label for="voltage-equation-'+voltageFormValues[i].inputID+'" class="control-label">Equation</label>\
+      </div>\
+      <div class="col-lg-10 col-md-10 col-sm-10">\
+        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageFormValues[i].inputID+'" placeholder="">\
+      </div>\
+      <div class="col-lg-2 col-md-2 col-sm-2 top-buffer-5">\
+        <label for="voltage-label-'+voltageFormValues[i].inputID+'" class="control-label">Label </label>\
+      </div>\
+      <div class="col-lg-10 col-md-10 col-sm-10">\
+        <input type="text" class="form-control input-sm voltage top-buffer-5" id="voltage-label-'+voltageFormValues[i].inputID+'" placeholder="">\
+      </div>\
+    ';
+    $('#voltage-ctn').append(voltageHTML);
+    $('#voltage-checkbox-'+voltageFormValues[i].inputID).prop('checked', true);
+    var voltageSelectDataSource = new kendo.data.DataSource({
+      data: $options,
+      group: {field: 'station'}
+    });
+    $('#ms-voltage-'+voltageFormValues[i].inputID).kendoMultiSelect({
+      filter: 'contains',
+      dataSource: voltageSelectDataSource,
+      dataValueField: 'value',
+      dataTextField: 'text'
+    })
+    .data('kendoMultiSelect')
+    .value(voltageFormValues[i].sensor);
+    $('#voltage-equation-'+voltageFormValues[i].inputID).val(voltageFormValues[i].equation);
+    $('#voltage-label-'+voltageFormValues[i].inputID).val(voltageFormValues[i].label);
+  }
+}
 
 // fixed axis
 $(function(){
@@ -2287,25 +2382,41 @@ $(function(){
 		$ex_ec_axes.max = $ex_ec_axis_max;
 	});
 
-	// $sat_ex_ec = $.map($("#ms-ex-ec option:selected"), function (el, i) {
-	// 	return $(el).val();
-	// });
-	// $sat_ex_ec_offset = $("#ex-ec-offset").val();
-	// $('#ms-ex-ec').on('change', function(e){
-	// 	e.stopImmediatePropagation();
-	// 	$sat_ex_ec = $.map($("#ms-ex-ec option:selected"), function (el, i) {
- //         	return $(el).val();
- //    	});
- //    	console.log($sat_ex_ec);
-	// });
-	// $('#ex-ec-offset').on('change', function (e) {
-	// 	e.stopImmediatePropagation();
-	// 	$sat_ex_ec_offset = $("#ex-ec-offset").val();
-	// });
-	
+  //voltage calc fixed axes
+  var voltageAxisCheckbox = $('#checkbox-voltage-axis').prop('checked', true);
+  voltageAxes.min = $('#voltage-axis-min').val();
+  voltageAxes.max = $('#voltage-axis-max').val();
+  if (!voltageAxisCheckbox){
+    $('#voltage-axis-min').attr('disabled', true);
+    $('#voltage-axis-max').attr('disabled', true);
+  }else{
+    $('#voltage-axis-min').removeAttr('disabled');
+    $('#voltage-axis-max').removeAttr('disabled');
+    voltageAxes.min = $('#voltage-axis-min').val();
+    voltageAxes.max = $('#voltage-axis-max').val();
+  }
+  $('checkbox-voltage-axis').on('change', function(e){
+    if ($(this).prop('checked')){
+      $('#voltage-axis-min').removeAttr('disabled');
+      $('#voltage-axis-max').removeAttr('disabled');
+      voltageAxes.min = $('#voltage-axis-min').val();
+      voltageAxes.max = $('#voltage-axis-max').val();
+    }else{
+      $('#voltage-axis-min').attr('disabled', true);
+      $('#voltage-axis-max').attr('disabled', true);
+      voltageAxes = null;
+    }
+  });
+  $('#voltage-axis-min').on('change', function(e){
+    voltageAxes.min = $(this).val();
+  });
+  $('#voltage-axis-max').on('change', function(e){
+    voltageAxes.max = $(this).val();
+  });
 
-	var moreSatExEC, satExECCount=0, dynamicExECSelects, dynamicExECTexts;
 
+	var moreSatExEC, satExECCount=0, dynamicExECSelects, dynamicExECTexts, voltageGraphCount=0;
+  //sat ex ec dynamic form creation
 	$('#btn-ex-ec').on('click', function (e) {
 		if(satExECLst.length > 0){
 			satExECCount = Math.max.apply(null, satExECLst) + 1;
@@ -2337,10 +2448,56 @@ $(function(){
 		satExECLst.push(satExECCount);
 		
 	});
+
+  //voltage calc dynamic form creation
+  $('#btn-voltage').on('click', function(e) {
+    if(voltageLst.length > 0){
+      voltageGraphCount = Math.max.apply(null, voltageLst) + 1;
+    }else{
+      voltageGraphCount  += 1;
+    }
+    var voltageHTML = '\
+      <div class="col-md-2 col-sm-2 col-lg-2 top-buffer">\
+        <label class="control-label">\
+          <input class="voltage" name="voltage-checkbox" id="voltage-checkbox-'+voltageGraphCount+'" value="1" type="checkbox"/>\
+            Sensor\
+        <label/>\
+      </div>\
+      <div class="col-md-10 col-sm-10 col-lg-10 top-buffer">\
+        <select class="form-control voltage input-sm m-bot5" id="ms-voltage-'+voltageGraphCount+'">\
+        </select>\
+      </div>\
+      <div class="col-lg-2 col-md-2 col-sm-2">\
+        <label for="voltage-equation-'+voltageGraphCount+'" class="control-label">Equation</label>\
+      </div>\
+      <div class="col-lg-10 col-md-10 col-sm-10">\
+        <input type="text" class="form-control input-sm voltage" id="voltage-equation-'+voltageGraphCount+'" placeholder="">\
+      </div>\
+      <div class="col-lg-2 col-md-2 col-sm-2 top-buffer-5">\
+        <label for="voltage-label-'+voltageGraphCount+'" class="control-label">Label </label>\
+      </div>\
+      <div class="col-lg-10 col-md-10 col-sm-10">\
+        <input type="text" class="form-control input-sm voltage top-buffer-5" id="voltage-label-'+voltageGraphCount+'" placeholder="">\
+      </div>\
+    ';
+    $('#voltage-ctn').append(voltageHTML);
+    var voltageMultiSelectID = '#ms-voltage-'+voltageGraphCount;
+    var voltageSelectDataSource = new kendo.data.DataSource({
+      data: $options,
+      group: {field: "station"}
+    });
+    $(voltageMultiSelectID).kendoMultiSelect({
+      filter: 'contains',
+      dataSource: voltageSelectDataSource, 
+      dataValueField: 'value',
+      dataTextField: 'text'
+    });
+    $('#voltage-checkbox-'+voltageGraphCount).prop('checked', true);
+    voltageLst.push(voltageGraphCount);
+  });
 	
-
+  //sat ex ec calc form change event handler
 	$('#ex-ec').on('change','input.ex-ec:checkbox', function (e){
-
 		if (!$(this).prop('checked')) {
 			var id = $(this).attr('id').split('-')[$(this).attr('id').split('-').length-1];
 			for (var i = 0; i < $sat_ex_ec_sensors.length; i++){
@@ -2356,7 +2513,23 @@ $(function(){
 			
 		};
 	});
-	
+  //voltage calc form change event handler
+  $('#voltage').on('change', 'input.voltage:checkbox', function(e){
+    if(!$(this).prop('checked')){
+      var id = $(this).attr('id').split('-')[$(this).attr('id').split('-').length-1];
+      for (var i = 0; i < voltageSensors.length; i++){
+        if (voltageSensors[i].inputID == id){
+          voltageSensors.splice(i, 1);
+        }
+        if (voltageLst[i] == id){
+          voltageLst.splice(i, 1);
+        }
+      };
+      populateVoltageForm(voltageSensors);
+    }
+  });
+
+  //Sat ex ec calc enable/disable
 	$('#checkbox-ex-ec').prop('checked', false);
 	$ex_ec_checkbox = $('#checkbox-ex-ec').prop('checked');
 	$('#checkbox-ex-ec').on('change', function (e) {
@@ -2372,7 +2545,22 @@ $(function(){
 		}
 	});
 
-	
+  //Voltage calc enable/disable
+  $('#checkbox-voltage').prop('checked', false);
+  voltageCheckbox = $('#checkbox-voltage').prop('checked');
+  $('#checkbox-voltage').on('change', function(e){
+    voltageCheckbox = $('#checkbox-voltage').prop('checked');
+    if(voltageCheckbox){
+      $('#checkbox-voltage-axis').removeAttr('disabled');
+      $('#voltage-axis-min').removeAttr('disabled');
+      $('#voltage-axis-max').removeAttr('disabled');
+    }else{
+      $('#checkbox-voltage-axis').attr('disabled', 'disabled');
+      $('#voltage-axis-min').attr('disabled', 'disabled');
+      $('#voltage-axis-max').attr('disabled', 'disabled');
+    }
+  });
+	//build Sat ex ec calc variables list
 	for (var i = 0; i < satExECLst.length; i++){
 		var ex_ec_obj = {'inputID':null,'sensors':[],'offset':null, 'label':null, 'saturation':null}
 		ex_ec_obj.sensors = $.map($('#ms-ex-ec-'+satExECLst[i]), function (el, i) {
@@ -2384,10 +2572,23 @@ $(function(){
 		ex_ec_obj.label = $('#ex-ec-label-'+satExECLst[i]).val();
 		$sat_ex_ec_sensors.push(ex_ec_obj);
 	};
-
+  //build voltage calc variables list
+  for (var i = 0; i < voltageLst.length; i++){
+    var voltageVarsObj = {
+      inputID: null, 
+      sensor: null,
+      equation: null,
+      label: null
+    }
+    voltageVarsObj.inputID = voltageLst[i];
+    voltageVarsObj.sensor = $('#ms-voltage-'+voltageLst[i]).val();
+    voltageVarsObj.equation = $('#voltage-equation-'+voltageLst[i]).val();
+    voltageVarsObj.label = $('#voltage-label-'+voltageLst[i]).val();
+    voltageSensors.push(voltageVarsObj);
+  }
+  //update Sat ex ec calc variables list on change
 	$('#ex-ec').on('change', '.ex-ec', function (e){
-		$sat_ex_ec_sensors = []
-		
+		$sat_ex_ec_sensors = [];
 		for (var i = 0; i < satExECLst.length; i++){
 			var ex_ec_obj = {'inputID':null,'sensors':[],'offset':null, 'label':null, 'saturation':null}
 			ex_ec_obj.sensors = $.map($('#ms-ex-ec-'+satExECLst[i]), function (el, i) {
@@ -2397,12 +2598,26 @@ $(function(){
 			ex_ec_obj.inputID = satExECLst[i];
 			ex_ec_obj.saturation = $('#ex-ec-saturation-'+satExECLst[i]).val();
 			ex_ec_obj.label = $('#ex-ec-label-'+satExECLst[i]).val();
-			console.log($('#ex-ec-label-'+satExECLst[i]).val());
 			$sat_ex_ec_sensors.push(ex_ec_obj);
 		};	
 	});
-
-
+  //update voltage calc variables list on change
+  $('#voltage').on('change', '.voltage', function(e){
+    voltageSensors = [];
+    for (var i = 0; i < voltageLst.length; i++){
+      var voltageVarsObj = {
+        inputID: null, 
+        sensor: null,
+        equation: null,
+        label: null
+      }
+      voltageVarsObj.inputID = voltageLst[i];
+      voltageVarsObj.sensor = $('#ms-voltage-'+voltageLst[i]).val();
+      voltageVarsObj.equation = $('#voltage-equation-'+voltageLst[i]).val();
+      voltageVarsObj.label = $('#voltage-label-'+voltageLst[i]).val();
+      voltageSensors.push(voltageVarsObj);
+    }
+  });
 });
 
 var $checkbox_ex_ec_avg = $('#checkbox-ex-ec-avg').prop('checked');
@@ -2442,7 +2657,6 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 				$main_sensors_axis_min = $('#main-sensors-axis-min').val();
 				$main_sensors_axis_max = $('#main-sensors-axis-max').val();
 				$main_sensors_axes = {'min': $main_sensors_axis_min, 'max':$main_sensors_axis_max};
-				console.log(all_widgets[$id].data.raw_sensors.params.axes);
 			};
 
 		}else{
@@ -2480,7 +2694,6 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 
 			};
 			if (all_widgets[$id].data.paw.params.axes != null) {
-				console.log(all_widgets[$id].data.paw.params.axes);
 				$('#checkbox-paw-axis').prop('checked', true);
 				$('#paw-axis-min').removeAttr('disabled');
 				$('#paw-axis-max').removeAttr('disabled');
@@ -2494,7 +2707,6 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 				$main_paw_axis_min = $('#paw-axis-min').val();
 				$main_paw_axis_max = $('#paw-axis-max').val();
 				$paw_axes = {'min': $main_paw_axis_min, 'max':$main_paw_axis_max};
-				console.log(all_widgets[$id].data.paw.params.axes);
 			};
 			
 		}else{
@@ -2679,11 +2891,10 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 			$('#s-main-dp-t').attr('disabled', 'disabled');
 			$('#s-main-dp-rh').attr('disabled', 'disabled');
 		};
-
+    //populate form for ex ec calc
 		if (all_widgets[$id].data.ex_ec != null){
 			$('#checkbox-ex-ec').prop('checked', true);
 			$ex_ec_checkbox = $('#checkbox-ex-ec').prop('checked');
-			console.log($('#checkbox-ex-ec').prop('checked'));
 			$('#checkbox-ex-ec-avg').removeAttr('disabled');
 			$('#ex-ec-axis-min').removeAttr('disabled');
 			$('#ex-ec-axis-max').removeAttr('disabled');
@@ -2711,11 +2922,29 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 			};
 		}else{
 			$('#checkbox-ex-ec').prop('checked', false);
-			console.log($('#checkbox-ex-ec').prop('checked'));
 			$('#checkbox-ex-ec-avg').attr('disabled', 'disabled');
 			$('#ex-ec-axis-max').attr('disabled', 'disabled');
 			$('#ex-ec-axis-max').attr('disabled', 'disabled');
 		}
+    //populate form for voltage calc
+    if (all_widgets[$id].data.voltage != null){
+      $('#checkbox-voltage').prop('checked', true);
+      voltageCheckbox = $('#checkbox-voltage').prop('checked');
+      $('voltage-axis-min').removeAttr('disabled');
+      $('voltage-axis-max').removeAttr('disabled');
+      voltageSensors = all_widgets[$id].data.voltage.params.sensors;
+      populateVoltageForm(voltageSensors);
+      if (all_widgets[$id].data.voltage.params.axes != null){
+        $('#checkbox-voltage-axis').prop('checked', true);
+        $('#voltage-axis-min').removeAttr('disabled');
+        $('#voltage-axis-max').removeAttr('disabled');
+        $('#voltage-axis-min').val(all_widgets[$id].data.voltage.params.axes.min);
+        $('#voltage-axis-max').val(all_widgets[$id].data.voltage.params.axes.max);
+        voltageAxes = all_widgets[$id].data.voltage.params.axes;
+      }
+    }else{
+
+    }
 
 		$('#reportrange span').html(all_widgets[$id].data.range.from + ' - ' + all_widgets[$id].data.range.to);
 		$date_from = all_widgets[$id].data.range.from
@@ -3212,6 +3441,19 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 				'title': 'Saturation Ex EC'
 			}
 		}
+    //voltage
+    var voltage = null;
+    if(voltageCheckbox){
+      voltage = {
+        'params':{
+          'sensors': voltageSensors,
+          'axes': voltageAxes
+        },
+        'value':'',
+        'name': 'voltage',
+        'title': 'Voltage'
+      }
+    }
 
 		$id = $invoker.parent().parent().parent().children('div').children('div').attr('id');
 		$type = 'main-chart';
@@ -3224,6 +3466,7 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 			'evapo':evapo,
 			'dew_point':dew_point,
 			'ex_ec': ex_ec,
+      'voltage': voltage,
 			'calc': {'params':{'sensor':'temp_min'}},
 			'range': {'from':$date_from, 'to':$date_to},
 			'title': $title

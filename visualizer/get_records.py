@@ -97,8 +97,9 @@ def set_widget(widget_dict, user):
 			elif key == 'ex_ec':
 				if val is not None:
 					widget_dict['data']['ex_ec']['value'] = get_sat_ec_data(widget_dict, user)
-	
-		
+			elif key == 'voltage':
+				if val is not None:
+					widget_dict['data']['voltage']['value'] = get_voltage_data(widget_dict, user)
 	return widget_dict
 
 def set_stat_widget(widget_data_id):
@@ -2287,9 +2288,49 @@ def calculate_sat_ec_fc(ec, vwc, temp, perm, offset, saturation, unit):
 	return ex_ec_data	
 
 
-
-
-
+def get_voltage_data(widget, user):
+	from Equation import Expression
+	graphs = widget['data']['voltage']['params']['sensors']
+	dt_from = parse_date(widget['data']['range']['from'])
+	dt_to = parse_date(widget['data']['range']['to'])
+	result = []
+	if len(graphs) == 0:
+		return []	
+	for graph in graphs:
+		voltage_data = []
+		if len(graph['sensor']) == 0:
+			continue
+		equation = graph['equation']
+		sensor = graph['sensor'][0].split('-')
+		if sensor[0] == 'fc':
+			raw_data = load_data(sensor[1], sensor[2], sensor[0], dt_from, dt_to)
+		else:
+			raw_data = load_data(sensor[1], sensor[2]+'-'+sensor[3], sensor[0], dt_from, dt_to)
+	# vwc = convert_sca(data['value'], sens[2], 'moist') if data['value'] is not None else data['value']
+		if len(raw_data) < 1:
+			continue
+		for data in raw_data:
+			value = None
+			date = data['date']
+			if sensor[0] == 'fc':
+				value = float(data['value'])
+			else:
+				value = convert_sca(data['value'], sensor[2], 'voltage') if data['value'] is not None else None
+			if value is None:
+				voltage_data.extend([{'date': date, 'value': value}])
+				continue
+			try:
+				fn = Expression(equation, ['x'])
+				value = fn(value)
+			except Exception as e:
+				print e
+				voltage_data.extend([{'date': date, 'value': None}])
+			voltage_data.extend([{'date': date, 'value': value}])
+			# print voltage_data
+		if len(voltage_data) > 1:
+			voltage_data[0].update({'sensor':'voltage', 'name':graph['label']})
+			result.extend([voltage_data])
+	return result
 
 def load_data(station_id, sensor, database, dt_from, dt_to):
 	diff = dt_to - dt_from
