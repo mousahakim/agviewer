@@ -237,6 +237,7 @@ def set_stat_widget(widget_data_id):
 				}
 			else:
 				if sensor.split('-')[0] == '183': #flow meter sensor in accumlated intervals
+					print data.data, data.get_previous_by_date().data
 					value = int(data.data[sensor]) - int(data.get_previous_by_date().data[sensor])
 					value = round(convert_sca(value, sensor.split('-')[0], widget_data.extract ), 2)
 					widget_data.value = value
