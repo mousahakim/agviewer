@@ -236,6 +236,23 @@ def set_stat_widget(widget_data_id):
 					'stale': stale
 				}
 			else:
+				if sensor.split('-')[0] == '183': #flow meter sensor in accumlated intervals
+					value = int(data.data[sensor]) - int(data.get_previous_by_date().data[sensor])
+					value = round(convert_sca(value, sensor.split('-')[0], widget_data.extract ), 2)
+					widget_data.value = value
+					widget_data.date_to = parse_date(data.data['date'])
+					if present - widget_data.date_to > timedelta(hours=24):
+						stale = True
+					widget_data.stale = stale
+					widget_data.save()
+					return {
+						'success': True, 
+						'message': 'success', 
+						'value': widget_data.value, 
+						'unit': '',
+						'date_to': data.data['date'], 
+						'stale': stale
+					}	
 				widget_data.value = round(convert_sca(int(data.data[sensor]), sensor.split('-')[0], widget_data.extract), 2)
 				widget_data.date_to = parse_date(data.data['date'])
 				if present - widget_data.date_to > timedelta(hours=24):
@@ -579,7 +596,18 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 
 		elif db == 'dg':
 			data = load_data(station, sensor_code+'-'+sensor.split('-')[3], db, dt_from, dt_to)
-
+			#flow meter sensor
+			if sensor_code == '183':
+				accum_data = []
+				previous = data[0]
+				for item in data:
+					#skip the first record
+					if item['date'] == previous['date']:
+						continue
+					value = int(item['value']) - int(previous['value'])
+					accum_data.extend([{'date':item['date'], 'value': value}])
+					previous = item
+				data = accum_data
 			if len(data) < 1:
 				duration = dt_to - dt_from
 				last_record = StationData.objects.filter(station_id=station).last()
@@ -1637,6 +1665,12 @@ def make_list(data, code):
 		return {'ECRN-100.Perc.[mm]': get_hourly_sum(data, 0.2)}
 	if code == '188': #if a PS-1 sensor
 		return {'ECRN-50.Perc.vol.[ml]': get_hourly_sum(data, 5)}
+	if code == '183':
+		accum_data = get_hourly_sum(data,1)
+		return {
+			'Flow.Meter.[L/s]': [{'date': rec['date'],
+			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
+			}
 
 	values = {}
 	for record in data:
