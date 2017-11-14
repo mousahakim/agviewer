@@ -164,7 +164,7 @@ def convert_sca(value, code, extract, unit=None):
 		return value
 
 	elif code == '183': # flow meter
-		return value
+		return value*10
 
 	elif code == '117':
 		if extract == 'water_dept':
@@ -359,7 +359,7 @@ def convert(value, code):
 		return {'G1 Drain Guage':value} # ask rodrigo.
 
 	elif code == '183': # flow meter
-		return {'Flow Meter':value}
+		return {'Flow Meter':value*10}
 	elif code == '189':
 		return {'ECRN 50 Precipitation':value}
 
