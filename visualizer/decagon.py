@@ -37,7 +37,18 @@ def parse_date(date_string):
 
 def convert_sca(value, code, extract, unit=None):
 	# print code, extract
-	if code == '241':
+	if code in ['64','65', '66', '67', '68']:
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		t_raw = rshift(value, 1) & 32767#
+		if extract == 'body':
+			t_raw = rshift(value, 16) & 65535#
+		return (t_raw - 5000) / 100
+
+	elif code == '241':
 		if float(value) != 0.0:
 			return 100*(3.62*10**-4 * float(value) - 0.554) #
 		else:
@@ -235,7 +246,19 @@ def convert_sca(value, code, extract, unit=None):
 
 
 def convert(value, code):
-	if code == '241':
+	if code in ['64','65', '66', '67', '68']:
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		t_raw_target = rshift(value, 1) & 32767#
+		t_raw_body = rshift(value, 16) & 65535#
+		t_target = (t_raw_target - 5000) / 100
+		t_body = (t_raw_target - 5000) / 100
+		return {'Apogee Target Temp': t_target, 'Apogee Body Temp': t_body}
+
+	elif code == '241':
 		if float(value) != 0.0:
 			return {'GS1 Moisture':100*(3.62*10**-4 * float(value) - 0.554)}
 		else:

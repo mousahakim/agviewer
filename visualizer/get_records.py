@@ -2299,7 +2299,7 @@ def get_sat_ec_data(widget_data, user):
 			temp_data = load_data(sens_temp.split('-')[1], sens_temp.split('-')[2], sens_temp.split('-')[0], dt_from, dt_to)
 			perm_data = load_data(sens_perm.split('-')[1], sens_perm.split('-')[2], sens_perm.split('-')[0], dt_from, dt_to)
 
-			ex_ec_data = calculate_sat_ec_fc(ec_data, vwc_data, temp_data, perm_data, offset, saturation, 'msm')
+			ex_ec_data = calculate_sat_ec_fc(ec_data, vwc_data, temp_data, perm_data, offset, saturation, 'dsm')
 			ex_ec_data[0].update({'sensor': 'sat_ex_ec', 'name': graph['label']})
 			sat_ex_ec_data.extend([ex_ec_data])
 
