@@ -296,6 +296,7 @@ def chill_hours(temp, threshold):
 	return False
 
 def saturation_ec(temp, vwc, ec, perm, offset, saturation, unit):
+	print temp, vwc
 	if temp is None:
 		return None
 	if vwc is None:
@@ -313,6 +314,8 @@ def saturation_ec(temp, vwc, ec, perm, offset, saturation, unit):
 	if unit == 'msm':
 		devisor = 100
 	elif unit == 'mscm':
+		devisor = 1
+	elif unit == 'dsm':
 		devisor = 1
 	ep = 80.3 - 0.37*(temp - 20)
 	sat_ec = abs((ep*ec/devisor)/(perm-offset))

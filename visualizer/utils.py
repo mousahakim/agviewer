@@ -345,60 +345,18 @@ def parse_date_http(date): # date in gmtime
 	return date
 
 def get_hmac(station, path):
-	# public_key = '12c6204ef457e0bc67fa6dc3838da7fb62e18401'
-	# private_key = 'f3376eb3efacb577d333f8883774360c8f20491b'
-
-	# method = 'GET'
-	# view = {
-	# 	"name":"Disease climate",
-	# 	"sensors":{
-	# 		"filter":{
-	# 			"group-1":True,
-	# 			"group-2":True,
-	# 			"group-3":True,
-	# 			"group-5":True,
-	# 			"group-12":True,
-	# 			"group-17":True}
-	# 		},
-	# 		"graph":{
-	# 		"plotGroup1":{
-	# 			"sensors":[1,2,3,17],
-	# 			"pos":1},
-	# 		"plotGroup2":{
-	# 			"sensors":[5,12],
-	# 			"pos":2}
-	# 		}
-	# 	}
-
-	view = {
-		'name': 'eto',
-		'data': {
-			'model': 'Evapotranspiration'
-		}
-	}
-	yesterday = parse_date("2017-03-15 09:00:06")
+	
+	yesterday = parse_date("2017-11-13 09:00")
 	# date_from = calendar.timegm((datetime.datetime.now() - timedelta(hours=12)).timetuple())
 	date_from = calendar.timegm(yesterday.timetuple())
 	date_to = calendar.timegm(datetime.datetime.now().timetuple())
-	path = '/disease/'+station+path
+	path = '/data/'+station+path
 	print path
-	#path = '/user/stations'
-	# path_st = '/station/00203F92/sensors'
-	# content_to_sign = method + path + date + public_key
-	# signature = hmac.new(private_key, content_to_sign, sha256).hexdigest()
 
-	# auth_string = 'hmac ' + public_key + ':' + signature
-	# print auth_string
-	# print date
-	# headers = {
-	# 	'Accept': 'application/json',
-	# 	'Authorization': auth_string,
-	# 	'Date' : date
-	# }
 	headers = make_headers('GET', path)
 	end_point = 'https://api.fieldclimate.com/v1'
 	print end_point
-	response = requests.post(end_point + path, headers=headers, verify=False) # very=false: this needs to be fixed
+	response = requests.get(end_point + path, headers=headers, verify=False) # very=false: this needs to be fixed
 
 	print response.status_code
 	# print response.text
