@@ -2404,7 +2404,7 @@ def get_voltage_data(widget, user):
 			voltage_data.extend([{'date': date, 'value': s_value}])
 			# print voltage_data
 		if len(voltage_data) > 1:
-			voltage_data[0].update({'sensor':'', 'name':'hhh'})
+			voltage_data[0].update({'sensor':'', 'name':graph['label']})
 			result.extend([voltage_data])
 	return result
 
