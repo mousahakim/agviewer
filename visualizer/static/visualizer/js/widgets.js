@@ -1535,7 +1535,7 @@ console.log(widget);
             min = parseInt(widget.data.voltage.params.axes.min);
             max = parseInt(widget.data.voltage.params.axes.max);
             valueAxis.id = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].sensor;
-            valueAxis.title = 'Voltage';
+            valueAxis.title = '';
             valueAxis.position = position;
             valueAxis.offset = 60*factor;
             valueAxis.minimum = min;
@@ -1548,7 +1548,7 @@ console.log(widget);
             graph.valueAxis = valueAxis.id;
           }else{
             valueAxis.id = widget.data.voltage.value[prop_lst[i].split('-')[1]][0].sensor;
-            valueAxis.title = 'Voltage';
+            valueAxis.title = '';
             valueAxis.position = position;
             valueAxis.offset = 60*factor;
             valueAxis.gridAlpha = 0;
