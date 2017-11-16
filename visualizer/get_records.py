@@ -2369,6 +2369,19 @@ def get_voltage_data(widget, user):
 			raw_data = load_data(sensor[1], sensor[2], sensor[0], dt_from, dt_to)
 		else:
 			raw_data = load_data(sensor[1], sensor[2]+'-'+sensor[3], sensor[0], dt_from, dt_to)
+			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
+			#189: ECRN-50.Perc.[mm]
+			if sensor[2] in ['222', '183', '221', '189']:
+				accum_data = get_hourly_sum(raw_data, 1)
+				raw_data = accum_data
+			#187: ECRN-100.Perc.[mm]
+			if sensor[2] in ['187']:
+				accum_data = get_hourly_sum(raw_data, 0.2)
+				raw_data = accum_data
+			#188: ECRN-50.Perc.vol.[ml]
+			if sensor[2] in ['188']:
+				accum_data = get_hourly_sum(raw_data, 5)
+				raw_data = accum_data
 	# vwc = convert_sca(data['value'], sens[2], 'moist') if data['value'] is not None else data['value']
 		if len(raw_data) < 1:
 			continue
@@ -2378,20 +2391,20 @@ def get_voltage_data(widget, user):
 			if sensor[0] == 'fc':
 				value = float(data['value'])
 			else:
-				value = convert_sca(data['value'], sensor[2], 'voltage') if data['value'] is not None else None
+				value = convert_sca(data['value'], sensor[2], '') if data['value'] is not None else None
 			if value is None:
 				voltage_data.extend([{'date': date, 'value': value}])
 				continue
 			try:
 				fn = Expression(equation, ['x'])
-				value = fn(value)
+				s_value = fn(value)
 			except Exception as e:
 				print e
 				voltage_data.extend([{'date': date, 'value': None}])
-			voltage_data.extend([{'date': date, 'value': value}])
+			voltage_data.extend([{'date': date, 'value': s_value}])
 			# print voltage_data
 		if len(voltage_data) > 1:
-			voltage_data[0].update({'sensor':'voltage', 'name':graph['label']})
+			voltage_data[0].update({'sensor':'', 'name':'hhh'})
 			result.extend([voltage_data])
 	return result
 
