@@ -236,11 +236,20 @@ def set_stat_widget(widget_data_id):
 					'stale': stale
 				}
 			else:
-				if sensor.split('-')[0] == '183': #flow meter sensor in accumlated intervals
+				#183: Flow Meter Sensor, 222: LWS Leaf Wetness Sensor, 221: PS-1 Pressure switch
+				#189: ECRN 50 mm, 187: ECRN 100, 188: ECRN 50 vol. ml
+				if sensor.split('-')[0] in ['183', '222', '221', '189', '187', '188']: 
 					print data.data, data.get_previous_by_date(station_id=station).data
 					value = int(data.data[sensor]) - int(data.get_previous_by_date(station_id=station).data[sensor])
+					#apply multiplier for 187: ECRN-100
+					if sensor.split('-')[0] == '187':
+						value *= 0.2
+					#apply multiplier for 187: ECRN-50
+					if sensor.split('-')[0] == '188':
+						value *= 5
 					value = round(convert_sca(value, sensor.split('-')[0], widget_data.extract ), 2)
 					widget_data.value = value
+
 					widget_data.date_to = parse_date(data.data['date'])
 					if present - widget_data.date_to > timedelta(hours=24):
 						stale = True
@@ -394,7 +403,19 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 
 		elif db == 'dg':
 			data = load_data(station, sensor_code+'-'+sensor.split('-')[3], db, dt_from, dt_to)
-
+			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
+			#189: ECRN-50.Perc.[mm]
+			if sensor_code in ['222', '183', '221', '189']:
+				accum_data = get_hourly_sum(data, 1)
+				data = accum_data
+			#187: ECRN-100.Perc.[mm]
+			if sensor_code in ['187']:
+				accum_data = get_hourly_sum(data, 0.2)
+				data = accum_data
+			#188: ECRN-50.Perc.vol.[ml]
+			if sensor_code in ['188']:
+				accum_data = get_hourly_sum(data, 5)
+				data = accum_data
 			if len(data) < 1:
 				duration = dt_to - dt_from
 				last_record = StationData.objects.filter(station_id=station).last()
@@ -597,18 +618,6 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 
 		elif db == 'dg':
 			data = load_data(station, sensor_code+'-'+sensor.split('-')[3], db, dt_from, dt_to)
-			#flow meter sensor
-			if sensor_code == '183':
-				accum_data = []
-				previous = data[0]
-				for item in data:
-					#skip the first record
-					if item['date'] == previous['date']:
-						continue
-					value = int(item['value']) - int(previous['value'])
-					accum_data.extend([{'date':item['date'], 'value': value}])
-					previous = item
-				data = accum_data
 			if len(data) < 1:
 				duration = dt_to - dt_from
 				last_record = StationData.objects.filter(station_id=station).last()
@@ -634,7 +643,19 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 						'stale': stale
 					}
 				stale = True
-
+			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
+			#189: ECRN-50.Perc.[mm]
+			if sensor_code in ['222', '183', '221', '189']:
+				accum_data = get_hourly_sum(data, 1)
+				data = accum_data
+			#187: ECRN-100.Perc.[mm]
+			if sensor_code in ['187']:
+				accum_data = get_hourly_sum(data, 0.2)
+				data = accum_data
+			#188: ECRN-50.Perc.vol.[ml]
+			if sensor_code in ['188']:
+				accum_data = get_hourly_sum(data, 5)
+				data = accum_data
 		for record in data:
 			if db == 'fc':
 				try:
@@ -1660,19 +1681,26 @@ def get_raw_data(widget_data, user):
 def make_list(data, code):
 	if code == '221': #if a PS-1 sensor
 		return {'PS-1': get_hourly_sum(data, 1), 'PS-1.sum': get_daily_sum(data, 0, 0)}
-	if code == '189': #if a PS-1 sensor
+	if code == '189': #if a ECRN-50.Perc.[mm]
 		return {'ECRN-50.Perc.[mm]': get_hourly_sum(data, 1)}
-	if code == '187': #if a PS-1 sensor
+	if code == '187': #if a ECRN-100
 		return {'ECRN-100.Perc.[mm]': get_hourly_sum(data, 0.2)}
-	if code == '188': #if a PS-1 sensor
+	if code == '188': #if a ECRN-50
 		return {'ECRN-50.Perc.vol.[ml]': get_hourly_sum(data, 5)}
+	#Flow Meter
 	if code == '183':
 		accum_data = get_hourly_sum(data,1)
 		return {
 			'Flow.Meter.[L/s]': [{'date': rec['date'],
 			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
 			}
-
+	#LWS Leaf Wetness
+	if code == '222':
+		accum_data = get_hourly_sum(data,1)
+		return {
+			'LWS.Leaf.Wetness[Min]': [{'date': rec['date'],
+			'value':convert_sca(int(rec['value']), code, '')} for rec in accum_data]
+			}
 	values = {}
 	for record in data:
 		if record['value'] is not None:
