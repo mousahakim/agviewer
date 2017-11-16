@@ -288,7 +288,8 @@ def convert_sca(value, code, extract, unit=None):
 		return value
 
 	elif code == '183': # flow meter
-		return value*10
+		value = int(value)
+		return value
 
 	elif code == '117':
 		if extract == 'water_dept':
