@@ -47,7 +47,120 @@ def convert_sca(value, code, extract, unit=None):
 		if extract == 'body':
 			t_raw = rshift(value, 16) & 65535#
 		return (t_raw - 5000) / 100
-
+	elif code == '95':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		if extract == 'direction':
+			d_raw = rshift(value, 1) & 511#
+			return d_raw
+		elif extract == 'speed':
+			s_raw = rshift(value, 10) & 4095#
+			return s_raw
+		elif extract in ['gusts', 'gust']:
+			g_raw = rshift(value, 22) & 511
+			return g_raw
+		elif extract == 'temp':
+			if g_raw <= 900:
+				temp = (g_raw - 400) / 10 #
+			else: 
+				temp = ((900 + 5 * (g_raw - 900)) - 400 ) / 10 #
+			return temp
+	elif code == '110':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		irradiance_532_raw = rshift(value, 1) & 2047#
+		irradiance_570_raw = rshift(value, 12) & 2047#
+		# orientation = rshift(value, 23) & 3#
+		variable_a_raw  = rshift(value, 25) & 63#
+		variable_a = 100 / variable_a_raw
+		if variable_a == 1:
+			variable_a = 0.98
+		irradiance_532 = 10**(irradiance_532_raw/480)/10000#
+		irradiance_570 = 10**(irradiance_570_raw/480)/10000#
+		pri = None
+		if irradiance_532 == 0 or irradiance_570 == 0\
+		or irradiance_532 == 2047 or irradiance_570 == 2047:
+			return pri
+		pri = (variable_a*irradiance_532 - irradiance_570)/(variable_a*irradiance_532+irradiance_570)
+		return pri
+	elif code == '111':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		irradiance_532_raw = rshift(value, 1) & 2047#
+		irradiance_570_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		#up-facing orientation
+		irradiance_532 = irradiance_532_raw/1000#
+		irradiance_570 = irradiance_570_raw/1000#
+		#down-facing orientation
+		if orientation == 1:
+			irradiance_532 = 10**(irradiance_532_raw/480)/10000#
+			irradiance_570 = 10**(irradiance_570_raw/480)/10000#
+		variable_a = None
+		if irradiance_532 == 0 or irradiance_570 == 0\
+		or irradiance_532 == 2047 or irradiance_570 == 2047:
+			return variable_a
+		variable_a = irradiance_570/irradiance_532
+		return variable_a
+	elif code == '114':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		red_raw = rshift(value, 1) & 2047#
+		nir_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		variable_a_raw  = rshift(value, 25) & 63#
+		variable_a = 100 / variable_a_raw
+		if variable_a == 1:
+			variable_a = 1.86
+		red = 10**(red_raw/480)/10000#
+		nir = 10**(nir_raw/480)/10000#
+		ndvi = None
+		if red == 0 or nir == 0:
+			return ndvi
+		ndvi = (variable_a*nir - red)/(variable_a*nir+red)
+		return ndvi
+	#LWS leaf wetness
+	elif code == '222':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		counts = rshift(value, 22) & 1023#
+		return counts
+	elif code == '115':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		red_raw = rshift(value, 1) & 2047#
+		nir_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		#up-facing orientation
+		red = red_raw/1000#
+		nir = nir_raw/1000#
+		#down-facing orientation
+		if orientation == 1:
+			red = 10**(red_raw/480)/10000#
+			nir = 10**(nir_raw/480)/10000#
+		variable_a = None
+		if red == 0 or nir == 0:
+			return variable_a
+		variable_a = red/nir
+		return variable_a
 	elif code == '241':
 		if float(value) != 0.0:
 			return 100*(3.62*10**-4 * float(value) - 0.554) #
@@ -253,11 +366,119 @@ def convert(value, code):
 			return 0
 		value = int(value)
 		t_raw_target = rshift(value, 1) & 32767#
-		t_raw_body = rshift(value, 16) & 65535#
+		# t_raw_body = rshift(value, 16) & 65535#
 		t_target = (t_raw_target - 5000) / 100
-		t_body = (t_raw_target - 5000) / 100
-		return {'Apogee Target Temp': t_target, 'Apogee Body Temp': t_body}
-
+		# t_body = (t_raw_target - 5000) / 100
+		return {
+			'Apogee Target Temp': t_target,
+			# 'Apogee Body Temp': t_body
+			}
+	elif code == '95':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		# d_raw = rshift(value, 1) & 511#
+		s_raw = rshift(value, 10) & 4095#
+		# g_raw = rshift(value, 22) & 511
+		# if g_raw <= 900:
+		# 	temp = (g_raw - 400) / 10 #
+		# else: 
+		# 	temp = ((900 + 5 * (g_raw - 900)) - 400 ) / 10 #
+		wind_speed = s_raw / 100
+		if wind_speed > 40.94:
+			wind_speed = None
+		return {
+			# 'DS-2 Sonic Anemometer Wind Direction': d_raw,
+			'DS-2 Sonic Anemometer Wind Speed': wind_speed,
+			# 'DS-2 Sonic Anemometer Wind Gusts': g_raw,
+			# 'DS-2 Sonic Anemometer Temp': temp
+		}
+	elif code == '110':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		irradiance_532_raw = rshift(value, 1) & 2047#
+		irradiance_570_raw = rshift(value, 12) & 2047#
+		# orientation = rshift(value, 23) & 3#
+		variable_a_raw  = rshift(value, 25) & 63#
+		variable_a = 100 / variable_a_raw
+		if variable_a == 1:
+			variable_a = 0.98
+		irradiance_532 = 10**(irradiance_532_raw/480)/10000#
+		irradiance_570 = 10**(irradiance_570_raw/480)/10000#
+		pri = None
+		if irradiance_532 == 0 or irradiance_570 == 0\
+		or irradiance_532 == 2047 or irradiance_570 == 2047:
+			return {'PRI': pri}
+		pri = (variable_a*irradiance_532 - irradiance_570)/(variable_a*irradiance_532+irradiance_570)
+		return {'PRI': PRI}
+	elif code == '111':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		irradiance_532_raw = rshift(value, 1) & 2047#
+		irradiance_570_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		#up-facing orientation
+		irradiance_532 = irradiance_532_raw/1000#
+		irradiance_570 = irradiance_570_raw/1000#
+		#down-facing orientation
+		if orientation == 1:
+			irradiance_532 = 10**(irradiance_532_raw/480)/10000#
+			irradiance_570 = 10**(irradiance_570_raw/480)/10000#
+		variable_a = None
+		if irradiance_532 == 0 or irradiance_570 == 0\
+		or irradiance_532 == 2047 or irradiance_570 == 2047:
+			return variable_a
+		variable_a = irradiance_570/irradiance_532
+		return {'PRI Variable_a': variable_a}
+	elif code == '114':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		red_raw = rshift(value, 1) & 2047#
+		nir_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		variable_a_raw  = rshift(value, 25) & 63#
+		variable_a = 100 / variable_a_raw
+		if variable_a == 1:
+			variable_a = 1.86
+		red = 10**(red_raw/480)/10000#
+		nir = 10**(nir_raw/480)/10000#
+		ndvi = None
+		if red == 0 or nir == 0:
+			return {'NDVI': ndvi}
+		ndvi = (variable_a*nir - red)/(variable_a*nir+red)
+		return {'NDVI': ndvi}
+	elif code == '115':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+		red_raw = rshift(value, 1) & 2047#
+		nir_raw = rshift(value, 12) & 2047#
+		orientation = rshift(value, 23) & 3#
+		#up-facing orientation
+		red = red_raw/1000#
+		nir = nir_raw/1000#
+		#down-facing orientation
+		if orientation == 1:
+			red = 10**(red_raw/480)/10000#
+			nir = 10**(nir_raw/480)/10000#
+		variable_a = None
+		if red == 0 or nir == 0:
+			return variable_a
+		variable_a = red/nir
+		return {'NDVI Variable_a': variable_a}
 	elif code == '241':
 		if float(value) != 0.0:
 			return {'GS1 Moisture':100*(3.62*10**-4 * float(value) - 0.554)}
