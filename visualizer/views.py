@@ -27,7 +27,6 @@ def index(request):
 	dashboards = Dashboard.objects.filter(user=request.user)
 	dash = request.GET.get('dashboard')
 	app_user = AppUser.objects.get(user=request.user)
-	print app_user.access_chart_settings
 	if dash is None:
 		try:
 			activedash = Dashboard.objects.get(user=request.user, active=True)
@@ -92,9 +91,17 @@ def index(request):
 @login_required
 def gis_view(request):
 	form = FileUploadForm()
+	fc_stations = Stations.objects.filter(user=request.user, database='fc')
+	dg_stations = Stations.objects.filter(user=request.user, database='dg')
+	alerts = Alerts.objects.filter(user=request.user)
+	dashboards = Dashboard.objects.filter(user=request.user)
 
 	return render(request,'gis.html', {
 			'name': request.user.first_name,
+			'fc_stations': fc_stations,
+			'dg_stations': dg_stations, 
+			'alerts': alerts,
+			'dashboards': dashboards,
 			'form':form
 			})	
 

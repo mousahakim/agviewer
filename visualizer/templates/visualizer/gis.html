@@ -203,11 +203,22 @@
           <div id="sidebar"  class="nav-collapse ">
               <!-- sidebar menu start-->
               <ul class="sidebar-menu" id="nav-accordion">
-                  <li>
+                  <li class="sub-menu">
                       <a class="active" href="{% url 'index' %}">
                           <i class="fa fa-dashboard"></i>
-                          <span>Dashboard</span>
+                          <span>Dashboards</span>
                       </a>
+                      <ul class="sub">
+
+                        {% for dash in dashboards %}
+                          <li class="sub-menu">
+                            <a class="dashboard-item" id="{{dash.uid}}" href="/?dashboard={{dash.uid}}">
+                              {{dash.name}}
+                            </a>
+                          </li>
+                        {% endfor %}
+
+                      </ul>
                   </li>
 
                   <li>
@@ -223,10 +234,17 @@
                           <i class="fa fa-bullseye"></i>
                           <span>Stations</span>
                       </a>
-                      {% for k, v in station_sensor.iteritems %}
+                      {% for station in fc_stations %}
                         <ul class="sub">
                             <li class="sub-menu">
-                                <a  href="boxed_page.html">{{k}}</a>
+                                <a  href="boxed_page.html">{{station.name}}</a>
+                            </li>
+                        </ul>
+                      {% endfor %}
+                      {% for station in dg_stations %}
+                        <ul class="sub">
+                            <li class="sub-menu">
+                                <a  href="boxed_page.html">{{station.name}}</a>
                             </li>
                         </ul>
                       {% endfor %}
@@ -235,7 +253,7 @@
                  
 
                   <!--Sensors menu start-->
-                  <li class="sub-menu">
+                  <!-- <li class="sub-menu">
                       <a href="javascript:;" >
                           <i class="fa fa-weibo"></i>
                           <span>Sensors</span>
@@ -255,8 +273,8 @@
                     {% endfor %}
                     
                   </li>
-                  <!--sensors menu end-->
-                  <li class="sub-menu">
+ -->                  <!--sensors menu end-->
+                  <!-- <li class="sub-menu">
                       <a href="javascript:;" >
                           <i class="fa fa-pagelines"></i>
                           <span>Farms</span>
@@ -266,7 +284,7 @@
                                 <a  href="boxed_page.html"></a>
                             </li>
                         </ul>
-                </li>
+                </li> -->
               </ul>
               <!-- sidebar menu end-->
           </div>

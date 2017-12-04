@@ -1943,8 +1943,8 @@ $(document).ready(function(){
 
 });
 
-$('#statmodal select.station').chosen({width:"100%", scroll_to_highlighted:false});
-$('#statmodal select.sensor').chosen({width:"100%", scroll_to_highlighted:false, disable_search:true});
+// $('#statmodal select.station').chosen({width:"100%", scroll_to_highlighted:false});
+// $('#statmodal select.sensor').chosen({width:"100%", scroll_to_highlighted:false, disable_search:true});
 
 
 // stat configuration modal 

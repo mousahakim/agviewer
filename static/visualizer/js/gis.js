@@ -163,7 +163,7 @@ function download_file() {
     dynamic_form(urlDownloadFile, 'post', {
         name: $files[0]
     });
-    notify('success', 3, 'File downloaded.');
+    // notify('success', 3, 'File downloaded.');
     
 }
 

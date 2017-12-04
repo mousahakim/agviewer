@@ -33,12 +33,11 @@
     <link href="{% static 'visualizer/assets/jquery-multi-select/css/multi-select.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'visualizer/css/slider.css' %}" rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'visualizer/css/kendo.bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'visualizer/css/kendo.common-bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'visualizer/css/kendo.common.min.css' %}" />
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.min.css' %}" />
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.mobile.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'visualizer/css/datatables.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'visualizer/css/bootstrap-switch.min.css' %}"/>
+    <!-- <link rel="stylesheet" href="{% static 'visualizer/css/bootstrap-switch.min.css' %}"/> -->
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/jquery.dataTables.min.css' %}"/> -->
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/dataTables.bootstrap.min.css' %}"/> -->
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/buttons.dataTables.min.css' %}"/> -->
@@ -215,10 +214,17 @@
                           <i class="fa fa-bullseye"></i>
                           <span>Stations</span>
                       </a>
-                      {% for k, v in station_sensor.iteritems %}
+                      {% for station in fc_stations %}
                         <ul class="sub">
                             <li class="sub-menu">
-                                <a  href="boxed_page.html">{{k}}</a>
+                                <a  href="boxed_page.html">{{station.name}}</a>
+                            </li>
+                        </ul>
+                      {% endfor %}
+                      {% for station in dg_stations %}
+                        <ul class="sub">
+                            <li class="sub-menu">
+                                <a  href="boxed_page.html">{{station.name}}</a>
                             </li>
                         </ul>
                       {% endfor %}
@@ -227,7 +233,7 @@
                  
 
                   <!--Sensors menu start-->
-                  <li class="sub-menu">
+                  <!-- <li class="sub-menu">
                       <a href="javascript:;" >
                           <i class="fa fa-weibo"></i>
                           <span>Sensors</span>
@@ -247,8 +253,8 @@
                     {% endfor %}
                     
                   </li>
-                  <!--sensors menu end-->
-                  <li class="sub-menu">
+ -->                  <!--sensors menu end-->
+                  <!-- <li class="sub-menu">
                       <a href="javascript:;" >
                           <i class="fa fa-pagelines"></i>
                           <span>Farms</span>
@@ -258,7 +264,7 @@
                                 <a  href="boxed_page.html"></a>
                             </li>
                         </ul>
-                </li>
+                </li> -->
               </ul>
               <!-- sidebar menu end-->
           </div>
@@ -1105,8 +1111,8 @@
     <script type="text/javascript" src="{% static 'visualizer/js/charts.js' %}"></script>
     <script type="text/javascript" src="{% static 'visualizer/js/bootstrap-slider.js' %}"></script>
     <!-- <script src="{% static 'visualizer/js/kendo.core.min.js' %}"></script> -->
-    <script src="{% static 'visualizer/js/kendo.ui.core.min.js' %}"></script>
-    <!-- <script src="{% static 'visualizer/js/kendo.all.min.js' %}"></script> -->
+    <!-- <script src="{% static 'visualizer/js/kendo.ui.core.min.js' %}"></script> -->
+    <script src="{% static 'visualizer/js/kendo.all.min.js' %}"></script>
     <!-- <script src="{% static 'visualizer/js/kendo.popup.min.js' %}"></script> -->
     <script src="{% static 'visualizer/js/datatables.min.js' %}"></script>
     <script src="{% static 'visualizer/js/bootstrap-switch.min.js' %}"></script>

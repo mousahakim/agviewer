@@ -207,7 +207,7 @@ def set_stat_widget(widget_data_id):
 		if widget_data.sensor is None:
 			return {
 				'success': False,
-				'message': e.message,
+				'message': 'Option only available for sensor',
 				'value': 'Error'
 			}
 		db = widget_data.sensor.split('-')[0]
