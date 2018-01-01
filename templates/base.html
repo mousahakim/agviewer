@@ -4,6 +4,9 @@
 {% block body_class %}tpl-base{% endblock %}
 
 {% block extend_root %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" media="screen">
+</head>
 {% block header %}
 {# INFO: navbar concept: http://getbootstrap.com/components/#navbar #}
 <header class="navbar navbar-head js-navbar-head navbar-inverse navbar-fixed-top">
@@ -12,9 +15,18 @@
         <div class="navbar-header">
             {# INFO: the logo should be placed first for seo reasons #}
             <h1 class="navbar-brand">
+                <!-- <a href="/">
+                    <span class="sr-only">{{ request.site.name }}</span>
+                    <img src="{% static "img/logo-agviewer.png" %}" alt="{{ request.site.name }}" />
+                </a> -->
+                <!-- <a href="/"> -->
+                    <!-- <span class="sr-only">{{ request.site.name }}</span> -->
+                    <!-- <img src="{% static "" %}" alt="{{ request.site.name }}" /> -->
+                <!-- </a> -->
                 <a href="/">
                     <span class="sr-only">{{ request.site.name }}</span>
-                    <img src="{% static "img/logo-main@print.png" %}" alt="{{ request.site.name }}" />
+                    <!-- <img src="{% static "" %}" alt="{{ request.site.name }}" /> -->
+                    {% placeholder "logo"%}
                 </a>
             </h1>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".js-navbar-header">
@@ -58,13 +70,20 @@
     {% block feature %}
         {% placeholder "feature" or %}
             <div class="feature-visual">
-                <img src="{% static 'img/visuals/feature-default.jpg' %}" alt="">
+                <img src="{% static 'img/visuals/feature-agviewer.jpg' %}" alt="">
             </div>
-            <div class="feature-content text-center">
-                <div class="spacer spacer-xs">&nbsp;</div>
-                <h1>{% trans "The Next Giant Leap For Mankind" %}</h1>
-            </div>
+            
         {% endplaceholder %}
+        <div class="feature-content text-left">
+            <div class="spacer spacer-xs">&nbsp;</div>
+            <h1>{% placeholder "left-feature-text-title" %}</h1>
+        </div>
+        <div class="feature-content text-left">
+            <div class="spacer spacer-xs">&nbsp;</div>
+            <div class="spacer spacer-xs">&nbsp;</div>
+            <div class="spacer spacer-xs">&nbsp;</div>
+            <p>{% placeholder "left-feature-text-description" %}</p>
+        </div>
     {% endblock feature %}
 </div>
 
