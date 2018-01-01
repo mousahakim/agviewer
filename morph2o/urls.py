@@ -19,13 +19,13 @@ from django.contrib.auth import views as auth_views
 from visualizer import views, test_view, get_records
 from visualizer.views import ANAuthenticationForm
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
-
 urlpatterns = [
    url(r'^$', views.index, name='index'),
    url(r'^admin/', include(admin.site.urls)),
-    url(r'^visualizer/', views.index, name='index1'),
-    url(r'^accounts/login/$', auth_views.login, {'authentication_form': ANAuthenticationForm, 'extra_context':{'next': '/'}}, name='login'),
+   url(r'^visualizer/', views.index, name='index1'),
+   url(r'^accounts/login/$', auth_views.login, {'authentication_form': ANAuthenticationForm, 'extra_context':{'next': '/'}}, name='login'),
    url(r'^log_out/',auth_views.logout, {'next_page': 'index'}, name="log_out" ),
    url(r'^test/', get_records.get_widget, name="get_widget"),
    url(r'^gis/', views.gis_view, name="gis_view"),
@@ -62,3 +62,8 @@ urlpatterns = [
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += i18n_patterns(
+    url(r'^cms/', include('cms.urls')),
+  )
+
