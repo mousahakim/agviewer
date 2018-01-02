@@ -26,7 +26,6 @@
                 <a href="/">
                     <span class="sr-only">{{ request.site.name }}</span>
                     <!-- <img src="{% static "" %}" alt="{{ request.site.name }}" /> -->
-                    {% placeholder "logo"%}
                 </a>
             </h1>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".js-navbar-header">
@@ -76,13 +75,7 @@
         {% endplaceholder %}
         <div class="feature-content text-left">
             <div class="spacer spacer-xs">&nbsp;</div>
-            <h1>{% placeholder "left-feature-text-title" %}</h1>
-        </div>
-        <div class="feature-content text-left">
-            <div class="spacer spacer-xs">&nbsp;</div>
-            <div class="spacer spacer-xs">&nbsp;</div>
-            <div class="spacer spacer-xs">&nbsp;</div>
-            <p>{% placeholder "left-feature-text-description" %}</p>
+            <h1>{% placeholder "feature-text" %}</h1>
         </div>
     {% endblock feature %}
 </div>
