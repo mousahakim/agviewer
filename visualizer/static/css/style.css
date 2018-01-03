@@ -1,0 +1,9 @@
+.navbar-head .navbar-brand a {
+	background: url('../img/logo-tiny.png') center no-repeat !important;
+	background-size: 150px !important; 
+	/*background-image: none !important;*/
+}
+
+/*.navbar-head .navbar-brand a > img {
+	height: 80px !important;
+}*/
