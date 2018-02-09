@@ -12,16 +12,6 @@ function getID() {
 
 
 $(function(){
-	console.log('widget clicked');
-	var gmap;
-	function initMap() {
-		// body...
-		gmap = new google.maps.Map($('#map'), {
-	      center: {lat: -34.397, lng: 150.644},
-	      zoom: 8
-	    });
-	}
-
 	$('#add-gis-widget').on('click', function(e){
 		
 		var gisWidgetID = getID();

@@ -169,6 +169,9 @@ a, a:hover, a:focus {
   .top-buffer-5{
     margin-top: 5px;
   }
+  .top-buffer-15{
+    margin-top: 15px;
+  }
   select{
     font-family: 'FontAwesome', 'Open Sans', sans-serif;
   }

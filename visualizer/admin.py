@@ -6,7 +6,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from visualizer.models import AppUser, SensorCodes, SMTPConfig, AlertEvents, EmailNotification, SMSNotification
+from visualizer.models import AppUser, SensorCodes, SMTPConfig, AlertEvents, EmailNotification, SMSNotification, MapTileSource
 
 @admin.register(AppUser)
 class AppUserAdmin(admin.ModelAdmin):
@@ -32,3 +32,7 @@ class EmailNotificationAdmin(admin.ModelAdmin):
 @admin.register(SMSNotification)
 class SMSNotificationAdmin(admin.ModelAdmin):
 	list_display = ('user', 'subject', 'success', 'error')
+
+@admin.register(MapTileSource)
+class MapTileSourceAdmin(admin.ModelAdmin):
+	list_display = ('name', 'url', 'attribution')

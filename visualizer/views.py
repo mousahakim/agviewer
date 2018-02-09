@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_POST
 from .forms import FileUploadForm
 import requests, json, time, os, sys, datetime, uuid
-from models import AppUser, Files, Alerts, AlertEvents, Settings, Widgets, Dashboard, Data
+from models import AppUser, Files, Alerts, AlertEvents, Settings, Widgets, Dashboard, Data, MapWidget, MapTileSource
 from get_records import *
 from .general import Alert
 from django.db import IntegrityError
@@ -22,8 +22,10 @@ def index(request):
 	
 	chart_widgets = Widgets.objects.filter(widget_type='main-chart', user=request.user)
 	stat_widgets = Widgets.objects.filter(widget_type='stat', user=request.user)
+	map_widgets = MapWidget.objects.filter(user=request.user)
 	fc_stations = Stations.objects.filter(user=request.user, database='fc')
 	dg_stations = Stations.objects.filter(user=request.user, database='dg')
+	tile_sources = MapTileSource.objects.all()
 	dashboards = Dashboard.objects.filter(user=request.user)
 	dash = request.GET.get('dashboard')
 	app_user = AppUser.objects.get(user=request.user)
@@ -32,18 +34,20 @@ def index(request):
 			activedash = Dashboard.objects.get(user=request.user, active=True)
 			chart_widgets = chart_widgets.filter(dashboard=activedash)
 			stat_widgets = stat_widgets.filter(dashboard=activedash)
+			map_widgets = map_widgets.filter(dashboard=activedash)
 		except Dashboard.DoesNotExist as e:
 			print e
 		
 		return render(request,'index.html', {
 			'name': request.user.first_name,
 			'chart_widgets': chart_widgets,
-			'stat_widgets': stat_widgets, 
+			'stat_widgets': stat_widgets,
+			'map_widgets' : map_widgets, 
 			'fc_stations': fc_stations,
 			'dg_stations': dg_stations, 
 			'dashboards': dashboards, 
-			'app_user': app_user
-			# 'data_sensors': data_sensors
+			'app_user': app_user,
+			'tile_sources': tile_sources
 
 		})
 	
@@ -64,7 +68,7 @@ def index(request):
 
 	chart_widgets = chart_widgets.filter(dashboard=activedash)
 	stat_widgets = stat_widgets.filter(dashboard=activedash)
-
+	map_widgets = map_widgets.filter(dashboard=activedash)
 
 	# t1 = datetime.datetime.now()
 	# data_sensors = {}
@@ -79,11 +83,12 @@ def index(request):
 		'name': request.user.first_name,
 		'chart_widgets': chart_widgets,
 		'stat_widgets': stat_widgets, 
+		'map_widgets' : map_widgets, 
 		'fc_stations': fc_stations,
 		'dg_stations': dg_stations, 
 		'dashboards': dashboards,
-		'app_user': app_user
-		# 'data_sensors': data_sensors
+		'app_user': app_user,
+		'tile_sources': tile_sources
 
 		})	
 
@@ -103,7 +108,7 @@ def gis_view(request):
 			'alerts': alerts,
 			'dashboards': dashboards,
 			'form':form
-			})	
+			})
 
 class ANAuthenticationForm(AuthenticationForm):
 

@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css?family=Hind+Madurai');
+
+.gis-panel {
+	padding: 1px;
+	height: 380px;
+}
+.gis-container {
+	width: 100%;
+	height: 100%;
+}
+.ol-control button{
+	background-color: rgba(128, 128, 128, .5);
+}
+.ol-control button:focus {
+	background-color: rgba(0, 0, 0, .5);
+}
+.ol-control button:hover {
+	background-color: rgba(0, 0, 0, .5);
+}
+.ol-scale-line {
+	background-color: rgba(128, 128, 128, .5);
+}
+.ol-overviewmap {
+	bottom: 2em;
+}
+.ol-mouse-position {
+	font-family: monospace;
+}
+.popover-content {
+    min-width: 145px;
+    font-family: 'Hind Madurai', sans-serif;
+}
+.popover-content > p {
+    margin-bottom: 0;
+}
+.popover-title {
+    padding: 4px 10px;
+    font-family: 'Hind Madurai', sans-serif;
+}
+.nosupport {
+    position: absolute;
+    width: calc(100% - 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+}
+.draw-button1 {
+	top: .5em;
+	right: calc(1.875em + 6px);
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	padding-left: 0px;
+}
+.popover-front {
+    z-index: 1011 !important;
+}
+.map-pie-chart {
+    overflow: hidden;
+    text-align: left;
+    width: 120px;
+    height: 120px; 
+    bottom: 10px;
+    left: 10px;
+    position: absolute;
+}
+/*.notification-bar {
+    width: 100%;
+    height: 1.5em;
+    display: table;
+}
+.notification-bar > div {
+    height: 100%;
+    display: table-cell;
+    border: 1px solid grey;
+    width: 34%;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+.notification-bar .message-bar {
+    width: 66%;
+}
+.notification-bar .ol-mouse-position {
+    font-family: monospace;
+    text-align: center;
+    position: static;
+}*/
+/*.toolbar {*/
+    /*height: 2em;*/
+    /*display: table;*/
+    /*padding-left: .2em;*/
+    /*position: absolute;*/
+    /*top: 1px;*/
+/*}*/
+/*.toolbar .ol-control {
+    position: static;
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0;
+}
+.toolbar .ol-control button {
+    border-radius: 2px;
+    background-color: rgba(128, 128, 128, .5);
+    width: 2em;
+    display: inline-block;
+}
+.toolbar .ol-control button:hover {
+    background-color: rgba(0, 0, 0, .5);
+}*/

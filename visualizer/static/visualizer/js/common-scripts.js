@@ -85,7 +85,7 @@ var Script = function () {
         }
     });
 
-    jQuery('.panel .tools .fa-times').click(function (e) {
+    jQuery('.panel .tools .fa-times').not('#map-widget-delete-button').click(function (e) {
         e.stopImmediatePropagation();
         if (!confirm('Are you sure you want to permenantly delete chart ?')) {
             return

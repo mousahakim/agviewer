@@ -35,6 +35,9 @@
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/kendo.common.core.min.css' %}" /> -->
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.min.css' %}" />
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.mobile.min.css' %}"/>
+    <!-- openlayers  -->
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="{% static 'visualizer/css/gis.css' %}"/>
 
     
     <style type="text/css">
@@ -655,35 +658,208 @@
                           <div class="panel-body">
                               <div id="{{widget.widget_id}}" class="chart-container">
                               <div class="curtain"><span><i class="fa fa-spin fa-spinner"></i> Loading...</span></div>
-                        
+                              
                               </div>
                           </div>
                       </section>
                       
                     </div>
                   {% endfor %}
-                  <div class="col-lg-6">
-					<section id="main-panel-" class="panel main-panel">
-						<header class="panel-heading">
-							<span class="title">New chart panel &nbsp;<i id="main-panel-1-i" class=""></i></span>
-							<span class="tools pull-right">
-								<a href="javascript:;" class="fa fa-chevron-down"></a>
-								<a href="#main-chart-modal" data-toggle="modal" class="fa fa-wrench"></a>
-								<a href="javascript:;" class="fa fa-times"></a>
-							</span>
-						</header>
-						<div class="panel-body">
-							<div id="map" class="gis-container chart-container">
-							</div>
-						</div>
-					</section>
-				</div>
+                  {% for widget in map_widgets %}
+                    <div class="col-lg-6">
+                      <section id="main-panel-" class="panel main-panel">
+                        <header class="panel-heading">
+                          <span class="title">{{widget.name}} &nbsp;<i id="map-widget-progress" class=""></i></span>
+                          <span class="tools pull-right">
+                            <a href="javascript:;" class="fa fa-chevron-down"></a>
+                            <a href="#GISModal" data-toggle="modal" class="fa fa-wrench"></a>
+                            <a href="javascript:;" class="fa fa-times" id="map-widget-delete-button"></a>
+                          </span>
+                        </header>
+                        <div class="panel-body gis-panel">
+                          <div id="{{widget.wid}}" class="gis-container chart-container">
+                            <div class="nosupport">Loading map tiles please wait. <i class="fa fa-spin fa-spinner"></i> </div>
+                          </div>
+                          <div id="pieChart-{{widget.wid}}" class="map-pie-chart"></div>
+                          <div id="map-popup-container" style="display: hidden;">
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  {% endfor %}
+
               </div>
-
-              
+              <!-- gis widget modal -->
+              <div class="modal fade" id="GISModal" tabindex="-1" role="dialog" aria-labelledby="GISModalLabel">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="GISModalLabel">GIS Widget Settings</h4>
+                    </div>
+                    <div class="modal-body">
+                      <section class="panel">
+                        <header class="panel-heading tab-bg-dark-navy-blue">
+                          <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
+                          <li role="presentation"><a href="#files" aria-controls="files" role="tab" data-toggle="tab">Files</a></li>
+                          <li role="presentation"><a href="#features" aria-controls="features" role="tab" data-toggle="tab">Features</a></li>
+                          <li role="presentation"><a href="#options" aria-controls="options" role="tab" data-toggle="tab">Options</a></li>
+                        </ul>
+                        <!-- /nav tabs -->
+                        </header>
+                        <div class="panel-body">
+                          <!-- Tab panes -->
+                        <div class="tab-content">
+                          <div role="tabpanel" class="tab-pane active" id="general">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-group row">
+                                  <div class="row">
+                                    <div class="col-lg-1"></div>
+                                    <label for="inputTitle" class="col-lg-2 col-sm-2 control-label">Title</label>
+                                      <div class="col-lg-8">
+                                          <input type="text" class="form-control" id="map-widget-title" placeholder="title">
+                                      </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-1"></div>
+                                    <label for="inputIndex" class="top-buffer-5 col-lg-2 col-sm-2 control-label">Index</label>
+                                    <div class="col-lg-4 top-buffer-5">
+                                        <input type="text" class="form-control" id="map-index" placeholder="0">
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-1"></div>
+                                    <label for="inputIndex" class="top-buffer-5 col-lg-2 col-sm-2 control-label">Zoom</label>
+                                    <div class="col-lg-4 top-buffer-5">
+                                        <input type="text" class="form-control" id="map-zoom" placeholder="">
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-1"></div>
+                                    <label for="inputIndex" class="top-buffer-5 col-lg-2 col-sm-2 control-label">Center</label>
+                                    <div class="col-lg-2 top-buffer-5">
+                                        <input type="text" class="form-control" id="map-center-lat" placeholder="lat">
+                                    </div>
+                                    <div class="col-lg-2 top-buffer-5">
+                                        <input type="text" class="form-control" id="map-center-long" placeholder="long">
+                                    </div>
+                                  </div>
+                                </div>
+                            </form>
+                          </div>
+                          <div role="tabpanel" class="tab-pane" id="files">
+                            <div class="form-group">
+                              <div class="row">
+                              <div class="col-lg-1"></div>
+                                <div class="file-table col-lg-9">
+                                  <select multiple class="form-control file-select" id="file-select">
+                                                      
+                                  </select>
+                                </div>  
+                              </div>
+                              <div class="row"> <!-- buttons row -->
+                                <div class="col-lg-1"></div>
+                                <div class="files-btn-container col-lg-9 top-buffer-5">
+                                  <button type="button" class="btn btn-sm btn-danger" id="btn-delete-file">
+                                    <i class="fa fa-trash-o"></i> Delete
+                                  </button>
+                                  <button type="button" class="btn btn-sm btn-default" id="btn-download-file">
+                                    <i class="fa fa-download"></i> Download
+                                  </button>
+                                  <button type="button" class="btn btn-sm btn-primary" id="btn-import-features">
+                                    <i class="fa fa-map-marker"></i> Import Features
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="upload-container ">
+                                  <div class="col-lg-1"></div>
+                                  <div class="k-content col-lg-9 top-buffer-15">
+                                      <input name="fileUpload" id="fileUpload" type="file" autocomplete="off" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                              
+                          </div>
+                          <div role="tabpanel" class="tab-pane" id="features">
+                            <div class="form-group">
+                              <div class="row">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-2 top-buffer">
+                                  <label class="control-label" for="map-feature-select">Features</label>
+                                </div>
+                                <div class="col-sm-7 top-buffer">
+                                  <select id="map-feature-select">
+                                    
+                                  </select>
+                                </div>  
+                              </div>
+                              <div class="row">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-2 top-buffer">
+                                  <label class="control-label" for="map-paw-select">PAW widget</label>
+                                </div>
+                                <div class="col-sm-7 top-buffer">
+                                  <select id="map-paw-select">
+                                    {% for widget in chart_widgets %}
+                                      <option value="{{widget.widget_id}}">{{widget.widget.title}}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-2 top-buffer">
+                                  <label class="control-label" for="map-stat-select">Stat widget</label>
+                                </div>
+                                <div class="col-sm-7 top-buffer">
+                                  <select id="map-stat-select">
+                                    {% for widget in stat_widgets %}
+                                      <optgroup label="{{widget.widget.title}}">
+                                        {% for data in widget.dataset.all %}
+                                          <option value="{{data.id}}">{{data.name}}</option>
+                                        {% endfor %}
+                                      </optgroup>
+                                    {% endfor %}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div role="tabpanel" class="tab-pane" id="options">
+                            <div class="form-group">
+                              <div class="row">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-2 top-buffer">
+                                  <label class="control-label" for="map-tile-source-select">Map tiles source</label>
+                                </div>
+                                <div class="col-sm-7 top-buffer">
+                                  <select id="map-tile-source-select">
+                                    {% for source in tile_sources%}
+                                      <option value="{{source.name}}">{{source.name}}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div>  
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- / tab panes -->
+                        </div>
+                      </section>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary " id="save-map-changes">Save changes</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /gis widget modal -->
               <!--main chart modal -->  
-
-
               <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="main-chart-modal" class="modal fade">
                 <div class="modal-dialog ">
                       <div class="modal-content">
@@ -1275,9 +1451,6 @@
                     </div>
                 </div>
              </div>
-
-
-
               <!--main chart modal end -->
               <!--notification modal -->
               <div aria-hidden="true" role="dialog" tabindex="-1" id="show-event-modal" class="modal fade">
@@ -1377,6 +1550,7 @@
     <!--amcharts -->
     <script src="{% static 'visualizer/amcharts/amcharts.js' %}" type="text/javascript"></script>
     <script src="{% static 'visualizer/amcharts/serial.js' %}" type="text/javascript"></script>
+    <script src="{% static 'visualizer/amcharts/pie.js' %}" type="text/javascript"></script>
     <script src="{% static 'visualizer/amcharts/themes/light.js' %}"></script>
     <script src="{% static 'visualizer/amcharts/plugins/export/export.js' %}"></script>
     <!--script for this page-->
@@ -1396,11 +1570,9 @@
     <!-- <script src="{% static 'visualizer/js/kendo.mobile.min.js' %}"></script> -->
     <script src="{% static 'visualizer/js/jscolor.min.js' %}"></script>
     <script src="{% static 'visualizer/js/utils.js' %}"></script>
-    <!--google maps api -- >
-    <script src="{% static 'visualizer/js/maps.js' %}"></script>
-  	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6QFn_rnwHupKdG4-iFnLNZsvhBQ0jw_M&callback=initMap"
-    async defer></script>
-    
+    <!-- openlayers 4 -->
+  	<script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
+    <script src="{% static 'visualizer/js/gis.js' %}"></script>
     <!-- <script src="{% static 'visualizer/js/kendo.multiselect.min.js' %}"></script>  -->
 <!--    <script src="{% static 'visualizer/assets/jquery-ui/jquery-ui-1.10.1.custom.min.js' %}" type="text/javascript"></script> -->
    <!-- <script type="text/javascript" src="{% static 'visualizer/js/advanced-form-components.js' %}"></script> -->

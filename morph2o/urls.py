@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from visualizer import views, test_view, get_records
+from visualizer import views, test_view, get_records, gis_views
 from visualizer.views import ANAuthenticationForm
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
@@ -57,9 +57,21 @@ urlpatterns = [
    url(r'^add_stat_data', views.add_stat_data, name='add_stat_data'),
    url(r'^change_stat_data', views.change_stat_data, name='change_stat_data'),
    url(r'^fetch_stat_data', views.fetch_stat_data, name='fetch_stat_data'),
-   url(r'^delete_stat_data', views.delete_stat_data, name='delete_stat_data')
-
-
+   url(r'^delete_stat_data', views.delete_stat_data, name='delete_stat_data'),
+   url(r'^upload', gis_views.upload, name='upload'),
+   url(r'^remove', gis_views.remove, name='remove'),
+   url(r'^file-list', gis_views.get_file_list, name='file-list'),
+   url(r'^save-feature', gis_views.save_feature, name='save-feature'), 
+   url(r'^save-map-widget', gis_views.create_map_widget, name='save-map-widget'), 
+   url(r'^get-map-widgets', gis_views.get_map_widget_list, name='get-map-widgets'),
+   url(r'^get-map-widget', gis_views.get_map_widget, name='get-map-widget'),
+   url(r'^delete-map-widget', gis_views.delete_map_widget, name='delete-map-widget'), 
+   url(r'^change-map-widget', gis_views.change_map_widget, name='change-map-widget'), 
+   url(r'^get-feature-list', gis_views.get_feature_list, name='get-feature-list'), 
+   url(r'^get-feature-stats', gis_views.get_feature_stats, name='get-feature-stats'), 
+   url(r'^change-paw-feature-stat', gis_views.change_paw_feature_stat, name='change-paw-feature-stat'),
+   url(r'^change-feature-stat', gis_views.change_feature_stat, name='change-feature-stat'),
+   url(r'^get-feature-stat-widgets', gis_views.get_feature_stat_widgets, name='get-feature-stat-widgets')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

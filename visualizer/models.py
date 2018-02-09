@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models import ForeignKey
-import hashlib, uuid, time
+import hashlib, uuid, time, os
 from django.conf import settings
+from django.dispatch import receiver
 from jsonfield import JSONField
 from django.core.validators import RegexValidator
 #from django.contrib.auth.models import User
@@ -258,4 +259,76 @@ class Data(models.Model):
 	value = models.FloatField(null=True)
 	unit = models.CharField(max_length=10)
 	stale = models.BooleanField(default=False)
+
+def get_file_path(instance, filename):
+	return 'files/{0}/{1}'.format(instance.user.username, filename)
+
+class MapWidget(models.Model):
+	wid = models.CharField(max_length=6, primary_key=True)
+	index = models.IntegerField(default=0)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	name = models.CharField(max_length=50, default="New map widget")
+	dashboard = models.ForeignKey('Dashboard')
+	zoom = models.IntegerField()
+	latitude = models.FloatField()
+	longitude = models.FloatField()
+	tile_source = models.ForeignKey('MapTileSource')
+	class Meta:
+		ordering = ['index']
+
+class MapTileSource(models.Model):
+	name = models.CharField(max_length=50, primary_key=True)
+	url = models.CharField(max_length=500)
+	attribution = models.CharField(max_length=300)
+
+class File(models.Model):
+	fid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	file = models.FileField(upload_to=get_file_path)
+
+class Feature(models.Model):
+	fid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+	name = models.CharField(max_length=100)
+	geom_type = models.CharField(max_length=100)
+	widget = ForeignKey('MapWidget')
+	feature = JSONField()
+
+class FeatureStat(models.Model):
+	fsid = models.UUIDField(primary_key=True, default=uuid.uuid4)
+	feature = models.ForeignKey('Feature')
+	widget = models.ForeignKey('Widgets', null=True)
+	data = models.ForeignKey('Data', null=True)
+	stat_type = models.CharField(max_length=1, choices=(('s', 'Stat'),('p', 'PAW')))
+	value = models.FloatField()
+
+@receiver(models.signals.post_delete, sender=File)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `File` object is deleted.
+    """
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
+
+@receiver(models.signals.pre_save, sender=File)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `File` object is updated
+    with new file.
+    """
+    if not instance.fid:
+        return False
+
+    try:
+        old_file = File.objects.get(fid=instance.fid).file
+    except File.DoesNotExist:
+        return False
+
+    new_file = instance.file
+    if not old_file == new_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)
+
 

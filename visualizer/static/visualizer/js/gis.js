@@ -1,293 +1,914 @@
-//crsf handler 
-$(function() {
-
-
-    // This function gets cookie with a given name
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+//setup django csrftoken cookie for ajax
+//get crsf token cookie
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
-    var csrftoken = getCookie('csrftoken');
+    return cookieValue;
+}
+//setup ajax crsf header
+function csrfSafeMethod(method) {
+// these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
 
-    /*
-    The functions below will create a header with csrftoken
-    */
+//globals
+var lastInvokerWidget;
 
-    function csrfSafeMethod(method) {
-        // these HTTP methods do not require CSRF protection
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+function getID() {
+	id = getRandomColor();
+	widget_lst = Object.keys(all_widgets);
+	if (id.split('#')[1] in widget_lst) {
+		return getID();
+	}else{
+		return id.split('#')[1];
+	};
+}
+
+function getFileList(){
+	$.ajax({
+      method: "GET",
+      url: 'file-list',
+      dataType: 'json'
+    }).done(function(fileList) {
+        //update file select
+        $('select#file-select').empty();
+        $.each(fileList, function (index, file){
+        	var fileName = file.fields.file.split('/')[file.fields.file.split('/').length-1];
+        	$('select#file-select').append('<option value="'+file.pk+'" url="'+file.fields.file+'">'+fileName+'</option>');
+        });
+    }).fail(function(msg){
+        alert('Failed to retreive files');
+    });
+}
+
+// function importFeatures(){
+// 	var map = lastInvokerWidget.data('map');
+// 	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
+//         return $(el).attr("url");
+//     });
+//     if (selectedFiles.length > 1){
+//     	alert('Please select one file at a time.');
+//     	return;
+//     }
+// 	//check for existing vector layers
+// 	var layers = map.getLayers();
+// 	var vectorLayer = new ol.layer.Vector({
+// 		source: new ol.source.Vector({
+// 			format: new ol.format.KML({
+// 				extractStyles:true
+// 			}),
+// 			url: selectedFiles[0]
+// 		})
+// 	});
+// 	map.addLayer(vectorLayer);
+// 	vectorLayer.once('change', function (){
+// 		var features = vectorLayer.getSource().getFeatures();
+// 		// features.forEach(function(feature, index, array){
+// 		// 	if (feature.getStyle() != null){
+// 		// 		console.log(feature.getStyle().call(feature)[0].getFill());
+// 		// 	}
+// 		// });
+// 		var targetElementID = $(map.getTargetElement()).attr('id');
+// 		var parser = new ol.format.GeoJSON();
+// 		var GeoJSONFeatureSet = parser.writeFeaturesObject(features);
+// 		saveFeatures(targetElementID, GeoJSONFeatureSet);
+// 	});
+	
+// }
+
+// function importFeatures(){
+// 	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
+//         return $(el).attr("url");
+//     });
+//     if (selectedFiles.length > 1){
+//     	alert('Please select one file at a time.');
+//     	return;
+//     }
+// 	var map = lastInvokerWidget.data('map');
+// 	var source = new ol.source.Vector({
+// 		format: new ol.format.KML({
+// 			extractStyles:true
+// 		}),
+// 		url: selectedFiles[0]
+// 	});
+// 	var targetElement = $(map.getTargetElement());
+// 	var parser = new ol.format.GeoJSON();
+// 	source.once('change',function(){
+// 		var features = source.getFeatures();
+// 		var GeoJSONFeatureSet = parser.writeFeaturesObject(features);
+// 		saveFeatures(targetElement.attr('id'), GeoJSONFeatureSet);
+// 		loadMapFeatures(targetElement);
+// 	});
+// }
+
+function importFeatures(){
+	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
+        return $(el).attr("url");
+    });
+    if (selectedFiles.length > 1){
+    	alert('Please select one file at a time.');
+    	return;
     }
-    function sameOrigin(url) {
-        // test that a given url is a same-origin URL
-        // url could be relative or scheme relative or absolute
-        var host = document.location.host; // host + port
-        var protocol = document.location.protocol;
-        var sr_origin = '//' + host;
-        var origin = protocol + sr_origin;
-        // Allow absolute or scheme relative URLs to same origin
-        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-            // or any other URL that isn't scheme relative or absolute i.e relative.
-            !(/^(\/\/|http:|https:).*/.test(url));
-    }
+	//check for existing vector layers
+	var vectorLayer = new ol.layer.Vector({
+		source: new ol.source.Vector({
+			format: new ol.format.KML({
+				extractStyles:false
+			}),
+			url: selectedFiles[0]
+		})
+	});
 
+	var map = lastInvokerWidget.data('map');
+
+	map.addLayer(vectorLayer);
+
+	var targetElement = $(map.getTargetElement());
+
+	var parser = new ol.format.GeoJSON();
+
+	vectorLayer.once('change', function (){
+
+		var features = vectorLayer.getSource().getFeatures();
+		
+		features.forEach(function(feature, index, array){
+
+			var GeoJSONFeature = parser.writeFeatureObject(feature);
+			//add loading icon on import feature button
+			$('#btn-import-features i').toggleClass('fa-map-marker', false);
+			$('#btn-import-features i').toggleClass('fa-spin fa-spinner', true);
+			$.ajax({
+				method: "POST",
+				url: 'save-feature',
+				dataType: 'json',
+				data: JSON.stringify({
+					widget: targetElement.attr('id'),
+					feature: GeoJSONFeature
+				})
+		    }).done(function(response) {
+
+				//remove loading icon on import feature button
+		    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+		    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+
+		    	//set feature id
+		    	feature.setId(response.fid);
+
+		    }).fail(function(msg){
+		    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+		    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+		        alert('Failed to save features to database.');
+		    });
+		});
+		//load features from database
+    	loadMapFeatures(targetElement);
+	});
+}
+
+
+function saveFeature(widget, feature){
+	console.log(feature);
+	var data = {
+		widget: widget,
+		feature
+	}
+	var featureId;
+	$('#btn-import-features i').toggleClass('fa-map-marker', false);
+	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', true);
+	$.ajax({
+	  async: false,
+      method: "POST",
+      url: 'save-feature',
+      dataType: 'json',
+      data: JSON.stringify(data)
+    }).done(function(response) {
+    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+    	featureId = response.fid;
+    }).fail(function(msg){
+    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+        alert('Failed to save features to database.');
+    });
+    return featureId;
+}
+
+function createMapWidget(mapWidgetID, options){
+	var newWidget = false;
+	if (typeof mapWidgetID == 'undefined'){
+		var mapWidgetID = getID();
+		var html = '<div class="col-lg-6">\
+			<section id="main-panel-" class="panel main-panel">\
+				<header class="panel-heading">\
+					<span class="title">New GIS widget &nbsp;<i id="map-widget-progress" class="fa fa-spin fa-cog"></i></span>\
+					<span class="tools pull-right">\
+						<a href="javascript:;" class="fa fa-chevron-down"></a>\
+						<a href="#GISModal" data-toggle="modal" class="fa fa-wrench"></a>\
+						<a href="javascript:;" class="fa fa-times" id="map-widget-delete-button"></a>\
+					</span>\
+				</header>\
+				<div class="panel-body gis-panel">\
+					<div id="'+mapWidgetID+'" class="gis-container chart-container">\
+						<div class="nosupport">Loading map tiles please wait. <i class="fa fa-spin fa-spinner"></i> </div>\
+					</div>\
+					<div id="pieChart-'+mapWidgetID+'" class="map-pie-chart"></div>\
+					<div id="map-popup-container" style="display: hidden;">\
+                    </div>\
+				</div>\
+			</section>\
+		</div>';
+		$('.chart-row').append(html);
+		options = {
+			center: [0,0],
+			zoom: 2,
+			tile_source: 'XYZ',
+			tile_url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+	        tile_attribution: '',
+		};
+		newWidget = true;
+	}
+
+	var tile_source;
+	switch (options.tile_source){
+		case 'ArcGIS':
+			tile_source = new ol.source.XYZ({
+				attributions: [new ol.Attribution({
+					html: ''
+				})],
+				url: options.tile_url
+			});
+			break;
+		case 'XYZ':
+			tile_source = new ol.source.XYZ({
+				attributions: options.tile_attribution,
+				url: options.tile_url
+			});
+			break;
+		default:
+			tile_source = new ol.source.XYZ({
+				attributions: options.tile_attribution,
+				url: options.tile_url
+			});
+			break;
+	}
+	var map = new ol.Map({
+        target: mapWidgetID,
+        layers: [
+            new ol.layer.Tile({
+                source: tile_source
+            }),
+        ],
+        controls: [
+            //Define the default controls
+            new ol.control.Zoom(),
+            new ol.control.Rotate(),
+            new ol.control.Attribution(),
+            new ol.control.FullScreen(),
+            //Define some new controls
+            new ol.control.ZoomSlider(),
+            // new ol.control.MousePosition({
+            // 	coordinateFormat: function (coordinates){
+            // 		var coordX = coordinates[0].toFixed(3);
+            // 		var coordY = coordinates[1].toFixed(3);
+            // 		return coordX + ', ' + coordY;
+            // 	}
+            // }),
+            // new ol.control.ScaleLine({
+            // 	units: 'degrees'
+            // }),
+            // new ol.control.OverviewMap()
+        ],
+        interactions: ol.interaction.defaults().extend([
+            new ol.interaction.Select({
+                layers: [new ol.layer.Vector()]
+            })
+        ]),
+        view: new ol.View({
+            center: options.center,
+            zoom: options.zoom
+        }), 
+    });
+    //bring popover to front when feature is click on
+    map.on('click', function(e){
+    	map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
+    		if (feature == null)
+    			return;
+    		var overlays = map.getOverlays();
+    		overlays.forEach(function(overlay, index, array) {
+    			var position = overlay.getPosition();
+    			if(feature.getGeometry().intersectsCoordinate(position)){
+    				//decrease z-index of all popovers with 'popover-front' class
+    				$('.popover').removeClass("popover-front");
+    				//increase z-index of clicked feature's popover.
+    				//popover element is generated next to overlay's element.
+    				$(overlay.getElement()).next('div.popover').addClass("popover-front");
+    			}
+    		})
+    	});
+    });
+    //associate map with element
+    $('#'+mapWidgetID).data('map',map);
+    //create pie chart
+    var chart = AmCharts.makeChart("pieChart-"+mapWidgetID,{
+		"type"    : "pie",
+		"titleField"  : "range",
+		"valueField"  : "value",
+		"colorField"	: "color",
+		"labelText"	: "[[percents]]%",
+		"balloonText" : "[[title]]: [[value]]",
+		"outlineAlpha": 0.5,
+		"outlineThickness": 2,
+		"labelRadius": -10,
+		"radius": 40,
+		"dataProvider"  : []
+	});
+	//associate chart with element
+	$('#pieChart-'+mapWidgetID).data('pieChart', chart);
+    //save new widget
+    if (newWidget){
+    	options['wid'] = mapWidgetID;
+    	$('#')
+    	$.ajax({
+    		method: 'POST', 
+    		url: 'save-map-widget',
+    		dataType: 'json',
+    		data: JSON.stringify(options)
+    	}).done(function(response){
+    		$('#'+mapWidgetID).closest('section.main-panel').find('i#map-widget-progress').toggleClass('fa-spin fa-cog', false);
+    	}).fail(function(response){
+    		alert('Failed to save GIS widget to database. Please referesh page and try again.');
+    	});
+    }
+}
+
+function loadMapWidgets(){
+	$.ajax({
+		method: 'POST', 
+		url: 'get-map-widgets',
+		dataType: 'json',
+	}).done(function(response){
+		$.each(response, function(index, widget) {
+			createMapWidget(widget.wid, widget);
+			var widgetElement = $('#'+widget.wid);
+			loadMapFeatures(widgetElement);
+		});
+	}).fail(function(response){
+		alert('Failed to save GIS widget to database. Please referesh page and try again.');
+	});
+}
+
+function loadMapFeatures(mapWidget){
+	var mapWidgetID = mapWidget.attr('id');
+	$.ajax({
+		method: 'POST', 
+		url: 'get-feature-list',
+		dataType: 'json',
+		data: JSON.stringify({'wid': mapWidgetID})
+	}).done(function(response){
+		//if no features return immediately
+		if (response.features.length < 1)
+			return;
+		var map = mapWidget.data('map');
+		var parser = new ol.format.GeoJSON();
+		var mapLayers = map.getLayers();
+		var features = parser.readFeatures(response);
+		var existingVectorLayer = false;
+		mapLayers.forEach(function (layer, index, array) {
+			if(layer instanceof ol.layer.Vector){
+				var source = layer.getSource();
+				features.forEach(function (feature, index, array) {
+					var existingFeature;
+					existingFeature = source.getFeatureById(feature.getId());
+					if(existingFeature == null)
+						source.addFeature(feature);
+
+				})
+				existingVectorLayer = true;
+			}
+		})
+		if(!existingVectorLayer){
+			var vectorLayer = new ol.layer.Vector({
+				source: new ol.source.Vector({
+					format: new ol.format.GeoJSON(),
+					features: features
+				})
+			});
+			map.addLayer(vectorLayer);	
+		}
+		mapLayers.forEach(function (layer, index, array) {
+			if(layer instanceof ol.layer.Vector)
+				console.log(layer.getSource().getFeatures());
+		})
+		features.forEach(function(feature, index, array){
+			//asynchronously load and render stats for each feature
+			loadMapFeatureStats(feature.getId(), mapWidget);
+		});
+	}).fail(function(response){
+		alert('Failed to load feature list.');
+	});
+}
+
+function loadMapFeatureStats(featureId, mapWidget){
+	$.ajax({
+		method: 'POST', 
+		url: 'get-feature-stats',
+		dataType: 'json',
+		data: JSON.stringify({'fid': featureId})
+	}).done(function(response){
+		//if no paw or stat return immediately
+		if(!response.paw.hasOwnProperty('fsid') && response.stats.length < 1)
+			return;
+		var map = mapWidget.data('map');
+		var mapLayers = map.getLayers();
+		var feature, source;
+		mapLayers.forEach(function (layer, index, array) {
+			if (layer instanceof ol.layer.Vector){
+				source = layer.getSource();
+				feature = source.getFeatureById(featureId);
+			}
+		});
+		console.log(featureId);
+		console.log(source.getFeatures());
+		//feature not found
+		if (feature == null)
+			return;
+		// don't create popup for non-polygon features
+		if (feature.getGeometry().getType() != 'Polygon')
+			return;
+		//style polygon according to paw value
+		var fill, style, color, featureStyle = feature.getStyle();
+		//get chart object
+		var pieChart = $('#pieChart-'+mapWidget.attr('id')).data('pieChart');
+		var dataProvider = pieChart.dataProvider;
+		var featureArea = feature.getGeometry().getArea();
+		console.log('dataProvider before changes: ', dataProvider)
+		if (response.paw.value != null){
+			if (response.paw.value < 30){
+				color = [254,180,186,0.7]
+				var rangeExists = false;
+				for (var i in dataProvider){
+					if (dataProvider[i].range == 'Red range'){
+						if (dataProvider[i].features.indexOf(featureId) < 0){
+							dataProvider[i].value += featureArea;
+							dataProvider[i].features.push(featureId);
+						}
+						rangeExists = true
+					} 
+				}
+				if (rangeExists){
+					pieChart.dataProvider = dataProvider;
+				}else{
+					pieChart.dataProvider.push({
+						range: "Red range",
+		    			value: featureArea,
+		    			color: "#feb4ba",
+		    			features: [featureId]
+					});
+				}
+			}else if(response.paw.value > 30 && response.paw.value < 70){
+				color = [255,255,187,0.7]
+				var rangeExists = false;
+				for (var i in dataProvider){
+					if (dataProvider[i].range == 'Yellow range'){
+						if (dataProvider[i].features.indexOf(featureId) < 0){
+							dataProvider[i].value += featureArea;
+							dataProvider[i].features.push(featureId);
+						}
+						rangeExists = true
+					} 
+				}
+				if (rangeExists){
+					pieChart.dataProvider = dataProvider;
+				}else{
+					pieChart.dataProvider.push({
+						range: "Yellow range",
+		    			value: featureArea,
+		    			color: "#ffffbb",
+		    			features: [featureId]
+					});
+				}
+			}else if(response.paw.value > 70 && response.paw.value < 100){
+				color = [186,255,202,0.7]
+				var rangeExists = false;
+				for (var i in dataProvider){
+					if (dataProvider[i].range == 'Green range'){
+						if (dataProvider[i].features.indexOf(featureId) < 0){
+							dataProvider[i].value += featureArea;
+							dataProvider[i].features.push(featureId);
+						}
+						rangeExists = true
+					} 
+				}
+				if (rangeExists){
+					pieChart.dataProvider = dataProvider;
+				}else{
+					pieChart.dataProvider.push({
+						range: "Green range",
+		    			value: featureArea,
+		    			color: "#baffca",
+		    			features: [featureId]
+					});
+				}
+			}else{
+				color = [109,192,255,0.7]
+				var rangeExists = false;
+				for (var i in dataProvider){
+					if (dataProvider[i].range == 'Blue range'){
+						if (dataProvider[i].features.indexOf(featureId) < 0){
+							dataProvider[i].value += featureArea;
+							dataProvider[i].features.push(featureId);
+						}
+						rangeExists = true
+					} 
+				}
+				if (rangeExists){
+					pieChart.dataProvider = dataProvider;
+				}else{
+					pieChart.dataProvider.push({
+						range: "Blue range",
+		    			value: featureArea,
+		    			color: "#6dc0ff",
+		    			features: [featureId]
+					});
+				}
+			}
+		}
+		//redraw chart
+		pieChart.validateData();
+
+		if (featureStyle == null){
+			style = new ol.style.Style({
+				fill: new ol.style.Fill({
+					color: color != null ? color : [0,0,0,0.1],
+
+				}),
+				stroke: new ol.style.Stroke({
+					color: [51,153,204, 0.7]
+				})
+			});
+			feature.setStyle(style);
+		}else{
+			//if feature has style change fill
+			//but retain other styles
+			fill = new ol.style.Fill({
+				color: color != null ? color : [0,0,0,0.1]
+			});
+			featureStyle.setFill()
+		}
+
+		var popUpCoord = feature.getGeometry().getInteriorPoint().getCoordinates();
+		var popUpElement = $('<div>', {id: featureId, title: feature.get('name')});
+		if($('#'+featureId).length > 0){
+			$('#'+featureId).popover('destroy');
+			$('#'+featureId).remove();
+		}
+		$('#map-popup-container').append(popUpElement);
+		var popUpOverlay = new ol.Overlay({
+			element: document.getElementById(featureId),
+		});
+		map.addOverlay(popUpOverlay);
+		popUpOverlay.setPosition(popUpCoord);
+		var popUpContent = '<p>PAW: <code style="display:inline;">' + response.paw.value + '</code></p>';
+		for(var i in response.stats){
+			popUpContent += '<p>'+response.stats[i].data+': <code style="display:inline;">'+response.stats[i].value+'</code></p>';
+		}
+		popUpElement.popover({
+          'placement': 'top',
+          'animation': false,
+          'html': true,
+          'content': popUpContent
+        });
+        popUpElement.popover('show');
+	}).fail(function(response){
+		alert('Failed to load feature list.');
+	});
+}
+
+function changeMapWidget(mapWidget){
+	var mapWidgetID = mapWidget.attr('id');
+	$.ajax({
+		method: 'POST', 
+		url: 'get-map-widget',
+		dataType: 'json',
+		data: JSON.stringify({wid:mapWidgetID})
+	}).done(function(response){
+		var map = mapWidget.data('map');
+		map.getView().setZoom(response.zoom);
+		map.getView().setCenter(response.center);
+		var layers = map.getLayers();
+		layers.forEach(function(layer, index, array){
+			if(layer instanceof ol.layer.Tile){
+				var tileSource = layer.getSource();
+				if (tileSource.getUrls().indexOf(response.tile_url) < 0){
+					tileSource.setUrl(response.tile_url);
+					tileSource.setAttributions(response.tile_attribution);
+				}
+			}
+		});
+	}).fail(function(response){
+		alert('Failed to load GIS widget settings.');
+	});
+
+}
+
+function getMapWidgetOptions(mapWidgetID){
+	$.ajax({
+		method: 'POST', 
+		url: 'get-map-widget',
+		dataType: 'json',
+		data: JSON.stringify({wid:mapWidgetID})
+	}).done(function(response){
+		$('#map-widget-title').val(response.name);
+		$('#map-index').val(response.index);
+		$('#map-zoom').val(response.zoom);
+		$('#map-center-lat').val(response.center[0]);
+		$('#map-center-long').val(response.center[1]);
+		$('select#map-tile-source-select').data('kendoMultiSelect').value([response.tile_source]);
+	}).fail(function(response){
+		alert('Failed to load GIS widget settings.');
+	});
+	$.ajax({
+		method: 'POST', 
+		url: 'get-feature-list',
+		dataType: 'json',
+		data: JSON.stringify({'wid': mapWidgetID})
+	}).done(function(response){
+		//parse response for dropdown widget
+		var dataSource = [];
+		$.each(response.features, function(index, item){
+			dataSource.push({fid:item.id,name:item.properties.name})
+		})
+		var select = $('select#map-feature-select').data('kendoMultiSelect');
+		select.setDataSource(dataSource);
+		if (dataSource.length > 1){
+			select.value(dataSource[0].fid);
+			select.trigger('change');
+		}
+	}).fail(function(response){
+		alert('Failed to load feature list.');
+	});
+}
+
+$(function(){
+	//setup django csrftoken cookie for ajax
+	//get crsf token cookie
+	var csrftoken = getCookie('csrftoken');
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
-                // Send the token to same-origin, relative URLs only.
-                // Send the token only if the method warrants CSRF protection
-                // Using the CSRFToken value acquired earlier
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             }
         }
     });
 
-});
+    getFileList();
 
-//glabals
-
-//ajax
-function ajax_request(callback, data, url) {
-    var request = $.ajax({
-          method: "POST",
-          url: url,
-          data: JSON.stringify(data), 
-          dataType: 'json'
-        }).done(function(data) {
-            callback(data);
-        }).fail(function(msg){
-            alert('failed');
-        });
-};
-
-function list_files(data){
-    console.log(data);
-    var file_list = '';
-    for(i=0;i<data.length;i++){
-        str = data[i].split('/');
-        file_list += "<option value="+data[i]+">"+str[str.length-1]+"</option>";
-    }; 
-    $('select.file-select').html(file_list);
-};
-
-$(function(){
-
-    ajax_request(list_files, {}, urlListFiles);
-
-});
-
-$(function() {
-    $('#file-upload-form').submit(function (event) {
-        event.preventDefault();
-        var data = new FormData($('#file-upload-form').get(0));
-        console.log('uploading ...');
-        var request = $.ajax({
-            method: 'POST',
-            url: $('#file-upload-form').attr('action'),
-            data: data,
-            processData: false,
-            contentType: false
-            }).done(function(data) {
-               ajax_request(list_files, {}, urlListFiles);
-            }).fail(function(msg){
-                alert('failed');
-        });
-    });
-
-    $('#delete-btn').on('click', function(e){
-        e.stopImmediatePropagation();
-        delete_files();
-    });
-    $('#download-btn').on('click', function(e){
-        e.stopImmediatePropagation();
-        download_file();
-    });
-    $('#add-btn').on('click', function(e){
-        e.stopImmediatePropagation();
-        get_url();
-    })
-});
-
-$("#ms-main-sensors option:selected")
-
-function get_selected(element){
-    var $files;
-    
-    $files = $.map(element, function (el, i) {
-        return $(el).val();
-    });
-
-    return $files  
-};
-
-
-function delete_files(){
-    var $element = $('select.file-select')
-    var $files = get_selected($element);
-    console.log('to be deleted: ', $files);
-    var request = $.ajax({
-          method: "POST",
-          url: urlDeleteFiles,
-          data: JSON.stringify($files), 
-          dataType: 'json'
-        }).done(function(data) {
-            console.log('files deleted.');
-            ajax_request(list_files, {}, urlListFiles);
-        }).fail(function(msg){
-            alert('failed');
-    });
-
-};
-
-
-function download_file() {
-    var $element = $('select.file-select');
-    var $files = get_selected($element);
-    if($files.length > 1){
-        alert('Please select a single file to download.');
-        return
-    };
-    notify('info', 5, 'Downloading ...');
-
-    dynamic_form(urlDownloadFile, 'post', {
-        name: $files[0]
-    });
-    notify('success', 3, 'File downloaded.');
-    
-}
-
-
-function dynamic_form(action, method, input) {
-    'use strict';
-    var form;
-    form = $('<form />', {
-        action: action,
-        method: method,
-        style: 'display: none;'
-    });
-    $(token, {}).appendTo(form);
-    if (typeof input !== 'undefined' && input !== null) {
-        $.each(input, function (name, value) {
-            $('<input />', {
-                type: 'hidden',
-                name: name,
-                value: value
-            }).appendTo(form);
-        });
-    }
-    form.appendTo('body').submit();
-}
-
-function get_url() {
-    var $element = $('select.file-select');
-    var $files = get_selected($element);
-    if ($files.length > 1){
-        alert('Please select a single file to download.');
-        return
-    };
-    var url;
-    var request = $.ajax({
-          method: "POST",
-          url: urlGetUrl,
-          data: JSON.stringify($files), 
-          dataType: 'json'
-        }).done(function(data) {
-            console.log('url received.');
-            add_layer('kml', data.url);
-        }).fail(function(msg){
-            alert('failed');
-    });
-
-    return url;
-};
-
-var features;
-function add_layer(type, data){
-    var vector_layer = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            url: data, 
-            format: new ol.format.KML()
-        })
-    });
-    console.log(data);
-    result = map.addLayer(vector_layer);
-    console.log('layer added', result);
-    source = vector.getSource(); 
-    features = source.getFeatures();
-    GetKMLFromFeatures(features);
-    notify('success', 5, 'Layer added.');
-};
-
-
-function GetKMLFromFeatures(features) {
-    var format = new ol.format.KML({
-        'extractStyles':true,
-        'writeStyles': true, 
-        'showPointNames':true
-        
-    });
-    console.log(ol.proj.ProjectionLike);
-    console.log(map.getView().getProjection().getCode());
-    console.log(format.writeFeaturesNode(features, {
-        'featureProjection': map.getView().getProjection().getCode()
-        //'dataProjection': 
-    }));
-
-    return format.writeFeatures(features, {
-        'featureProjection':map.getView().getProjection().getCode()
-    });
-}
-
-//visual notification
-
-function notify(type, delay, msg) {
-              var alert = jQuery("<div>").addClass("alert alert-" + type).on("click", function () {
-                  jQuery(this).remove();
-              }).prependTo(".growl");
-              jQuery("<p>").text(msg).appendTo(alert);
-              jQuery(alert).animate({
-                  opacity: 0
-              }, 1000 * delay, function () {
-                  jQuery(this).remove();   
-              });
-    }
-
-
-function unzip(blob) {
-    // use a BlobReader to read the zip from a Blob object
-    zip.createReader(new zip.BlobReader(blob), function(reader) {
-
-      // get all entries from the zip
-      reader.getEntries(function(entries) {
-        if (entries.length) {
-
-          // get first entry content as text
-          entries[0].getData(new zip.TextWriter(), function(text) {
-            // text contains the entry data as a String
-            console.log(text);
-
-            // close the zip reader
-            reader.close(function() {
-              // onclose callback
-            });
-
-          }, function(current, total) {
-            // onprogress callback
-          });
+	$('#add-gis-widget').on('click', function(e){
+		createMapWidget();
+	});
+	
+    $("#fileUpload").kendoUpload({
+        async: {
+            saveUrl: "upload",
+            removeUrl: "remove",
+            autoUpload: true
+        },
+        upload: function(e){
+	    	// insert csrftoken into form before upload
+            e.data = {csrfmiddlewaretoken: csrftoken}	
+        },
+        success: function (response){
+        	getFileList();
+        }, 
+        remove: function (event){
+        	event.preventDefault();
+            //remove uploaded file from UI
+            this.clearFileByUid(event.files[0].uid);
+        }, 
+        localization: {
+        	select: 'Upload files...'
         }
-      });
-    }, function(error) {
-      // onerror callback
     });
-}
+
+    $('#btn-delete-file').on('click', function(e){
+    	var selectedFiles = $.map($('select#file-select'), function (el, i) {
+	        return $(el).val();
+	    });
+
+	    if (!confirm('Are you sure you want to delete '+ selectedFiles.length +' file(s) ?')){
+	    	return;
+	    }
+    	$.ajax({
+    		method: 'POST', 
+    		url: 'remove',
+    		dataType: 'json',
+    		data: JSON.stringify(selectedFiles)
+    	}).done(function(response){
+    		getFileList();
+    	}).fail(function(response){
+    		alert('Delete operation failed.');
+    	});
+    });
+
+    $('#btn-download-file').on('click', function(e){
+    	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
+	        return $(el).attr("url");
+	    });
+	    for (var i = 0; i < selectedFiles.length; i++)
+	    	window.open(selectedFiles[i]);
+    });
+
+    
+
+    $('#btn-import-features').on('click', function(e){
+    	if (lastInvokerWidget == null){
+    		alert('No GIS widget selected');
+    		return;
+    	}
+    	importFeatures();
+    });
+
+    $('#GISModal').on('shown.bs.modal', function (e){
+    	lastInvokerWidget = $(e.relatedTarget).closest('section.main-panel').find('div.gis-container');
+    	//get map widget options
+    	getMapWidgetOptions(lastInvokerWidget.attr('id'));
+    });
+
+    $('select#map-feature-select').kendoMultiSelect({
+    	maxSelectedItems: 1,
+    	dataTextField: "name",
+    	dataValueField: "fid",
+    	change: function (e){
+    		var value = this.value();
+    		if (value.length < 1)
+    			return
+    		$.ajax({
+	    		method: 'POST', 
+	    		url: 'get-feature-stat-widgets',
+	    		dataType: 'json',
+	    		data: JSON.stringify({'fid': value[0]})
+	    	}).done(function(response){
+	    		$('select#map-paw-select').data('kendoMultiSelect').value(response.paw);
+	    		$('select#map-stat-select').data('kendoMultiSelect').value(response.stats);
+	    	}).fail(function(response){
+	    		alert('Failed to load feature stat.');
+	    	});
+    	},
+    }).data('kendoMultiSelect');
+    $('select#map-paw-select').kendoMultiSelect({
+    	maxSelectedItems: 1,
+    	value: [],
+    	change: function (e){
+    		var value = this.value();
+    		var feature = $('select#map-feature-select').data('kendoMultiSelect').value();
+    		$.ajax({
+	    		method: 'POST', 
+	    		url: 'change-paw-feature-stat',
+	    		dataType: 'json',
+	    		data: JSON.stringify({'widget': value, 'feature_id':feature[0]})
+	    	}).done(function(response){
+	    		changeMapWidget(lastInvokerWidget);
+	    		loadMapFeatureStats(feature[0], lastInvokerWidget);
+	    	}).fail(function(response){
+	    		alert('Failed to change feature stat.');
+	    	});
+    	}
+    }).data('kendoMultiSelect');
+    $('select#map-stat-select').kendoMultiSelect({
+    	maxSelectedItems: 3,
+    	value: [],
+    	change: function (e){
+    		var value = this.value();
+    		var feature = $('select#map-feature-select').data('kendoMultiSelect').value();
+    		$.ajax({
+	    		method: 'POST', 
+	    		url: 'change-feature-stat',
+	    		dataType: 'json',
+	    		data: JSON.stringify({'data_ids': value, 'feature_id': feature[0]})
+	    	}).done(function(response){
+	    		changeMapWidget(lastInvokerWidget);
+	    		loadMapFeatureStats(feature[0], lastInvokerWidget);
+	    	}).fail(function(response){
+	    		alert('Failed to change feature stat.');
+	    	});
+    	}
+    }).data('kendoMultiSelect');
+    $('select#map-tile-source-select').kendoMultiSelect({
+    	maxSelectedItems: 1, 
+    	change: function(e){
+    		var value = this.value();
+    		var widget = lastInvokerWidget.attr('id');
+    	}
+
+    }).data('kendoMultiSelect');
+
+
+
+    $('div.chart-row').on('click', 'a#map-widget-delete-button', function(e){
+    	if(!confirm("Are you sure you want to delete map widget ?")){
+    		return
+    	}
+    	var main_panel = $(this).closest('section.main-panel') 
+    	var widget_id = main_panel.find('div.gis-container').attr('id');
+    	$.ajax({
+    		method: 'POST', 
+    		url: 'delete-map-widget',
+    		dataType: 'json',
+    		data: JSON.stringify({'wid': widget_id})
+    	}).done(function(response){
+    		main_panel.parent().remove();
+    	}).fail(function(response){
+    		alert('Delete operation failed.');
+    	});
+    });
+
+    $('#GISModal').find('button#save-map-changes').on('click', function(e){
+    		var title = $('#map-widget-title').val();
+    		var index = $('#map-index').val();
+    		var zoom = $('#map-zoom').val();
+    		var lat = $('#map-center-lat').val();
+    		var long = $('#map-center-long').val();
+    		var tile_source = $('select#map-tile-source-select').data('kendoMultiSelect').value();
+    		var data = {
+    			'wid': lastInvokerWidget.attr('id'),
+    			'name': title, 
+    			'index': index,
+    			'zoom': zoom, 
+    			'lat': lat, 
+    			'long': long,
+    			'tile_source': tile_source[0],
+    		}
+    		$.ajax({
+	    		method: 'POST', 
+	    		url: 'change-map-widget',
+	    		dataType: 'json',
+	    		data: JSON.stringify(data)
+	    	}).done(function(response){
+	    		$('#GISModal').modal('hide');
+	    		changeMapWidget(lastInvokerWidget);
+	    	}).fail(function(response){
+	    		alert('Failed. Widget not modified.');
+	    	});
+    });
+    
+    loadMapWidgets();
+ //    var chart = AmCharts.makeChart("pieChart",{
+	//   "type"    : "pie",
+	//   "titleField"  : "range",
+	//   "valueField"  : "percentage",
+	//   "colorField"	: "color",
+	//   "labelText"	: "[[percents]]%",
+	//   "balloonText" : "[[title]]: [[value]]",
+	//   "outlineAlpha": 0.5,
+	//   "outlineThickness": 2,
+	//   "labelRadius": -10,
+	//   "radius": 40,
+	//   "dataProvider"  : [
+ //    		{
+ //    			"range": "Blue range",
+ //    			"percentage": 20,
+ //    			"color": "#6dc0ff"
+
+ //    		},
+ //    		{
+ //    			"range": "Green range",
+ //    			"percentage": 40,
+ //    			"color": "#baffca"
+
+ //    		},
+ //    		{
+ //    			"range": "Yellow range",
+ //    			"percentage": 20,
+ //    			"color": "#ffffbb"
+
+ //    		},
+ //    		{
+ //    			"range": "Red range",
+ //    			"percentage": 20,
+ //    			"color": "#feb4ba"
+
+ //    		},
+ //    	]
+	// });
+
+	// $('#pieChart').data('pieChart', chart);
+
+	// var myChart = $('#pieChart').data('pieChart');
+	//  myChart.dataProvider.push({
+ //    			"range": "Red range",
+ //    			"percentage": 20,
+ //    			"color": "#feb4ba"
+
+ //    		});
+
+}); // end of $(function)
