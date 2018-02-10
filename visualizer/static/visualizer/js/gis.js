@@ -294,7 +294,7 @@ function createMapWidget(mapWidgetID, options){
             })
         ]),
         view: new ol.View({
-            center: options.center,
+            center: ol.proj.fromLonLat(options.center),
             zoom: options.zoom
         }), 
     });
@@ -604,7 +604,7 @@ function changeMapWidget(mapWidget){
 	}).done(function(response){
 		var map = mapWidget.data('map');
 		map.getView().setZoom(response.zoom);
-		map.getView().setCenter(response.center);
+		map.getView().setCenter(ol.proj.fromLonLat(response.center));
 		var layers = map.getLayers();
 		layers.forEach(function(layer, index, array){
 			if(layer instanceof ol.layer.Tile){
