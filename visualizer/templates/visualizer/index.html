@@ -424,12 +424,12 @@
                       </ul>
                   </li>
 
-                  <li>
+                  <!-- <li>
                       <a href="{% url 'gis_view' %}" >
                           <i class="fa fa-map-marker"></i>
                           <span>GIS | Maps </span>
                       </a>
-                  </li>
+                  </li> -->
                 
 
                   <!--Stations menu start-->
@@ -804,9 +804,7 @@
                                 </div>
                                 <div class="col-sm-7 top-buffer">
                                   <select id="map-paw-select">
-                                    {% for widget in chart_widgets %}
-                                      <option value="{{widget.widget_id}}">{{widget.widget.title}}</option>
-                                    {% endfor %}
+
                                   </select>
                                 </div>
                               </div>
@@ -817,13 +815,7 @@
                                 </div>
                                 <div class="col-sm-7 top-buffer">
                                   <select id="map-stat-select">
-                                    {% for widget in stat_widgets %}
-                                      <optgroup label="{{widget.widget.title}}">
-                                        {% for data in widget.dataset.all %}
-                                          <option value="{{data.id}}">{{data.name}}</option>
-                                        {% endfor %}
-                                      </optgroup>
-                                    {% endfor %}
+
                                   </select>
                                 </div>
                               </div>

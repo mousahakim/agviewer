@@ -240,8 +240,39 @@ def create_feature_stat(params):
 	except Exception as e:
 		return {'response': {'message':e.message + 'here 2'}, 'status':500}
 
-def update_feature_stat(request):
-	pass
+def update_feature_stat(fid):
+	""" Update stat calculations for a feature
+	"""
+	try:
+		feature = Feature.objects.get(fid=fid)
+		featurestat_set = feature.featurestat_set.all()
+		for stat in featurestat_set:
+			if stat.stat_type == 'p':
+				widget = stat.widget
+				widget_data = widget.widget
+				if widget_data['data']['paw'] is not None:
+					paw_graphs = widget_data['data']['paw']['value']
+					paw_values = []
+					for graph in paw_graphs:
+						paw_values.extend([graph[-1]['value']])
+					if len(paw_values) > 0:
+						try:
+							value = round(sum(paw_values)/len(paw_values))
+							stat.value = value
+							stat.save()
+						except Exception as e:
+							raise e
+					else:
+						continue
+				else:
+					continue
+			else:
+				value = stat.data.value
+				stat.value = value
+				stat.save()
+		return True
+	except Exception as e:
+		raise e
 
 def get_feature_stats(request):
 	""" Get the list of feature stats for a specific feature
@@ -249,6 +280,9 @@ def get_feature_stats(request):
 	try:
 		params = json.loads(request.body)
 		feature = Feature.objects.get(fid=params['fid'])
+		#update stat before returning value
+		# update_feature_stat(feature.fid)
+
 		feature_stat_set = feature.featurestat_set.all()
 		response_data = {
 			'paw': {},
@@ -272,6 +306,7 @@ def get_feature_stats(request):
 					'value': stat.value
 				}
 				response_data['paw'].update(stat_dict)
+		print response_data
 		return HttpResponse(json.dumps(response_data))
 	except Exception as e:
 		return HttpResponse(json.dumps({'message':e.message}),status=500)
@@ -347,21 +382,37 @@ def change_feature_stat(request):
 			return HttpResponse(json.dumps({'message': count +' feature stats deleted.'}))
 		response_data = []
 		for data in new_data_ids:
-			# convert ids from string to int
-			if int(data) in existing_data_ids:
-				continue
-			else:
-				params.update({'new_data_id': data})
-				response = create_feature_stat(params)
-				response_data.extend([response['response']])
-		#delete any 
-		# for data in existing_data_ids
+			params.update({'new_data_id': data})
+			response = create_feature_stat(params)
+			response_data.extend([response['response']])
+
 		return HttpResponse(json.dumps(response_data))
 	except Exception, e:
 		raise e
 
+def get_chart_widget_list(request):
+	""" Get the list of user's chart widgets
+	"""
+	try:
+		chart_widgets = Widgets.objects.filter(user=request.user, widget_type='main-chart')
+		widget_list = []
+		for widget in chart_widgets:
+			widget_list.extend([{'value': widget.widget_id, 'text': widget.widget['title']}])
+		return HttpResponse(json.dumps(widget_list))
+	except Exception, e:
+		raise e
 
-
+def get_data_widget_list(request):
+	""" Get the list of user's chart widgets
+	"""
+	try:
+		datas = Data.objects.filter(user=request.user)
+		data_list = []
+		for data in datas:
+			data_list.extend([{'value': data.id, 'text': data.name, 'widget': data.widget.widget['title']}])
+		return HttpResponse(json.dumps(data_list))
+	except Exception, e:
+		raise e
 
 
 

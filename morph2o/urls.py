@@ -71,7 +71,9 @@ urlpatterns = [
    url(r'^get-feature-stats', gis_views.get_feature_stats, name='get-feature-stats'), 
    url(r'^change-paw-feature-stat', gis_views.change_paw_feature_stat, name='change-paw-feature-stat'),
    url(r'^change-feature-stat', gis_views.change_feature_stat, name='change-feature-stat'),
-   url(r'^get-feature-stat-widgets', gis_views.get_feature_stat_widgets, name='get-feature-stat-widgets')
+   url(r'^get-feature-stat-widgets', gis_views.get_feature_stat_widgets, name='get-feature-stat-widgets'), 
+   url(r'^get-chart-widget-list', gis_views.get_chart_widget_list, name='get-chart-widget-list'),
+   url(r'^get-data-widget-list', gis_views.get_data_widget_list, name='get-data-widget-list')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

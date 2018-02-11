@@ -51,66 +51,6 @@ function getFileList(){
     });
 }
 
-// function importFeatures(){
-// 	var map = lastInvokerWidget.data('map');
-// 	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
-//         return $(el).attr("url");
-//     });
-//     if (selectedFiles.length > 1){
-//     	alert('Please select one file at a time.');
-//     	return;
-//     }
-// 	//check for existing vector layers
-// 	var layers = map.getLayers();
-// 	var vectorLayer = new ol.layer.Vector({
-// 		source: new ol.source.Vector({
-// 			format: new ol.format.KML({
-// 				extractStyles:true
-// 			}),
-// 			url: selectedFiles[0]
-// 		})
-// 	});
-// 	map.addLayer(vectorLayer);
-// 	vectorLayer.once('change', function (){
-// 		var features = vectorLayer.getSource().getFeatures();
-// 		// features.forEach(function(feature, index, array){
-// 		// 	if (feature.getStyle() != null){
-// 		// 		console.log(feature.getStyle().call(feature)[0].getFill());
-// 		// 	}
-// 		// });
-// 		var targetElementID = $(map.getTargetElement()).attr('id');
-// 		var parser = new ol.format.GeoJSON();
-// 		var GeoJSONFeatureSet = parser.writeFeaturesObject(features);
-// 		saveFeatures(targetElementID, GeoJSONFeatureSet);
-// 	});
-	
-// }
-
-// function importFeatures(){
-// 	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
-//         return $(el).attr("url");
-//     });
-//     if (selectedFiles.length > 1){
-//     	alert('Please select one file at a time.');
-//     	return;
-//     }
-// 	var map = lastInvokerWidget.data('map');
-// 	var source = new ol.source.Vector({
-// 		format: new ol.format.KML({
-// 			extractStyles:true
-// 		}),
-// 		url: selectedFiles[0]
-// 	});
-// 	var targetElement = $(map.getTargetElement());
-// 	var parser = new ol.format.GeoJSON();
-// 	source.once('change',function(){
-// 		var features = source.getFeatures();
-// 		var GeoJSONFeatureSet = parser.writeFeaturesObject(features);
-// 		saveFeatures(targetElement.attr('id'), GeoJSONFeatureSet);
-// 		loadMapFeatures(targetElement);
-// 	});
-// }
-
 function importFeatures(){
 	var selectedFiles = $.map($('select#file-select option:selected'), function (el, i) {
         return $(el).attr("url");
@@ -425,9 +365,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		dataType: 'json',
 		data: JSON.stringify({'fid': featureId})
 	}).done(function(response){
-		//if no paw or stat return immediately
-		if(!response.paw.hasOwnProperty('fsid') && response.stats.length < 1)
-			return;
+
 		var map = mapWidget.data('map');
 		var mapLayers = map.getLayers();
 		var feature, source;
@@ -437,8 +375,9 @@ function loadMapFeatureStats(featureId, mapWidget){
 				feature = source.getFeatureById(featureId);
 			}
 		});
-		console.log(featureId);
-		console.log(source.getFeatures());
+		//remove paw stat from polygon
+		// if(!response.paw.hasOwnProperty('fsid'))
+		// 	feature.setStyle(null);
 		//feature not found
 		if (feature == null)
 			return;
@@ -446,7 +385,8 @@ function loadMapFeatureStats(featureId, mapWidget){
 		if (feature.getGeometry().getType() != 'Polygon')
 			return;
 		//style polygon according to paw value
-		var fill, style, color, featureStyle = feature.getStyle();
+		var style, color;
+		// , featureStyle = feature.getStyle();
 		//get chart object
 		var pieChart = $('#pieChart-'+mapWidget.attr('id')).data('pieChart');
 		var dataProvider = pieChart.dataProvider;
@@ -454,7 +394,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		console.log('dataProvider before changes: ', dataProvider)
 		if (response.paw.value != null){
 			if (response.paw.value < 30){
-				color = [254,180,186,0.7]
+				color = [254,180,186,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
 					if (dataProvider[i].range == 'Red range'){
@@ -476,7 +416,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 					});
 				}
 			}else if(response.paw.value > 30 && response.paw.value < 70){
-				color = [255,255,187,0.7]
+				color = [255,255,187,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
 					if (dataProvider[i].range == 'Yellow range'){
@@ -498,7 +438,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 					});
 				}
 			}else if(response.paw.value > 70 && response.paw.value < 100){
-				color = [186,255,202,0.7]
+				color = [186,255,202,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
 					if (dataProvider[i].range == 'Green range'){
@@ -520,7 +460,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 					});
 				}
 			}else{
-				color = [109,192,255,0.7]
+				color = [109,192,255,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
 					if (dataProvider[i].range == 'Blue range'){
@@ -542,53 +482,67 @@ function loadMapFeatureStats(featureId, mapWidget){
 					});
 				}
 			}
+		}else{
+			//update pie chart data to remove non-existing area values
+			for(var i in dataProvider){
+				if (dataProvider[i].features.indexOf(featureId) > -1){
+					for(var j in dataProvider[i].features){
+						if (dataProvider[i].features[j] == featureId)
+							dataProvider[i].features.pop(j);
+					}
+					if (dataProvider[i].features.length < 1){
+						dataProvider.pop(i);
+					}else{
+						dataProvider[i].value -= featureArea;
+					}
+				}
+			}
+			pieChart.dataProvider = dataProvider;
 		}
 		//redraw chart
 		pieChart.validateData();
+		var statsText, fill, stroke, text;
+		for (var i in response.stats){
+			//do not concatenate with 'undefined'
+			if(statsText == null){
+				statsText = response.stats[i].data +': '+ response.stats[i].value +'\n';
+			}else{
+				statsText += response.stats[i].data +': '+ response.stats[i].value +'\n';
+			}
+			
+		}
+		if (statsText == null)
+			statsText = '';
+		console.log(statsText);
+		style = new ol.style.Style({
+			fill: new ol.style.Fill({
+				color: color != null ? color : [255,255,255,0],
 
-		if (featureStyle == null){
-			style = new ol.style.Style({
+			}),
+			stroke: new ol.style.Stroke({
+				color: [51,153,204, 0.7]
+			}),
+			text: new ol.style.Text({
+				font: 'Hind Madurai',
+				overflow: true,
+				// placement: 'line',
+				rotateWithView: true,
+				// textAlign: 'left',
 				fill: new ol.style.Fill({
-					color: color != null ? color : [0,0,0,0.1],
-
+					color: [0,0,0,1]
 				}),
 				stroke: new ol.style.Stroke({
-					color: [51,153,204, 0.7]
-				})
-			});
-			feature.setStyle(style);
-		}else{
-			//if feature has style change fill
-			//but retain other styles
-			fill = new ol.style.Fill({
-				color: color != null ? color : [0,0,0,0.1]
-			});
-			featureStyle.setFill()
-		}
-
-		var popUpCoord = feature.getGeometry().getInteriorPoint().getCoordinates();
-		var popUpElement = $('<div>', {id: featureId, title: feature.get('name')});
-		if($('#'+featureId).length > 0){
-			$('#'+featureId).popover('destroy');
-			$('#'+featureId).remove();
-		}
-		$('#map-popup-container').append(popUpElement);
-		var popUpOverlay = new ol.Overlay({
-			element: document.getElementById(featureId),
+					color: [255,255,255,1]
+				}),
+				text: response.paw.value == null ? statsText :'PAW: ' + 
+				response.paw.value + '\n' + statsText, 
+			}),
+			image: new ol.style.Icon({
+				src: 'http://172.16.68.200:8000/files/admin/paw-drop.png'
+			})
 		});
-		map.addOverlay(popUpOverlay);
-		popUpOverlay.setPosition(popUpCoord);
-		var popUpContent = '<p>PAW: <code style="display:inline;">' + response.paw.value + '</code></p>';
-		for(var i in response.stats){
-			popUpContent += '<p>'+response.stats[i].data+': <code style="display:inline;">'+response.stats[i].value+'</code></p>';
-		}
-		popUpElement.popover({
-          'placement': 'top',
-          'animation': false,
-          'html': true,
-          'content': popUpContent
-        });
-        popUpElement.popover('show');
+		feature.setStyle(style);
+
 	}).fail(function(response){
 		alert('Failed to load feature list.');
 	});
@@ -654,6 +608,41 @@ function getMapWidgetOptions(mapWidgetID){
 			select.value(dataSource[0].fid);
 			select.trigger('change');
 		}
+	}).fail(function(response){
+		alert('Failed to load feature list.');
+	});
+}
+
+function  getChartWidgetList(){
+	$.ajax({
+		method: 'POST', 
+		url: 'get-chart-widget-list',
+		dataType: 'json',
+	}).done(function(response){
+		console.log(response);
+		var select = $('select#map-paw-select').data('kendoMultiSelect');
+		select.setDataSource(response);
+
+	}).fail(function(response){
+		alert('Failed to chart widget list.');
+	});
+}
+
+function getDataWidgetList(){
+	$.ajax({
+		method: 'POST', 
+		url: 'get-data-widget-list',
+		dataType: 'json',
+	}).done(function(response){
+
+		var select = $('select#map-stat-select').data('kendoMultiSelect');
+		console.log(response);
+		var dataSource = new kendo.data.DataSource({
+			data: response,
+			group: {field: 'widget'}
+		})
+		select.setDataSource(dataSource);
+
 	}).fail(function(response){
 		alert('Failed to load feature list.');
 	});
@@ -768,6 +757,8 @@ $(function(){
     $('select#map-paw-select').kendoMultiSelect({
     	maxSelectedItems: 1,
     	value: [],
+    	dataValueField: 'value', 
+    	dataTextField: 'text',
     	change: function (e){
     		var value = this.value();
     		var feature = $('select#map-feature-select').data('kendoMultiSelect').value();
@@ -787,6 +778,8 @@ $(function(){
     $('select#map-stat-select').kendoMultiSelect({
     	maxSelectedItems: 3,
     	value: [],
+    	dataValueField: 'value', 
+    	dataTextField: 'text',
     	change: function (e){
     		var value = this.value();
     		var feature = $('select#map-feature-select').data('kendoMultiSelect').value();
@@ -803,6 +796,9 @@ $(function(){
 	    	});
     	}
     }).data('kendoMultiSelect');
+    //initialize paw and stat selects
+    getChartWidgetList();
+    getDataWidgetList();
     $('select#map-tile-source-select').kendoMultiSelect({
     	maxSelectedItems: 1, 
     	change: function(e){
@@ -841,10 +837,10 @@ $(function(){
     		var tile_source = $('select#map-tile-source-select').data('kendoMultiSelect').value();
     		var data = {
     			'wid': lastInvokerWidget.attr('id'),
-    			'name': title, 
+    			'name': title,
     			'index': index,
-    			'zoom': zoom, 
-    			'lat': lat, 
+    			'zoom': zoom,
+    			'lat': lat,
     			'long': long,
     			'tile_source': tile_source[0],
     		}
@@ -860,55 +856,5 @@ $(function(){
 	    		alert('Failed. Widget not modified.');
 	    	});
     });
-    
     loadMapWidgets();
- //    var chart = AmCharts.makeChart("pieChart",{
-	//   "type"    : "pie",
-	//   "titleField"  : "range",
-	//   "valueField"  : "percentage",
-	//   "colorField"	: "color",
-	//   "labelText"	: "[[percents]]%",
-	//   "balloonText" : "[[title]]: [[value]]",
-	//   "outlineAlpha": 0.5,
-	//   "outlineThickness": 2,
-	//   "labelRadius": -10,
-	//   "radius": 40,
-	//   "dataProvider"  : [
- //    		{
- //    			"range": "Blue range",
- //    			"percentage": 20,
- //    			"color": "#6dc0ff"
-
- //    		},
- //    		{
- //    			"range": "Green range",
- //    			"percentage": 40,
- //    			"color": "#baffca"
-
- //    		},
- //    		{
- //    			"range": "Yellow range",
- //    			"percentage": 20,
- //    			"color": "#ffffbb"
-
- //    		},
- //    		{
- //    			"range": "Red range",
- //    			"percentage": 20,
- //    			"color": "#feb4ba"
-
- //    		},
- //    	]
-	// });
-
-	// $('#pieChart').data('pieChart', chart);
-
-	// var myChart = $('#pieChart').data('pieChart');
-	//  myChart.dataProvider.push({
- //    			"range": "Red range",
- //    			"percentage": 20,
- //    			"color": "#feb4ba"
-
- //    		});
-
 }); // end of $(function)
