@@ -116,32 +116,32 @@ function importFeatures(){
 }
 
 
-function saveFeature(widget, feature){
-	console.log(feature);
-	var data = {
-		widget: widget,
-		feature
-	}
-	var featureId;
-	$('#btn-import-features i').toggleClass('fa-map-marker', false);
-	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', true);
-	$.ajax({
-	  async: false,
-      method: "POST",
-      url: 'save-feature',
-      dataType: 'json',
-      data: JSON.stringify(data)
-    }).done(function(response) {
-    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
-    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
-    	featureId = response.fid;
-    }).fail(function(msg){
-    	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
-    	$('#btn-import-features i').toggleClass('fa-map-marker', true);
-        alert('Failed to save features to database.');
-    });
-    return featureId;
-}
+// function saveFeature(widget, feature){
+// 	console.log(feature);
+// 	var data = {
+// 		widget: widget,
+// 		feature
+// 	}
+// 	var featureId;
+// 	$('#btn-import-features i').toggleClass('fa-map-marker', false);
+// 	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', true);
+// 	$.ajax({
+// 	  async: false,
+//       method: "POST",
+//       url: 'save-feature',
+//       dataType: 'json',
+//       data: JSON.stringify(data)
+//     }).done(function(response) {
+//     	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+//     	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+//     	featureId = response.fid;
+//     }).fail(function(msg){
+//     	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
+//     	$('#btn-import-features i').toggleClass('fa-map-marker', true);
+//         alert('Failed to save features to database.');
+//     });
+//     return featureId;
+// }
 
 function createMapWidget(mapWidgetID, options){
 	var newWidget = false;
@@ -157,7 +157,7 @@ function createMapWidget(mapWidgetID, options){
 						<a href="javascript:;" class="fa fa-times" id="map-widget-delete-button"></a>\
 					</span>\
 				</header>\
-				<div class="panel-body gis-panel">\
+				<div class="panel-body gis-panel" id="gis-panel-'+mapWidgetID+'">\
 					<div id="'+mapWidgetID+'" class="gis-container chart-container">\
 						<div class="nosupport">Loading map tiles please wait. <i class="fa fa-spin fa-spinner"></i> </div>\
 					</div>\
@@ -213,7 +213,9 @@ function createMapWidget(mapWidgetID, options){
             new ol.control.Zoom(),
             new ol.control.Rotate(),
             new ol.control.Attribution(),
-            new ol.control.FullScreen(),
+            new ol.control.FullScreen({
+            	source: 'gis-panel-'+mapWidgetID
+            }),
             //Define some new controls
             new ol.control.ZoomSlider(),
             // new ol.control.MousePosition({

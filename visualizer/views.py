@@ -1165,4 +1165,15 @@ def delete_stat_data(request):
 	return HttpResponse(json.dumps(responsedata), status=200)
 
 
-
+def resize_chart(request):
+	""" Resize chart widget panel
+	"""
+	try:
+		params = json.loads(request.body)
+		widget = Widgets.objects.get(user=request.user, widget_id=params['widget_id'])
+		expand = params['expand']
+		widget.expand = expand
+		widget.save()
+		return HttpResponse(json.dumps({'expand': widget.expand}))
+	except Exception, e:
+		raise e
