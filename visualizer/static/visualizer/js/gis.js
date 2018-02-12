@@ -166,6 +166,12 @@ function createMapWidget(mapWidgetID, options){
 				url: options.tile_url
 			});
 			break;
+		case 'BingMapsAerial+Labels':
+			tile_source = new ol.source.BingMaps({
+				key: 'AnST1eDSeRY_VRrb86ud4B1Y_iS1OnD2NMs7EKYN8JvtRNoMt5ZjGWGsE8bNkTlJ', 
+				imagerySet: 'AerialWithLabels'
+			});
+			break;
 		default:
 			tile_source = new ol.source.XYZ({
 				attributions: options.tile_attribution,
