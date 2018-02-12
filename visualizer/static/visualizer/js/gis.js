@@ -115,34 +115,6 @@ function importFeatures(){
 	});
 }
 
-
-// function saveFeature(widget, feature){
-// 	console.log(feature);
-// 	var data = {
-// 		widget: widget,
-// 		feature
-// 	}
-// 	var featureId;
-// 	$('#btn-import-features i').toggleClass('fa-map-marker', false);
-// 	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', true);
-// 	$.ajax({
-// 	  async: false,
-//       method: "POST",
-//       url: 'save-feature',
-//       dataType: 'json',
-//       data: JSON.stringify(data)
-//     }).done(function(response) {
-//     	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
-//     	$('#btn-import-features i').toggleClass('fa-map-marker', true);
-//     	featureId = response.fid;
-//     }).fail(function(msg){
-//     	$('#btn-import-features i').toggleClass('fa-spin fa-spinner', false);
-//     	$('#btn-import-features i').toggleClass('fa-map-marker', true);
-//         alert('Failed to save features to database.');
-//     });
-//     return featureId;
-// }
-
 function createMapWidget(mapWidgetID, options){
 	var newWidget = false;
 	if (typeof mapWidgetID == 'undefined'){
@@ -536,11 +508,8 @@ function loadMapFeatureStats(featureId, mapWidget){
 				stroke: new ol.style.Stroke({
 					color: [255,255,255,1]
 				}),
-				text: response.paw.value == null ? statsText :'PAW: ' + 
+				text: response.paw.value == null ? statsText :response.paw.widget + '\nPAW: ' + 
 				response.paw.value + '\n' + statsText, 
-			}),
-			image: new ol.style.Icon({
-				src: 'http://172.16.68.200:8000/files/admin/paw-drop.png'
 			})
 		});
 		feature.setStyle(style);
