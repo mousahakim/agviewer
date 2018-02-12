@@ -537,15 +537,42 @@ function changeMapWidget(mapWidget){
 		map.getView().setZoom(response.zoom);
 		map.getView().setCenter(ol.proj.fromLonLat(response.center));
 		var layers = map.getLayers();
+		var tileSource;
 		layers.forEach(function(layer, index, array){
 			if(layer instanceof ol.layer.Tile){
 				var tileSource = layer.getSource();
-				if (tileSource.getUrls().indexOf(response.tile_url) < 0){
-					tileSource.setUrl(response.tile_url);
-					tileSource.setAttributions(response.tile_attribution);
+				switch (response.tile_source){
+					case 'ArcGIS':
+						tileSource = new ol.source.XYZ({
+							attributions: [new ol.Attribution({
+								html: ''
+							})],
+							url: response.tile_url
+						});
+						break;
+					case 'XYZ':
+						tileSource = new ol.source.XYZ({
+							attributions: response.tile_attribution,
+							url: response.tile_url
+						});
+						break;
+					case 'BingMapsAerial+Labels':
+						tileSource = new ol.source.BingMaps({
+							key: 'AnST1eDSeRY_VRrb86ud4B1Y_iS1OnD2NMs7EKYN8JvtRNoMt5ZjGWGsE8bNkTlJ', 
+							imagerySet: 'AerialWithLabels'
+						});
+						break;
+					default:
+						tileSource = new ol.source.XYZ({
+							attributions: response.tile_attribution,
+							url: response.tile_url
+						});
+						break;
 				}
-			}
+				layer.setSource(tileSource);
+			}	
 		});
+
 	}).fail(function(response){
 		alert('Failed to load GIS widget settings.');
 	});
