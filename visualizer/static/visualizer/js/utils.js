@@ -1,5 +1,4 @@
 
-
 $(document).ready(function(){
 	$('.expandable').not('.gis').on('click', function  (e) {
 		var ctnDiv =  $(this).closest('div');
