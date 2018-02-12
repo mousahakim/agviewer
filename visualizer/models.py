@@ -79,6 +79,7 @@ class Widgets(models.Model):
 	widget_type = models.CharField(max_length=100)
 	widget = JSONField()
 	dashboard = models.ForeignKey('Dashboard', null=True, default=None)
+	expand = models.BooleanField(default=False)
 	class Meta:
 		ordering = ['index']
 
@@ -273,6 +274,7 @@ class MapWidget(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	tile_source = models.ForeignKey('MapTileSource')
+	expand = models.BooleanField(default=False)
 	class Meta:
 		ordering = ['index']
 
@@ -284,7 +286,7 @@ class MapTileSource(models.Model):
 class File(models.Model):
 	fid = models.UUIDField(primary_key=True, default=uuid.uuid4)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
-	file = models.FileField(upload_to=get_file_path)
+	file = models.FileField(upload_to='files/')
 
 class Feature(models.Model):
 	fid = models.UUIDField(primary_key=True, default=uuid.uuid4)

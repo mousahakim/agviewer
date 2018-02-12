@@ -3506,7 +3506,7 @@ $('#main-chart-modal').on('show.bs.modal', function (e){
 		}
 
 		widget = new Widget($id, $index, $title, $type, '', $data);
-		$invoker.parent().parent().parent().children('div').append('<div class="curtain"><span><i class="fa fa-spin fa-spinner"></i> Loading...</span></div>');
+		$invoker.parent().parent().parent().children('div').append('<div class="nosupport curtain"><i class="fa fa-spin fa-spinner"></i> Loading... </div>');
 		notify_elem = notify_man('info', 'Loading chart... please wait.');
 		ajax_request(render_chart, widget, notify_elem);
 
@@ -3529,7 +3529,22 @@ function getID() {
 }
 function addChartWidget() {
 	widget_id = getID();	
-	large_html = '<div class="col-lg-6"><section id="main-panel-" class="panel main-panel"><header class="panel-heading"><span class="title">New chart panel &nbsp;<i id="main-panel-{{forloop.counter}}-i" class=""></i></span><span class="tools pull-right"><a href="javascript:;" class="fa fa-chevron-down"></a><a href="#main-chart-modal" data-toggle="modal" class="fa fa-wrench"></a><a href="javascript:;" class="fa fa-times"></a></span></header><div class="panel-body"><div id="'+widget_id+'" class="chart-container"></div></div></section></div>'
+	large_html = '<div class="col-lg-6">\
+                <section id="main-panel-" class="panel main-panel">\
+                  <header class="panel-heading">\
+                    <span class="title">New chart panel &nbsp;<i id="main-panel-{{forloop.counter}}-i" class=""></i></span>\
+                    <span class="tools pull-right">\
+                      <a href="javascript:;" class="fa fa-expand expandable"></a>\
+                      <a href="javascript:;" class="fa fa-chevron-down"></a>\
+                      <a href="#main-chart-modal" data-toggle="modal" class="fa fa-wrench"></a>\
+                      <a href="javascript:;" class="fa fa-times"></a>\
+                    </span>\
+                  </header>\
+                  <div class="panel-body">\
+                  <div id="'+widget_id+'" class="chart-container"></div>\
+                  </div>\
+                </section>\
+              </div>'
 	$('.chart-row').append(large_html);
 }
 

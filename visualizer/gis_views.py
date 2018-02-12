@@ -414,8 +414,18 @@ def get_data_widget_list(request):
 	except Exception, e:
 		raise e
 
-
-
+def resize_map(request):
+	""" Resize map widget panel
+	"""
+	try:
+		params = json.loads(request.body)
+		widget = MapWidget.objects.get(user=request.user, wid=params['wid'])
+		expand = params['expand']
+		widget.expand = expand
+		widget.save()
+		return HttpResponse(json.dumps({'expand': widget.expand}))
+	except Exception, e:
+		raise e
 
 
 

@@ -641,7 +641,11 @@
               <div class="row chart-row">
                 
                   {% for widget in chart_widgets %}
+                    {% if widget.expand %}
+                    <div class="col-lg-12">
+                    {% else %}
                     <div class="col-lg-6">
+                    {% endif %}
                       <section id="main-panel-{{forloop.counter}}" class="panel main-panel">
                           <header class="panel-heading">
                               <span class="title">{{widget.widget.title}}</span>&nbsp; <i class="fa-spin"></i>
@@ -657,7 +661,7 @@
                           </header>
                           <div class="panel-body">
                               <div id="{{widget.widget_id}}" class="chart-container">
-                              <div class="curtain"><span><i class="fa fa-spin fa-spinner"></i> Loading...</span></div>
+                              <div class="nosupport curtain"><i class="fa fa-spin fa-spinner"></i> Loading... </div>
                               
                               </div>
                           </div>
@@ -666,19 +670,29 @@
                     </div>
                   {% endfor %}
                   {% for widget in map_widgets %}
+                    {% if widget.expand %}
+                    <div class="col-lg-12">
+                    {% else %}
                     <div class="col-lg-6">
+                    {% endif %}
                       <section id="main-panel-" class="panel main-panel">
                         <header class="panel-heading">
                           <span class="title">{{widget.name}} &nbsp;<i id="map-widget-progress" class=""></i></span>
                           <span class="tools pull-right">
+                            <a href="javascript:;" class="fa fa-expand expandable gis"></a>
                             <a href="javascript:;" class="fa fa-chevron-down"></a>
                             <a href="#GISModal" data-toggle="modal" class="fa fa-wrench"></a>
                             <a href="javascript:;" class="fa fa-times" id="map-widget-delete-button"></a>
                           </span>
                         </header>
-                        <div class="panel-body gis-panel">
+                        {% if widget.expand %}
+                          <div class="panel-body gis-panel fullscreen extended-map" id="gis-panel-{{widget.wid}}">
+                        {% else %}
+                          <div class="panel-body gis-panel fullscreen" id="gis-panel-{{widget.wid}}">
+                        {% endif %}
+                        
                           <div id="{{widget.wid}}" class="gis-container chart-container">
-                            <div class="nosupport">Loading map tiles please wait. <i class="fa fa-spin fa-spinner"></i> </div>
+                            <div class="nosupport"><i class="fa fa-spin fa-spinner"></i> Loading... </div>
                           </div>
                           <div id="pieChart-{{widget.wid}}" class="map-pie-chart"></div>
                           <div id="map-popup-container" style="display: hidden;">
