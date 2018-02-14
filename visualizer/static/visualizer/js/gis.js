@@ -511,9 +511,6 @@ function loadMapFeatureStats(featureId, mapWidget){
 				fill: new ol.style.Fill({
 					color: [0,0,0,1]
 				}),
-				stroke: new ol.style.Stroke({
-					color: [255,255,255,1]
-				}),
 				text: response.paw.value == null ? statsText :response.paw.widget + '\nPAW: ' + 
 				response.paw.value + '\n' + statsText, 
 			})
