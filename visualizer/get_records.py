@@ -238,8 +238,8 @@ def set_stat_widget(widget_data_id):
 			else:
 				#183: Flow Meter Sensor, 222: LWS Leaf Wetness Sensor, 221: PS-1 Pressure switch
 				#189: ECRN 50 mm, 187: ECRN 100, 188: ECRN 50 vol. ml
-				if sensor.split('-')[0] in ['183', '222', '221', '189', '187', '188']: 
-					print data.data, data.get_previous_by_date(station_id=station).data
+				if sensor.split('-')[0] in ['180', '183', '222', '221', '189', '187', '188']: 
+					# print data.data, data.get_previous_by_date(station_id=station).data
 					value = int(data.data[sensor]) - int(data.get_previous_by_date(station_id=station).data[sensor])
 					#apply multiplier for 187: ECRN-100
 					if sensor.split('-')[0] == '187':
@@ -405,7 +405,7 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 			data = load_data(station, sensor_code+'-'+sensor.split('-')[3], db, dt_from, dt_to)
 			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
 			#189: ECRN-50.Perc.[mm]
-			if sensor_code in ['222', '183', '221', '189']:
+			if sensor_code in ['222', '180', '183', '221', '189']:
 				accum_data = get_hourly_sum(data, 1)
 				data = accum_data
 			#187: ECRN-100.Perc.[mm]
@@ -645,7 +645,7 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 				stale = True
 			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
 			#189: ECRN-50.Perc.[mm]
-			if sensor_code in ['222', '183', '221', '189']:
+			if sensor_code in ['222', '180', '183', '221', '189']:
 				accum_data = get_hourly_sum(data, 1)
 				data = accum_data
 			#187: ECRN-100.Perc.[mm]
@@ -1694,6 +1694,13 @@ def make_list(data, code):
 			'Flow.Meter.[L/s]': [{'date': rec['date'],
 			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
 			}
+	#Flow Meter
+	if code == '180':
+		accum_data = get_hourly_sum(data,1)
+		return {
+			'Flow.Meter.[L/s]': [{'date': rec['date'],
+			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
+			}
 	#LWS Leaf Wetness
 	if code == '222':
 		accum_data = get_hourly_sum(data,1)
@@ -2371,7 +2378,7 @@ def get_voltage_data(widget, user):
 			raw_data = load_data(sensor[1], sensor[2]+'-'+sensor[3], sensor[0], dt_from, dt_to)
 			#222: LWS Leaf Wetness Sensor, 183: Flow Meter Sensor, 221: PS-1 Pressure Switch
 			#189: ECRN-50.Perc.[mm]
-			if sensor[2] in ['222', '183', '221', '189']:
+			if sensor[2] in ['222', '180', '183', '221', '189']:
 				accum_data = get_hourly_sum(raw_data, 1)
 				raw_data = accum_data
 			#187: ECRN-100.Perc.[mm]
