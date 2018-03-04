@@ -1698,7 +1698,7 @@ def make_list(data, code):
 	if code == '180':
 		accum_data = get_hourly_sum(data,1)
 		return {
-			'Flow.Meter.[L/s]': [{'date': rec['date'],
+			'Flow.Meter.[L/H]': [{'date': rec['date'],
 			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
 			}
 	#LWS Leaf Wetness
@@ -2452,8 +2452,12 @@ def load_widgets(user):
 	# print 'load widget in get_records called'
 	# data_dict = {'degree_days_acc': 'Degree Days Accu.', 'temp_min':'Min Temperature', 'temp_avg':'Avg. Temperature',
 	#  'temp_max': 'Max Temperature', 'chilling_hours_acc':'Chilling Hours Accu.'}
+	try:
+		active_dashboard = Dashboard.objects.get(user=user, active=True)
+	except Exception, e:
+		raise e
 	widget_dict = {}
-	widgets = Widgets.objects.filter(user=user)
+	widgets = Widgets.objects.filter(user=user, dashboard=active_dashboard)
 	if widgets.exists():
 		for widget in widgets:
 			if widget.widget_type != 'stat':
