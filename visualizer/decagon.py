@@ -288,7 +288,8 @@ def convert_sca(value, code, extract, unit=None):
 		return value
 	elif code == '180': #flow meter
 		value = int(value)
-		return value
+		#default multiplier
+		return value * 3.785#
 	elif code == '183': # flow meter
 		value = int(value)
 		#default multiplier
