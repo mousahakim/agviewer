@@ -115,6 +115,93 @@ function importFeatures(){
 	});
 }
 
+var downloadMapAsPNG = function(){
+	console.log(lastInvokerWidget.attr('id'));
+	var canvas = lastInvokerWidget.find('canvas').get(0);
+	canvas.toBlob(function(blob){
+		saveAs(blob, 'map.png');
+	});
+};
+var downloadMapAsGJSON = function(){
+	var map = lastInvokerWidget.data('map');
+	var layers = map.getLayers();
+	var vectorLayer;
+
+	layers.forEach(function (layer) {
+		
+		if (layer instanceof ol.layer.Vector)
+			vectorLayer = layer;
+	});
+
+	var features = vectorLayer.getSource().getFeatures();
+	if (features.length < 1){
+		alert('Map contains no features that can be exported as KML');
+		return;
+	}
+
+	var parser = new ol.format.GeoJSON();
+
+	var geojson = parser.writeFeatures(features);
+
+	// console.log(geojson);
+
+	var blob = new Blob([geojson], {type: "text/json;charset=utf-8"});
+
+	saveAs(blob, 'map-features.geojson');
+};
+var downloadMapAsKML = function(){
+	var map = lastInvokerWidget.data('map');
+	var layers = map.getLayers();
+	var vectorLayer;
+
+	layers.forEach(function (layer) {
+		
+		if (layer instanceof ol.layer.Vector)
+			vectorLayer = layer;
+	});
+
+	var features = vectorLayer.getSource().getFeatures();
+	if (features.length < 1){
+		alert('Map contains no features that can be exported as KML');
+		return;
+	}
+
+	var parser = new ol.format.KML({
+		writeStyles: false, 
+		extractStyles:true
+
+	});
+
+	// var kml = '<?xml version="1.0" encoding="UTF-8"?>\n' + parser.writeFeaturesNode(features);
+	var kml = parser.writeFeaturesNode(features);
+	var kmlStyle = '<Style id="PolyStyle"><LineStyle><width>1.5</width></LineStyle><PolyStyle><color>7d0000ff</color></PolyStyle></Style>';
+
+	$(kml).find('Document').prepend(kmlStyle);
+
+	$(kml).find('styleUrl').replaceWith('<styleUrl>#PolyStyle</styleUrl>');
+	console.log(kml);
+
+	var kmlString = (new XMLSerializer()).serializeToString(kml);
+	// console.log(typeof kmlString);
+	// console.log(kmlString);
+
+	var blob = new Blob (['<?xml version="1.0" encoding="UTF-8"?>\n' + kmlString], {type: "text/xml;charset=utf-8"});
+	saveAs(blob, 'map-features.kml');
+
+};
+
+function drawPolygon(){
+	alert('drawing polygon');
+}
+
+function drawSquare(){
+	alert('drawing square');
+}
+
+function saveDrawings(){
+	console.log($(this).closest('div.gis-container').attr('id'));
+}
+
 function createMapWidget(mapWidgetID, options){
 	var newWidget = false;
 	if (typeof mapWidgetID == 'undefined'){
@@ -150,6 +237,7 @@ function createMapWidget(mapWidgetID, options){
 		newWidget = true;
 	}
 
+	//create map tile source
 	var tile_source;
 	switch (options.tile_source){
 		case 'ArcGIS':
@@ -179,6 +267,108 @@ function createMapWidget(mapWidgetID, options){
 			});
 			break;
 	}
+	//create controls
+	var DownloadMap = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<i class="fa fa-download"></i>';
+		button.title = 'Download map as';
+
+		var this_ = this;
+
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			$('#map-dialog').data('kendoDialog').open();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			$('#map-dialog').data('kendoDialog').open();
+		}, false);
+
+		var element = document.createElement('div');
+		element.className = 'download-map ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+
+	};
+	ol.inherits(DownloadMap, ol.control.Control);
+	var DrawPolygon = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.title = 'Draw polygon';
+		button.innerHTML = '<img src="/static/visualizer/img/drawpolygon.png">';
+
+		var this_ = this;
+
+		button.addEventListener('click', drawPolygon, false);
+		button.addEventListener('touchstart', drawPolygon, false);
+
+		var element = document.createElement('div');
+		element.className = 'draw-polygon ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(DrawPolygon, ol.control.Control);
+
+	var DrawSquare = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<img src="/static/visualizer/img/drawsquare.png">';
+		button.title = 'Draw rectangle';
+
+		var this_ = this;
+
+		button.addEventListener('click', drawSquare, false);
+		button.addEventListener('touchstart', drawSquare, false);
+
+		var element = document.createElement('div');
+		element.className = 'draw-square ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(DrawSquare, ol.control.Control);
+
+	var SaveDrawings = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<i class="fa fa-save"></i>';
+		button.title = 'Save drawings';
+		var this_ = this;
+
+		button.addEventListener('click', saveDrawings, false);
+		button.addEventListener('touchstart', saveDrawings, false);
+
+		var element = document.createElement('div');
+		element.className = 'save-drawings ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(SaveDrawings, ol.control.Control);
+
 	var map = new ol.Map({
         target: mapWidgetID,
         layers: [
@@ -196,6 +386,10 @@ function createMapWidget(mapWidgetID, options){
             }),
             //Define some new controls
             new ol.control.ZoomSlider(),
+            new DownloadMap(),
+            new DrawPolygon(),
+            new DrawSquare(),
+            new SaveDrawings(),
             // new ol.control.MousePosition({
             // 	coordinateFormat: function (coordinates){
             // 		var coordX = coordinates[0].toFixed(3);
@@ -208,7 +402,9 @@ function createMapWidget(mapWidgetID, options){
             // }),
             // new ol.control.OverviewMap()
         ],
-        interactions: ol.interaction.defaults().extend([
+        interactions: ol.interaction.defaults({
+        	mouseWheelZoom: false
+        }).extend([
             new ol.interaction.Select({
                 layers: [new ol.layer.Vector()]
             })
@@ -217,6 +413,27 @@ function createMapWidget(mapWidgetID, options){
             center: ol.proj.fromLonLat(options.center),
             zoom: options.zoom
         }), 
+    });
+    //change text size on zoom change
+    map.getView().on('propertychange', function (e) {
+
+    	if(e.key == 'resolution'){
+    		var layers = map.getLayers();
+
+    		layers.forEach(function (layer, index, array) {
+
+    			if(layer instanceof ol.layer.Vector){
+
+    				var features = layer.getSource().getFeatures();
+    				var fontSize = map.getView().getZoom() - 7;
+    				
+    				features.forEach(function (feature, index, array) {
+    					if(feature.getStyle() != null)
+    						feature.getStyle().getText().setFont(fontSize + 'px Hind Madurai');
+    				});
+    			}
+    		});
+    	}
     });
     //bring popover to front when feature is click on
     map.on('click', function(e){
@@ -318,6 +535,7 @@ function loadMapFeatures(mapWidget){
 		})
 		if(!existingVectorLayer){
 			var vectorLayer = new ol.layer.Vector({
+				style: styleMap(map),
 				source: new ol.source.Vector({
 					format: new ol.format.GeoJSON(),
 					features: features
@@ -325,10 +543,7 @@ function loadMapFeatures(mapWidget){
 			});
 			map.addLayer(vectorLayer);	
 		}
-		mapLayers.forEach(function (layer, index, array) {
-			if(layer instanceof ol.layer.Vector)
-				console.log(layer.getSource().getFeatures());
-		})
+
 		features.forEach(function(feature, index, array){
 			//asynchronously load and render stats for each feature
 			loadMapFeatureStats(feature.getId(), mapWidget);
@@ -371,7 +586,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		var pieChart = $('#pieChart-'+mapWidget.attr('id')).data('pieChart');
 		var dataProvider = pieChart.dataProvider;
 		var featureArea = feature.getGeometry().getArea();
-		console.log('dataProvider before changes: ', dataProvider)
+
 		if (response.paw.value != null){
 			if (response.paw.value < 30){
 				color = [254,180,186,0.9]
@@ -493,7 +708,9 @@ function loadMapFeatureStats(featureId, mapWidget){
 		}
 		if (statsText == null)
 			statsText = '';
-		console.log(statsText);
+
+		var fontSize = map.getView().getZoom() - 7;
+
 		style = new ol.style.Style({
 			fill: new ol.style.Fill({
 				color: color != null ? color : [255,255,255,0],
@@ -503,7 +720,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 				color: [51,153,204, 0.7]
 			}),
 			text: new ol.style.Text({
-				font: 'Hind Madurai',
+				font: fontSize + 'px Hind Madurai',
 				overflow: true,
 				// placement: 'line',
 				rotateWithView: true,
@@ -620,7 +837,7 @@ function  getChartWidgetList(){
 		url: 'get-chart-widget-list',
 		dataType: 'json',
 	}).done(function(response){
-		console.log(response);
+
 		var select = $('select#map-paw-select').data('kendoMultiSelect');
 		select.setDataSource(response);
 
@@ -637,7 +854,7 @@ function getDataWidgetList(){
 	}).done(function(response){
 
 		var select = $('select#map-stat-select').data('kendoMultiSelect');
-		console.log(response);
+
 		var dataSource = new kendo.data.DataSource({
 			data: response,
 			group: {field: 'widget'}
@@ -647,6 +864,18 @@ function getDataWidgetList(){
 	}).fail(function(response){
 		alert('Failed to load feature list.');
 	});
+}
+
+function styleMap(map){
+	var zoom = map.getView().getZoom();
+	var font_size = zoom * 10; // arbitrary value
+	return [
+		new ol.style.Style({
+		  text: new ol.style.Text({
+		    font: font_size + 'px Calibri,sans-serif'
+		  })
+		})
+	];
 }
 
 $(function(){
@@ -808,6 +1037,30 @@ $(function(){
     	}
 
     }).data('kendoMultiSelect');
+
+    $('#map-dialog').kendoDialog({
+		width: "250px",
+        // title: "Download format",
+        closable: true,
+        modal: false,
+        content: "Please choose a format.",
+        actions: [
+            { text: 'PNG', action: downloadMapAsPNG },
+            { text: 'GeoJSON', action: downloadMapAsGJSON },
+            { text: 'KML', action: downloadMapAsKML },
+            // { text: 'Cancel', primary: true }
+        ],
+        // close: onClose
+	}).data('kendoDialog').close();
+
+    //customize tooltips with bootstrap
+    $('.ol-zoom-in, .ol-zoom-out').tooltip({
+        placement: 'right'
+	});
+
+	$('.ol-rotate-reset, .ol-attribution button[title]').tooltip({
+	  placement: 'left'
+	});
 
 
 
