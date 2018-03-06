@@ -89,14 +89,14 @@ def get_map_widget(request):
 		raise e
 
 def change_map_widget(request):
-	""" Get a single map widget's options
+	""" change map widget's options
 	"""
 	try:
 		params = json.loads(request.body)
 		widget = MapWidget.objects.filter(user=request.user, wid=params['wid'])
 		tile_source = MapTileSource.objects.get(name=params['tile_source'])
 		widget.update(index=params['index'], name=params['name'],\
-			zoom=int(params['zoom']), latitude=float(params['lat']), longitude=float(params['long']), tile_source=tile_source)
+			zoom=float(params['zoom']), latitude=float(params['lat']), longitude=float(params['long']), tile_source=tile_source)
 		return HttpResponse(json.dumps({'success': True}))
 	except Exception, e:
 		raise e

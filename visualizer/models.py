@@ -270,7 +270,7 @@ class MapWidget(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	name = models.CharField(max_length=50, default="New map widget")
 	dashboard = models.ForeignKey('Dashboard')
-	zoom = models.IntegerField()
+	zoom = models.FloatField()
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	tile_source = models.ForeignKey('MapTileSource')
