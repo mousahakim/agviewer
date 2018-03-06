@@ -200,12 +200,12 @@
                       </ul>
                   </li>
 
-                  <li>
+                  <!-- <li>
                       <a href="{% url 'gis_view' %}" >
                           <i class="fa fa-map-marker"></i>
                           <span>GIS | Maps </span>
                       </a>
-                  </li>
+                  </li> -->
                 
 
                   <!--Stations menu start-->
@@ -326,10 +326,10 @@
                             		<div class="form-group col-md-2 col-sm-3">
                                       <select class="form-control station">
                                             {% for station in fc_stations %}
-                                                <option value="{{station.station}}" db="{{station.database}}" station-name="{{station.name}}">{{station.name}}</option>    
+                                                <option value="{{station.station}}" db="{{station.database}}" station-name="{{station.name}}">{{station.name}} [{{station.station}}]</option>    
                                             {% endfor %}
                                             {% for station in dg_stations %}
-                                            	<option value="{{station.station}}" db="{{station.database}}" station-name="{{station.name}}">{{station.name}}</option>
+                                            	<option value="{{station.station}}" db="{{station.database}}" station-name="{{station.name}}">{{station.name}} [{{station.station}}]</option>
                                             {% endfor %}
                                         </select>
                                   </div>
@@ -354,7 +354,7 @@
 
                                         <optgroup label="Field Climate">
                                                   {% for station in fc_stations %}
-                                                      <optgroup label="{{station.name}}">
+                                                      <optgroup label="{{station.name}} [{{station.station}}]">
                                                       {% for k, v in station.sensors.iteritems %}
                                                           <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                                                       {% endfor %}
@@ -363,7 +363,7 @@
                                           </optgroup>
                                           <optgroup label="Decagon">
                                                   {% for station in dg_stations %}
-                                                      <optgroup label="{{station.name}}">
+                                                      <optgroup label="{{station.name}} [{{station.station}}]">
                                                       {% for k, v in station.sensors.iteritems %}
                                                               <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                                                       {% endfor %}
@@ -431,7 +431,7 @@
 
                             		      <optgroup label="Field Climate">
                             		                {% for station in fc_stations %}
-                            		                    <optgroup label="{{station.name}}">
+                            		                    <optgroup label="{{station.name}} [{{station.station}}]">
                             		                    {% for k, v in station.sensors.iteritems %}
                         		                            <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                             		                    {% endfor %}
@@ -440,7 +440,7 @@
                             		        </optgroup>
                             		        <optgroup label="Decagon">
                             		                {% for station in dg_stations %}
-                            		                    <optgroup label="{{station.name}}">
+                            		                    <optgroup label="{{station.name}} [{{station.station}}]">
                             		                    {% for k, v in station.sensors.iteritems %}
                             		                            <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                             		                    {% endfor %}
@@ -505,7 +505,7 @@
 
                             		      <optgroup label="Field Climate">
                             		                {% for station in fc_stations %}
-                            		                    <optgroup label="{{station.name}}">
+                            		                    <optgroup label="{{station.name}} [{{station.station}}]">
                             		                    {% for k, v in station.sensors.iteritems %}
                         		                            <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                             		                    {% endfor %}
@@ -514,7 +514,7 @@
                             		        </optgroup>
                             		        <optgroup label="Decagon">
                             		                {% for station in dg_stations %}
-                            		                    <optgroup label="{{station.name}}">
+                            		                    <optgroup label="{{station.name}} [{{station.station}}]">
                             		                    {% for k, v in station.sensors.iteritems %}
                             		                            <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                             		                    {% endfor %}
@@ -862,12 +862,12 @@
                                           		<select class="form-control station" id="s-station-r" name="">
                                           			<optgroup label="Fieldclimate">
 		                                          	   {% for station in fc_stations %}
-		                                          	    <option value="{{station.station}}">{{station.name}}</option>
+		                                          	    <option value="{{station.station}}">{{station.name}} [{{station.station}}]</option>
 		                                          	    {% endfor %}
 	                                          	    </optgroup>
 	                                          	    <optgroup label="Decagon">
 	                                          	    	{% for station in dg_stations %}
-		                                          	    <option value="{{station.station}}">{{station.name}}</option>
+		                                          	    <option value="{{station.station}}">{{station.name}} [{{station.station}}]</option>
 		                                          	    {% endfor %}
 	                                          	    </optgroup>
                                           		</select>
@@ -931,7 +931,7 @@
                                       <select class="form-control alert-sensors" data-role="multiselect">
                                         <optgroup label="Field Climate">
                                                 {% for station in fc_stations %}
-                                                    <optgroup label="{{station.name}}">
+                                                    <optgroup label="{{station.name}} [{{station.station}}]">
                                                     {% for k, v in station.sensors.iteritems %}
                                                         <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                                                     {% endfor %}
@@ -940,7 +940,7 @@
                                         </optgroup>
                                         <optgroup label="Decagon">
                                                 {% for station in dg_stations %}
-                                                    <optgroup label="{{station.name}}">
+                                                    <optgroup label="{{station.name}} [{{station.station}}]">
                                                     {% for k, v in station.sensors.iteritems %}
                                                             <option value="{{station.database}}-{{station.station}}-{{k}}">{{v}}</option>
                                                     {% endfor %}
