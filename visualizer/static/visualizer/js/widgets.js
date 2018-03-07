@@ -1245,8 +1245,21 @@ console.log(widget);
            "marginRight": 5,
            "markerLabelGap": 2, 
            "markerSize": 10, 
-           "valueWidth": 40
-	  
+           "valueWidth": 40,
+           "listeners": [
+            {
+              "event": "rollOverItem", 
+              "method": function (event) {
+                setLineThickness(event.chart.graphs[event.dataItem.index], 5);
+              }
+            },
+            {
+              "event": "rollOutItem", 
+              "method": function (event) {
+                setLineThickness(event.chart.graphs[event.dataItem.index], 2);
+              }
+            }
+           ]
 	       },
 	     "guides": []
 
@@ -1266,7 +1279,7 @@ console.log(widget);
   //add chart event listener
   chart.timeout;
   chart.addListener( "rollOverGraph", function( event ) {
-    setLineThickness( event.graph, 3 );
+    setLineThickness( event.graph, 5 );
   } );
   chart.addListener( "rollOutGraph", function( event ) {
     setLineThickness( event.graph, 2 );
