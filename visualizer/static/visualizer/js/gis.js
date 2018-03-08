@@ -983,6 +983,28 @@ $(function(){
 	    		alert('Failed to load feature stat.');
 	    	});
     	},
+    	filter: "contains",
+    	filtering: function (e) {
+	      //custom filtering logic
+	      if (e.filter != null){
+	        e.preventDefault();
+
+	        var filterWords = e.filter.value.split(" ");
+
+	        var filters = [];
+
+	        for(var i = 0; i < filterWords.length; i++){
+
+	          filters.push({field:"name", operator:"contains", value:filterWords[i]});
+
+	        }
+
+	        e.sender.dataSource.filter([
+	          {"logic":"and",
+	           "filters": filters
+	          }]);  
+	      } 
+	    }
     }).data('kendoMultiSelect');
     $('select#map-paw-select').kendoMultiSelect({
     	maxSelectedItems: 1,
@@ -1003,7 +1025,29 @@ $(function(){
 	    	}).fail(function(response){
 	    		alert('Failed to change feature stat.');
 	    	});
-    	}
+    	}, 
+    	filter:"contains",
+    	filtering: function (e) {
+	      //custom filtering logic
+	      if (e.filter != null){
+	        e.preventDefault();
+
+	        var filterWords = e.filter.value.split(" ");
+
+	        var filters = [];
+
+	        for(var i = 0; i < filterWords.length; i++){
+
+	          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+	        }
+
+	        e.sender.dataSource.filter([
+	          {"logic":"and",
+	           "filters": filters
+	          }]);  
+	      } 
+	    }
     }).data('kendoMultiSelect');
     $('select#map-stat-select').kendoMultiSelect({
     	maxSelectedItems: 3,
@@ -1024,7 +1068,29 @@ $(function(){
 	    	}).fail(function(response){
 	    		alert('Failed to change feature stat.');
 	    	});
-    	}
+    	}, 
+    	filter:"contains",
+    	filtering: function (e) {
+	      //custom filtering logic
+	      if (e.filter != null){
+	        e.preventDefault();
+
+	        var filterWords = e.filter.value.split(" ");
+
+	        var filters = [];
+
+	        for(var i = 0; i < filterWords.length; i++){
+
+	          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+	        }
+
+	        e.sender.dataSource.filter([
+	          {"logic":"and",
+	           "filters": filters
+	          }]);  
+	      } 
+	    }
     }).data('kendoMultiSelect');
     //initialize paw and stat selects
     getChartWidgetList();
@@ -1034,7 +1100,29 @@ $(function(){
     	change: function(e){
     		var value = this.value();
     		var widget = lastInvokerWidget.attr('id');
-    	}
+    	}, 
+    	filter: "contains",
+    	filtering: function (e) {
+	      //custom filtering logic
+	      if (e.filter != null){
+	        e.preventDefault();
+
+	        var filterWords = e.filter.value.split(" ");
+
+	        var filters = [];
+
+	        for(var i = 0; i < filterWords.length; i++){
+
+	          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+	        }
+
+	        e.sender.dataSource.filter([
+	          {"logic":"and",
+	           "filters": filters
+	          }]);  
+	      } 
+	    }
 
     }).data('kendoMultiSelect');
 

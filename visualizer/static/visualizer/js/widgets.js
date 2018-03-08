@@ -625,12 +625,54 @@ $(function() {
 
   $('#stat-sensor-select').kendoMultiSelect({
     maxSelectedItems: 1,
-    filter: 'contains'
+    filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
   }).data('kendoMultiSelect');
 
   $('#stat-data-select').kendoMultiSelect({
     maxSelectedItems: 1,
-    filter: 'contains'
+    filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
   }).data('kendoMultiSelect');
 
   $('#add-stat-widget-modal').on('show.bs.modal', function(e){
@@ -778,7 +820,28 @@ $(function() {
   //initialize add stat modal chart select
   $('#stat-chart-select').kendoMultiSelect({
     maxSelectedItems: 1, 
-    filter: 'contains'
+    filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
   });
 
   $('#add-stat-data-modal').on('show.bs.modal', function(e){
@@ -1856,7 +1919,28 @@ $(document).ready(function(){
 				delete main_sensors_labels[dataItem.value];
 			};
 		},
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	})
 	.data('kendoMultiSelect');
 	$('#ms-main-sensors-label-ctn').on('change', 'input', function (e) {
@@ -1904,44 +1988,253 @@ $(document).ready(function(){
 			if ($pawFields.hasOwnProperty(dataItem.value))
 				delete $pawFields[dataItem.value];
 		},
-		filter: 'contains'
-	
+		filter: 'contains',
+    filtering: function (e) {
+      //custome filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_cp = $('#s-main-cp').kendoMultiSelect({
 		maxSelectedItems: 1, 
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custome filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_dd = $('#s-main-dd').kendoMultiSelect({
 		maxSelectedItems: 1, 
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custome filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_ch = $('#s-main-ch').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_eto_t = $('#s-main-eto-t').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_eto_rh = $('#s-main-eto-rh').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_eto_sr = $('#s-main-eto-sr').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_eto_ws = $('#s-main-eto-ws').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_dp_t = $('#s-main-dp-t').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	s_main_dp_rh = $('#s-main-dp-rh').kendoMultiSelect({
 		maxSelectedItems: 1,
-		filter: 'contains'
+		filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    }
 	}).data('kendoMultiSelect');
 	// s_stat_station = $('#statmodal select.station').kendoMultiSelect({
 	// 	maxSelectedItems: 1,
@@ -2075,6 +2368,27 @@ function populateExEC(exECParams) {
 		});
 		$('#ms-ex-ec-'+exECParams[i].inputID).kendoMultiSelect({
 			filter: 'contains',
+      filtering: function (e) {
+        //custom filtering logic
+        if (e.filter != null){
+          e.preventDefault();
+
+          var filterWords = e.filter.value.split(" ");
+
+          var filters = [];
+
+          for(var i = 0; i < filterWords.length; i++){
+
+            filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+          }
+
+          e.sender.dataSource.filter([
+            {"logic":"and",
+             "filters": filters
+            }]);  
+        } 
+      },
 			dataSource: dataSource,
 			dataValueField: 'value',
 			dataTextField: 'text'
@@ -2128,6 +2442,27 @@ function populateVoltageForm(voltageFormValues){
     });
     $('#ms-voltage-'+voltageFormValues[i].inputID).kendoMultiSelect({
       filter: 'contains',
+      filtering: function (e) {
+        //custom filtering logic
+        if (e.filter != null){
+          e.preventDefault();
+
+          var filterWords = e.filter.value.split(" ");
+
+          var filters = [];
+
+          for(var i = 0; i < filterWords.length; i++){
+
+            filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+          }
+
+          e.sender.dataSource.filter([
+            {"logic":"and",
+             "filters": filters
+            }]);  
+        } 
+      },
       dataSource: voltageSelectDataSource,
       dataValueField: 'value',
       dataTextField: 'text'
@@ -2486,6 +2821,27 @@ $(function(){
 		});
 		$(elementID).kendoMultiSelect({
 			filter: 'contains',
+      filtering: function (e) {
+        //custom filtering logic
+        if (e.filter != null){
+          e.preventDefault();
+
+          var filterWords = e.filter.value.split(" ");
+
+          var filters = [];
+
+          for(var i = 0; i < filterWords.length; i++){
+
+            filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+          }
+
+          e.sender.dataSource.filter([
+            {"logic":"and",
+             "filters": filters
+            }]);  
+        } 
+      },
 			dataSource: dataSource, 
 			dataValueField: 'value',
 			dataTextField: 'text'
@@ -2534,6 +2890,27 @@ $(function(){
     });
     $(voltageMultiSelectID).kendoMultiSelect({
       filter: 'contains',
+      filtering: function (e) {
+        //custom filtering logic
+        if (e.filter != null){
+          e.preventDefault();
+
+          var filterWords = e.filter.value.split(" ");
+
+          var filters = [];
+
+          for(var i = 0; i < filterWords.length; i++){
+
+            filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+          }
+
+          e.sender.dataSource.filter([
+            {"logic":"and",
+             "filters": filters
+            }]);  
+        } 
+      },
       dataSource: voltageSelectDataSource, 
       dataValueField: 'value',
       dataTextField: 'text'

@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.min.css' %}" />
     <link rel="stylesheet" href="{% static 'visualizer/css/kendo.flat.mobile.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'visualizer/css/datatables.min.css' %}"/>
-    <!-- <link rel="stylesheet" href="{% static 'visualizer/css/bootstrap-switch.min.css' %}"/> -->
+    <link rel="stylesheet" href="{% static 'visualizer/css/bootstrap-switch.min.css' %}"/>
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/jquery.dataTables.min.css' %}"/> -->
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/dataTables.bootstrap.min.css' %}"/> -->
     <!-- <link rel="stylesheet" href="{% static 'visualizer/css/buttons.dataTables.min.css' %}"/> -->
@@ -285,16 +285,16 @@
                             <form class="" role="form">
                             <div class="row">
                               <div class="form-group col-md-2 col-sm-3">
-                                <label class="sr-only" for="exampleInputPassword2">Old Password</label>
-                                <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Old password">
+                                <label class="sr-only" for="old-password">Old Password</label>
+                                <input type="password" class="form-control" id="old-password" placeholder="Old password">
                               </div>
                               <div class="form-group col-md-2 col-sm-3">
-                                <label class="sr-only" for="exampleInputPassword2">New Password</label>
-                                <input type="password" class="form-control" id="exampleInputPassword2" placeholder="New password">
+                                <label class="sr-only" for="new-password">New Password</label>
+                                <input type="password" class="form-control" id="new-password" placeholder="New password">
                               </div>
                               <div class="form-group col-md-2 col-sm-3">
-                                <label class="sr-only" for="exampleInputPassword2">New Password</label>
-                                <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Confirm password">
+                                <label class="sr-only" for="confirm-password">New Password</label>
+                                <input type="password" class="form-control" id="confirm-password" placeholder="Confirm password">
                               </div>
                               <div class="form-group col-md-2">
                               	<button type="submit" class="btn btn-success">Change</button>	
@@ -334,8 +334,8 @@
                                         </select>
                                   </div>
                                   <div class="form-group col-md-2 col-sm-3">
-                                      <label class="sr-only" for="exampleInputPassword2">Alias</label>
-                                      <input type="text" class="form-control station-alias" id="exampleInputPassword2" placeholder="Alias">
+                                      <label class="sr-only" for="station-alias">Alias</label>
+                                      <input type="text" class="form-control station-alias" id="station-alias" placeholder="Alias">
                                   </div>
                                   <div class="form-group col-md-2">
                                   	<button type="submit" class="btn btn-success station">Save</button>		
@@ -350,7 +350,7 @@
                             <form class="" role="form">
                             	<div class="row">
                             		<div class="form-group col-md-2 col-sm-3">
-                                      <select class="form-control sensor" id="s-sensors" name="ms-main-sensors[]">
+                                      <select class="form-control sensor" name="ms-main-sensors[]">
 
                                         <optgroup label="Field Climate">
                                                   {% for station in fc_stations %}
@@ -388,7 +388,7 @@
                             <form class="" role="form">
                             <div class="row">
                             	<div class="form-group col-md-2 col-sm-3">
-                                      <select class="form-control graph-calc-color" id="s-sensors" name="ms-main-sensors[]">
+                                      <select class="form-control graph-calc-color" name="ms-main-sensors[]">
                                       		<option value="paw">PAW</option>
                                       		<option value="paw_avg">PAW (AVG)</option>
                                       		<option value="chilling_portions">Chilling Portions</option>
@@ -427,7 +427,7 @@
                             <form class="" role="form">
                             	<div class="row">
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control graph-sensor-color" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control graph-sensor-color" name="ms-main-sensors[]">
 
                             		      <optgroup label="Field Climate">
                             		                {% for station in fc_stations %}
@@ -474,7 +474,7 @@
                             <form class="" role="form">
                             	<div class="row">
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control graph-calc-type" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control graph-calc-type" name="ms-main-sensors[]">
                             		    		<option value="paw">PAW</option>
                             		    		<option value="paw_avg">PAW (AVG)</option>
                             		    		<option value="chilling_portions">Chilling Portions</option>
@@ -485,7 +485,7 @@
                             		    </select>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control graph-graph-type" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control graph-graph-type" name="ms-main-sensors[]">
                             		    		<option value="line"> Line</option>
                             		    		<option value="column"> Bar</option>
                             		    </select>
@@ -501,7 +501,7 @@
                             <form class="" role="form">
                             	<div class="row">
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control graph-sensor-type" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control graph-sensor-type" name="ms-main-sensors[]">
 
                             		      <optgroup label="Field Climate">
                             		                {% for station in fc_stations %}
@@ -524,7 +524,7 @@
                             		    </select>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control sensor-graph-type" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control sensor-graph-type" name="ms-main-sensors[]">
                             		    		<option value="line"> Line</option>
                             		    		<option value="column"> Bar</option>
                             		    </select>
@@ -543,7 +543,7 @@
                             		    <label class="" style="font-weight:normal;" >Reset date:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control cp-reset-dt" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control cp-reset-dt" name="ms-main-sensors[]">
                             		    		<option value="01"> January</option>
                             		    		<option value="02"> February</option>
                             		    		<option value="03"> March</option>
@@ -573,7 +573,7 @@
                             		    <label class="" style="font-weight:normal;" >Reset date:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control ch-reset-dt" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control ch-reset-dt" name="ms-main-sensors[]">
                             		    		<option value="01"> January</option>
                             		    		<option value="02"> February</option>
                             		    		<option value="03"> March</option>
@@ -603,7 +603,7 @@
                             		    <label class="" style="font-weight:normal;" >Default threshold:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <input type="text" class="form-control ch-threshold" id="" placeholder="C">
+                            		    <input type="text" class="form-control ch-threshold" placeholder="C">
                             		</div>
                             		<div class="col-md-2">
                             			<button type="submit" class="btn btn-success ch-threshold">Save</button>
@@ -619,7 +619,7 @@
                             		    <label class="" style="font-weight:normal;" >Reset date:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control dd-reset-dt" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control dd-reset-dt" name="ms-main-sensors[]">
                             		    		<option value="01"> January</option>
                             		    		<option value="02"> February</option>
                             		    		<option value="03"> March</option>
@@ -649,7 +649,7 @@
                             		    <label class="" style="font-weight:normal;" >Default threshold:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <input type="text" class="form-control dd-threshold" id="" placeholder="C">
+                            		    <input type="text" class="form-control dd-threshold" placeholder="C">
                             		</div>
                             		<div class="col-md-2">
                             			<button type="submit" class="btn btn-success dd-threshold">Save</button>
@@ -665,7 +665,7 @@
                             		    <label class="" style="font-weight:normal;" >Reset date:</label>
                             		</div>
                             		<div class="form-group col-md-2 col-sm-3">
-                            		    <select class="form-control ar-reset-dt" id="s-sensors" name="ms-main-sensors[]">
+                            		    <select class="form-control ar-reset-dt" name="ms-main-sensors[]">
                             		    		<option value="01"> January</option>
                             		    		<option value="02"> February</option>
                             		    		<option value="03"> March</option>

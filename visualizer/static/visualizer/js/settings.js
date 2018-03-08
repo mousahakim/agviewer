@@ -407,6 +407,27 @@ $(function () {
   $s_station = $('select.station').kendoMultiSelect({
     maxSelectedItems: 1,
     filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    },
     value: []
   }).data('kendoMultiSelect');
 
@@ -434,6 +455,27 @@ $(function () {
   $s_sensor = $('select.sensor').kendoMultiSelect({
     maxSelectedItems: 1,
     filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    },
     value: []
   }).data('kendoMultiSelect');
 
@@ -475,6 +517,27 @@ $(function () {
   $s_color_sense = $('select.graph-sensor-color').kendoMultiSelect({
     maxSelectedItems: 1,
     filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    },
     value: []
   }).data('kendoMultiSelect');
 
@@ -513,7 +576,28 @@ $(function () {
 
   $s_graph_sense = $('select.graph-sensor-type').kendoMultiSelect({
     maxSelectedItems: 3,
-    filter: 'contains', 
+    filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    },
     value: []
   }).data('kendoMultiSelect');
 
@@ -620,7 +704,28 @@ $(function () {
   });
 
    alert_sensors = $('select.alert-sensors').kendoMultiSelect({
-    filter: 'contains', 
+    filter: 'contains',
+    filtering: function (e) {
+      //custom filtering logic
+      if (e.filter != null){
+        e.preventDefault();
+
+        var filterWords = e.filter.value.split(" ");
+
+        var filters = [];
+
+        for(var i = 0; i < filterWords.length; i++){
+
+          filters.push({field:"text", operator:"contains", value:filterWords[i]});
+
+        }
+
+        e.sender.dataSource.filter([
+          {"logic":"and",
+           "filters": filters
+          }]);  
+      } 
+    },
     value: [],
   }).data('kendoMultiSelect'); 
 
