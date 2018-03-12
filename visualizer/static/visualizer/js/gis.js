@@ -43,8 +43,7 @@ function getFileList(){
         //update file select
         $('select#file-select').empty();
         $.each(fileList, function (index, file){
-        	var fileName = file.fields.file.split('/')[file.fields.file.split('/').length-1];
-        	$('select#file-select').append('<option value="'+file.pk+'" url="'+file.fields.file+'">'+fileName+'</option>');
+        	$('select#file-select').append('<option value="'+file.fid+'" url="'+file.url+'">'+file.name+'</option>');
         });
     }).fail(function(msg){
         alert('Failed to retreive files');
