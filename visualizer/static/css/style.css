@@ -6,6 +6,16 @@
 .feature-visual {
 	height: 500px !important;
 }
+
+.cms-icon-logo:before, div.cms .cms-toolbar-item-logo a:before {
+	content: "";
+    background-image: url(/static/img/logo-tiny-cms.png);
+    background-size: 85px 45px;
+    height: 45px;
+    width: 85px;
+    display: inline-block;
+    background-repeat: no-repeat;
+}
 /*.navbar-head .navbar-brand a > img {
 	height: 80px !important;
 }*/
