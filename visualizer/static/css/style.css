@@ -3,7 +3,9 @@
 	background-size: 150px !important; 
 	/*background-image: none !important;*/
 }
-
+.feature-visual {
+	height: 500px !important;
+}
 /*.navbar-head .navbar-brand a > img {
 	height: 80px !important;
 }*/
