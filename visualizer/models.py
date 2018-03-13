@@ -288,11 +288,6 @@ class File(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	file = models.FileField(upload_to=get_file_path)
 
-	# def _get_file_url(self):
-	# 	"Returns file's url"
-	# 	return self.file.url
-	# url = property(_get_file_url)
-
 class Feature(models.Model):
 	fid = models.UUIDField(primary_key=True, default=uuid.uuid4)
 	name = models.CharField(max_length=100)
