@@ -88,17 +88,17 @@ def update_widget(widget, username):
 		print 'KeyError', e
 		return
 
-	from visualizer.utils import parse_date
-	try:
-		date_from = parse_date(widget['data']['range']['to'])
-		date_to = parse_date(widget['data']['range']['from'])
-	except KeyError as e:
-		print 'KeyError', e
-		return
-	duration = date_from - date_to
+	# from visualizer.utils import parse_date
+	# try:
+	# 	date_from = parse_date(widget['data']['range']['to'])
+	# 	date_to = parse_date(widget['data']['range']['from'])
+	# except KeyError as e:
+	# 	print 'KeyError', e
+	# 	return
+	# duration = date_from - date_to
 	current_time = datetime.now()
 	try:
-		widget['data']['range']['from'] = date_to_string(current_time - duration)
+		widget['data']['range']['from'] = date_to_string(current_time - timedelta(weeks=2))
 		widget['data']['range']['to'] = date_to_string(current_time)
 	except KeyError as e:
 		print 'KeyError', e
