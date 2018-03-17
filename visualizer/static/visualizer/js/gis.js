@@ -465,8 +465,11 @@ function createMapWidget(mapWidgetID, options){
 		"outlineAlpha": 0.5,
 		"outlineThickness": 2,
 		"labelRadius": -10,
-		"radius": 40,
-		"dataProvider"  : []
+		"radius": '40%',
+		"dataProvider"  : [], 
+		// "responsive": {
+	 //    	"enabled": true
+	 //  	}
 	});
 	//associate chart with element
 	$('#pieChart-'+mapWidgetID).data('pieChart', chart);
