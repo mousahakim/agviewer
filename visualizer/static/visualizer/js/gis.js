@@ -115,7 +115,7 @@ function importFeatures(){
 }
 
 var downloadMapAsPNG = function(){
-	console.log(lastInvokerWidget.attr('id'));
+	// console.log(lastInvokerWidget.attr('id'));
 	var canvas = lastInvokerWidget.find('canvas').get(0);
 	canvas.toBlob(function(blob){
 		saveAs(blob, 'map.png');
@@ -178,7 +178,7 @@ var downloadMapAsKML = function(){
 	$(kml).find('Document').prepend(kmlStyle);
 
 	$(kml).find('styleUrl').replaceWith('<styleUrl>#PolyStyle</styleUrl>');
-	console.log(kml);
+	// console.log(kml);
 
 	var kmlString = (new XMLSerializer()).serializeToString(kml);
 	// console.log(typeof kmlString);
@@ -414,44 +414,58 @@ function createMapWidget(mapWidgetID, options){
         }), 
     });
     //change text size on zoom change
-    map.getView().on('propertychange', function (e) {
+    // map.getView().on('propertychange', function (e) {
 
-    	if(e.key == 'resolution'){
-    		var layers = map.getLayers();
+    // 	if(e.key == 'resolution'){
+    // 		var layers = map.getLayers();
 
-    		layers.forEach(function (layer, index, array) {
+    // 		layers.forEach(function (layer, index, array) {
 
-    			if(layer instanceof ol.layer.Vector){
+    // 			if(layer instanceof ol.layer.Vector){
 
-    				var features = layer.getSource().getFeatures();
-    				var fontSize = map.getView().getZoom() - 7;
-    				
-    				features.forEach(function (feature, index, array) {
-    					if(feature.getStyle() != null)
-    						feature.getStyle().getText().setFont(fontSize + 'px Hind Madurai');
-    				});
-    			}
-    		});
-    	}
-    });
+    // 				var features = layer.getSource().getFeatures();
+    // 				var fontSize = 10;
+    // 				if (window.matchMedia("(min-width: 300px)").matches) {
+				// 		/* the viewport is at least 400 pixels wide */
+				// 		fontSize = 10;
+				// 	} else if (window.matchMedia("(min-width: 370px)").matches) {
+				// 		fontSize = 12;
+				// 	} else if (window.matchMedia("(min-width: 400px)").matches) {
+				// 		fontSize = 14;
+				// 	} else if (window.matchMedia("(min-width: 700px)").matches) {
+				// 		fontSize = 16;
+				// 	} else if (window.matchMedia("(min-width: 1000px)").matches) {
+				// 		fontSize = 18;
+				// 	} else if (window.matchMedia("(min-width: 1400px)").matches) {
+				// 		fontSize = 20;
+				// 	}
+				// 	console.log('font: ',fontSize);
+    // 				features.forEach(function (feature, index, array) {
+    // 					if(feature.getStyle() != null)
+    // 						feature.getStyle().getText().setFont(fontSize + 'px Hind Madurai');
+    // 				});
+    // 			}
+    // 		});
+    // 	}
+    // });
     //bring popover to front when feature is click on
-    map.on('click', function(e){
-    	map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
-    		if (feature == null)
-    			return;
-    		var overlays = map.getOverlays();
-    		overlays.forEach(function(overlay, index, array) {
-    			var position = overlay.getPosition();
-    			if(feature.getGeometry().intersectsCoordinate(position)){
-    				//decrease z-index of all popovers with 'popover-front' class
-    				$('.popover').removeClass("popover-front");
-    				//increase z-index of clicked feature's popover.
-    				//popover element is generated next to overlay's element.
-    				$(overlay.getElement()).next('div.popover').addClass("popover-front");
-    			}
-    		})
-    	});
-    });
+    // map.on('click', function(e){
+    // 	map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
+    // 		if (feature == null)
+    // 			return;
+    // 		var overlays = map.getOverlays();
+    // 		overlays.forEach(function(overlay, index, array) {
+    // 			var position = overlay.getPosition();
+    // 			if(feature.getGeometry().intersectsCoordinate(position)){
+    // 				//decrease z-index of all popovers with 'popover-front' class
+    // 				$('.popover').removeClass("popover-front");
+    // 				//increase z-index of clicked feature's popover.
+    // 				//popover element is generated next to overlay's element.
+    // 				$(overlay.getElement()).next('div.popover').addClass("popover-front");
+    // 			}
+    // 		})
+    // 	});
+    // });
     //associate map with element
     $('#'+mapWidgetID).data('map',map);
     //create pie chart
@@ -711,7 +725,26 @@ function loadMapFeatureStats(featureId, mapWidget){
 		if (statsText == null)
 			statsText = '';
 
-		var fontSize = map.getView().getZoom() - 7;
+		var fontSize = 10;
+		if (window.matchMedia("(min-width: 300px)").matches) {
+			/* the viewport is at least 400 pixels wide */
+			fontSize = 10;
+		}
+
+		if (window.matchMedia("(min-width: 700px)").matches) {
+
+			fontSize = 12;
+		}
+
+		if (window.matchMedia("(min-width: 1400px)").matches) {
+
+			fontSize = 14;
+		}
+
+		if (window.matchMedia("(min-width: 2000px)").matches) {
+
+			fontSize = 18;
+		}
 
 		style = new ol.style.Style({
 			fill: new ol.style.Fill({
@@ -869,12 +902,31 @@ function getDataWidgetList(){
 }
 
 function styleMap(map){
-	var zoom = map.getView().getZoom();
-	var font_size = zoom * 10; // arbitrary value
+	var fontSize = 10; // arbitrary value
+	if (window.matchMedia("(min-width: 300px)").matches) {
+		/* the viewport is at least 400 pixels wide */
+		fontSize = 10;
+	}
+
+	if (window.matchMedia("(min-width: 700px)").matches) {
+
+		fontSize = 12;
+	}
+
+	if (window.matchMedia("(min-width: 1400px)").matches) {
+
+		fontSize = 14;
+	}
+
+	if (window.matchMedia("(min-width: 2000px)").matches) {
+
+		fontSize = 18;
+	}
+	
 	return [
 		new ol.style.Style({
 		  text: new ol.style.Text({
-		    font: font_size + 'px Calibri,sans-serif'
+		    font: fontSize + 'px Calibri,sans-serif'
 		  })
 		})
 	];
