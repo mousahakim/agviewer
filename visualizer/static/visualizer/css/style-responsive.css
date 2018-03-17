@@ -1,9 +1,15 @@
+@media (min-width: 1400px) {
+    .map-pie-chart {
+        width: 200px !important;
+        height: 200px !important;
+    }
+}
+
 @media (min-width: 980px) {
     /*-----*/
     .custom-bar-chart {
         margin-bottom: 40px;
     }
-
 }
 
 @media (min-width: 768px) and (max-width: 979px) {

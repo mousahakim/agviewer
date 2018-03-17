@@ -60,11 +60,12 @@
     overflow: hidden;
     text-align: left;
     width: 120px;
-    height: 120px; 
+    height: 120px;
     bottom: 10px;
     left: 10px;
     position: absolute;
 }
+
 /*full screen */
 .fullscreen:-moz-full-screen {
     height: 100% !important;
