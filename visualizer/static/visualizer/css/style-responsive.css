@@ -3,6 +3,9 @@
         width: 200px !important;
         height: 200px !important;
     }
+    .extended-map {
+        height: 1000px !important;
+    }
 }
 
 @media (min-width: 980px) {
