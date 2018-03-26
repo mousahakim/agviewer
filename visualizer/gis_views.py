@@ -289,8 +289,8 @@ def get_feature_stats(request):
 	try:
 		params = json.loads(request.body)
 		feature = Feature.objects.get(fid=params['fid'])
-		#update stat before returning value
-		# update_feature_stat(feature.fid)
+		# update stat before returning value
+		update_feature_stat(feature.fid)
 
 		feature_stat_set = feature.featurestat_set.all()
 		response_data = {
