@@ -42,15 +42,15 @@ def update_stat_widget(widget_id):
 
 		for data in dataset:
 			
-			print 'date_from before: ',data.date_from
-			print 'date_to before: ', data.date_to
-			print 'duration: ', data.date_to - data.date_from
-
-			try:
-				station = data.sensor.split('-')[1]
-			except Exception as e:
-				print e
-				return
+			if data.sensor is not None:
+				try:
+					station = data.sensor.split('-')[1]
+				except Exception as e:
+					print e
+					return
+			else:
+				set_stat_widget(data.id)
+				return				
 
 			last_record = StationData.objects.filter(station_id=station).last()
 			if last_record is None:
@@ -61,10 +61,6 @@ def update_stat_widget(widget_id):
 			
 			data.save()
 
-			print '------'
-			print 'duration after: ', duration
-			print 'date_from after: ',data.date_from
-			print 'date_to after: ',data.date_to
 			set_stat_widget(data.id)
 
 @shared_task

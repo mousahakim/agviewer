@@ -456,7 +456,7 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 					print e.message
 					continue
 
-	elif chart is not None:
+	if chart is not None:
 
 		data = get_data_from_chart(chart, dt_from, dt_to)
 
@@ -466,14 +466,14 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 			except Exception as e:
 				continue
 
-	else:
-		return {
-			'success': False, 
-			'message': 'No chart or sensor selected.',
-			'value': None,
-			'date_to': None,
-			'stale': stale
-		}
+	# if chart is None :
+	# 	return {
+	# 		'success': False, 
+	# 		'message': 'No chart or sensor selected.',
+	# 		'value': None,
+	# 		'date_to': None,
+	# 		'stale': stale
+	# 	}
 
 	if len(value_lst) < 1:
 		return {
@@ -708,7 +708,7 @@ def get_data_from_chart(chart_id, dt_from, dt_to):
 
 			duration = dt_to - dt_from
 
-			if key in ['raw_sensors', 'ex_ec', 'paw']:
+			if key in ['raw_sensors', 'ex_ec', 'paw', 'voltage']:
 				#if empty move on
 				if len(data['value'][0]) < 1:
 					continue
