@@ -41,30 +41,67 @@ def update_stat_widget(widget_id):
 	if dataset.exists():
 
 		for data in dataset:
-			
-			print 'date_from before: ',data.date_from
-			print 'date_to before: ', data.date_to
-			print 'duration: ', data.date_to - data.date_from
 
-			try:
-				station = data.sensor.split('-')[1]
-			except Exception as e:
-				print e
-				return
+			if data.sensor is not None:
 
-			last_record = StationData.objects.filter(station_id=station).last()
-			if last_record is None:
-				return
-			duration = data.date_to - data.date_from
-			data.date_to = last_record.date
-			data.date_from = last_record.date - duration
-			
-			data.save()
+				try:
+					station = data.sensor.split('-')[1]
+				except Exception as e:
+					print e
+					return
+				last_record = StationData.objects.filter(station_id=station).last()
+				if last_record is None:
+					return
+				duration = data.date_to - data.date_from
+				data.date_to = last_record.date
+				data.date_from = last_record.date - duration
+				
+				data.save()
 
-			print '------'
-			print 'duration after: ', duration
-			print 'date_from after: ',data.date_from
-			print 'date_to after: ',data.date_to
+			elif data.chart is not None:
+
+				for key, value in data.chart.widget['data'].iteritems():
+					#skip non-data items
+					if key in ['title', 'range', 'calc']:
+						continue
+
+					if value is not None:
+						#if empty move on
+						if value['value'] is None:
+							continue
+						if len(value['value']) < 1:
+							continue
+
+						duration = data.date_to - data.date_from
+
+						if key in ['raw_sensors', 'ex_ec', 'paw', 'voltage']:
+							#if empty move on
+
+							if len(value['value'][0]) < 1:
+								continue
+
+							data.date_from = parse_date(value['value'][0][-1]['date']) - duration
+							data.date_to = parse_date(value['value'][0][-1]['date'])
+							data.save()
+
+						elif key in ['dew_point', 'evapo']:
+							#if empty move on
+
+							if data['value'] is None:
+								continue
+							if len(data['value']) < 1:
+								continue
+
+							duration = data.date_to - data.date_from
+
+							data.date_from = parse_date(data['value'][-1]['date']) - duration
+							data.date_to = parse_date(data['value'][-1]['date'])
+							data.save()
+
+						#no chart calculation for degree days, chill hours and portions
+						else: 
+							continue
+
 			set_stat_widget(data.id)
 
 @shared_task

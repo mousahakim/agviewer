@@ -121,6 +121,7 @@ def set_stat_widget(widget_data_id):
 		}
 
 	if widget_data.function == 'min' or widget_data.function == 'max' or widget_data.function == 'avg':
+
 		try:
 			widget_id = widget_data.chart.widget_id if widget_data.chart is not None else None
 			result = min_max_avg(widget_data.function, widget_data.sensor, widget_data.extract, widget_id,\
@@ -204,6 +205,7 @@ def set_stat_widget(widget_data_id):
 
 	elif widget_data.function == 'last_record':
 		#option only available for sensor
+
 		if widget_data.sensor is None:
 			return {
 				'success': False,
@@ -456,8 +458,8 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 					print e.message
 					continue
 
-	elif chart is not None:
-
+	if chart is not None:
+		print 'calculating min_max_avg for chart'
 		data = get_data_from_chart(chart, dt_from, dt_to)
 
 		for record in data:
@@ -466,14 +468,14 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 			except Exception as e:
 				continue
 
-	else:
-		return {
-			'success': False, 
-			'message': 'No chart or sensor selected.',
-			'value': None,
-			'date_to': None,
-			'stale': stale
-		}
+	# if chart is None :
+	# 	return {
+	# 		'success': False, 
+	# 		'message': 'No chart or sensor selected.',
+	# 		'value': None,
+	# 		'date_to': None,
+	# 		'stale': stale
+	# 	}
 
 	if len(value_lst) < 1:
 		return {
@@ -570,7 +572,7 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 			'message': '',
 			'value': round(result, 2),
 			'unit': '',
-			'date_to': date_to_string(dt_to),
+			'date_to': data[-1]['date'],
 			'stale': stale
 		}
 
@@ -674,6 +676,8 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 		# print value_lst
 		result = sum(value_lst)
 
+		dt_to = parse_date(data[-1]['date'])
+
 		return {
 			'success': True, 
 			'message': '',
@@ -708,11 +712,14 @@ def get_data_from_chart(chart_id, dt_from, dt_to):
 
 			duration = dt_to - dt_from
 
-			if key in ['raw_sensors', 'ex_ec', 'paw']:
+			if key in ['raw_sensors', 'ex_ec', 'paw', 'voltage']:
 				#if empty move on
+
 				if len(data['value'][0]) < 1:
 					continue
-				if dt_from >= parse_date(data['value'][0][-1]['date']):
+
+				if dt_to >= parse_date(data['value'][0][-1]['date']):
+
 					dt_from = parse_date(data['value'][0][-1]['date']) - duration
 					dt_to = parse_date(data['value'][0][-1]['date'])
 
@@ -726,12 +733,13 @@ def get_data_from_chart(chart_id, dt_from, dt_to):
 
 			elif key in ['dew_point', 'evapo']:
 				#if empty move on
+
 				if data['value'] is None:
 					continue
 				if len(data['value']) < 1:
 					continue
 
-				if dt_from >= parse_date(data['value'][-1]['date']):
+				if dt_to >= parse_date(data['value'][-1]['date']):
 					dt_from = parse_date(data['value'][-1]['date']) - duration
 					dt_to = parse_date(data['value'][-1]['date'])
 
