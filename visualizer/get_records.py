@@ -459,7 +459,7 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 					continue
 
 	if chart is not None:
-		print 'calculating min_max_avg for chart'
+		
 		data = get_data_from_chart(chart, dt_from, dt_to)
 
 		for record in data:
