@@ -116,13 +116,18 @@
     max-height: 20px;
 }
 
+.draw-circle {
+    top: calc(.5em + 1.375em*3 + 4px*6 + 12px); /* 2 buttons down */
+    right: .5em;
+}
+
 .save-drawings {
-    top: calc(.5em + 1.375em*3 + 4px*6 + 12px); /* 3 buttons down */
+    top: calc(.5em + 1.375em*4 + 4px*9 + 12px); /* 3 buttons down */
     right: .5em;
 }
 
 .download-map {
-    top: calc(.5em + 1.375em*4 + 4px*9 + 12px); /* 4 buttons down */
+    top: calc(.5em + 1.375em*5 + 4px*12 + 12px); /* 4 buttons down */
     right: .5em;
 }
 

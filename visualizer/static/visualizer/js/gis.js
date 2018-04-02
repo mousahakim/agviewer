@@ -190,15 +190,145 @@ var downloadMapAsKML = function(){
 };
 
 function drawPolygon(){
-	alert('drawing polygon');
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source
+	});
+
+	map.addLayer(vectorLayer);
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Polygon'
+	});
+
+	map.addInteraction(draw);
 }
 
 function drawSquare(){
-	alert('drawing square');
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source
+	});
+
+	map.addLayer(vectorLayer);
+
+	var geomFunction = ol.interaction.Draw.createBox();
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Circle',
+		geometryFunction: geomFunction
+	});
+
+	map.addInteraction(draw);
+}
+
+function drawCircle(){
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source
+	});
+
+	map.addLayer(vectorLayer);
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Circle',
+	});
+
+	map.addInteraction(draw);
 }
 
 function saveDrawings(){
-	console.log($(this).closest('div.gis-container').attr('id'));
+	var map = lastInvokerWidget.data('map');
+
+	var layers = map.getLayers();
+
+	var parser = new ol.format.GeoJSON();
+
+	var mapWidgetId = map.getTarget();
+
+	layers.forEach(function(layer, index, array){
+
+		if(layer instanceof ol.layer.Vector){
+
+			var features = layer.getSource().getFeatures();
+
+			features.forEach(function(feature, i, a){
+
+				if(feature.getId() == undefined){
+
+					var GeoJSONFeature = parser.writeFeatureObject(feature);
+
+					var circularPolygon = ol.geom.Polygon.fromCircle(feature.getGeometry());
+
+					var geoJSONCircularPolygon = parser.writeGeometryObject(circularPolygon);
+
+					console.log(GeoJSONFeature);
+					console.log(feature.getGeometry().getProperties());
+
+					GeoJSONFeature.properties = {name: 'Feature Circle ' + i};
+
+					GeoJSONFeature.geometry = geoJSONCircularPolygon;
+
+					$.ajax({
+						method: "POST",
+						url: 'save-feature',
+						dataType: 'json',
+						data: JSON.stringify({
+							widget: mapWidgetId,
+							feature: GeoJSONFeature
+						})
+				    }).done(function(response) {
+
+				    	//set feature id
+				    	feature.setId(response.fid);
+
+				    }).fail(function(msg){
+
+				        alert('Failed to save features to database.');
+
+				    });
+
+				}
+
+			});
+
+		}
+
+	})
+
 }
 
 function createMapWidget(mapWidgetID, options){
@@ -307,8 +437,14 @@ function createMapWidget(mapWidgetID, options){
 
 		var this_ = this;
 
-		button.addEventListener('click', drawPolygon, false);
-		button.addEventListener('touchstart', drawPolygon, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawPolygon();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawPolygon();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'draw-polygon ol-unselectable ol-control';
@@ -331,8 +467,14 @@ function createMapWidget(mapWidgetID, options){
 
 		var this_ = this;
 
-		button.addEventListener('click', drawSquare, false);
-		button.addEventListener('touchstart', drawSquare, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawSquare();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawSquare();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'draw-square ol-unselectable ol-control';
@@ -345,6 +487,36 @@ function createMapWidget(mapWidgetID, options){
 	};
 	ol.inherits(DrawSquare, ol.control.Control);
 
+	var DrawCircle = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<i class="fa fa-circle-o"></i>';
+		button.title = 'Draw circle';
+
+		var this_ = this;
+
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawCircle();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawCircle();
+		}, false);
+
+		var element = document.createElement('div');
+		element.className = 'draw-circle ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(DrawCircle, ol.control.Control);
+
 	var SaveDrawings = function(opt_options){
 
 		var options = opt_options || {};
@@ -354,8 +526,14 @@ function createMapWidget(mapWidgetID, options){
 		button.title = 'Save drawings';
 		var this_ = this;
 
-		button.addEventListener('click', saveDrawings, false);
-		button.addEventListener('touchstart', saveDrawings, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			saveDrawings();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			saveDrawings();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'save-drawings ol-unselectable ol-control';
@@ -388,6 +566,7 @@ function createMapWidget(mapWidgetID, options){
             new DownloadMap(),
             new DrawPolygon(),
             new DrawSquare(),
+            new DrawCircle(),
             new SaveDrawings(),
             // new ol.control.MousePosition({
             // 	coordinateFormat: function (coordinates){
