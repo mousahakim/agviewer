@@ -121,13 +121,33 @@
     right: .5em;
 }
 
-.save-drawings {
+.draw-circle img {
+    max-width: 18px;
+    max-height: 20px;
+}
+
+.clear-drawings {
     top: calc(.5em + 1.375em*4 + 4px*9 + 12px); /* 3 buttons down */
     right: .5em;
 }
 
+.clear-drawings img {
+    max-width: 18px;
+    max-height: 20px;
+}
+
+.save-drawings {
+    top: calc(.5em + 1.375em*5 + 4px*12 + 12px); /* 3 buttons down */
+    right: .5em;
+}
+
+.save-drawings img {
+    max-width: 18px;
+    max-height: 20px;
+}
+
 .download-map {
-    top: calc(.5em + 1.375em*5 + 4px*12 + 12px); /* 4 buttons down */
+    top: calc(.5em + 1.375em*6 + 4px*15 + 12px); /* 4 buttons down */
     right: .5em;
 }
 

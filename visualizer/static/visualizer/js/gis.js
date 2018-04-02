@@ -202,7 +202,8 @@ function drawPolygon(){
 	var source = new ol.source.Vector();
 
 	var vectorLayer = new ol.layer.Vector({
-		source: source
+		source: source,
+		layerType: 'Drawing'
 	});
 
 	map.addLayer(vectorLayer);
@@ -228,7 +229,8 @@ function drawSquare(){
 	var source = new ol.source.Vector();
 
 	var vectorLayer = new ol.layer.Vector({
-		source: source
+		source: source,
+		layerType: 'Drawing'
 	});
 
 	map.addLayer(vectorLayer);
@@ -257,7 +259,8 @@ function drawCircle(){
 	var source = new ol.source.Vector();
 
 	var vectorLayer = new ol.layer.Vector({
-		source: source
+		source: source,
+		layerType: 'Drawing'
 	});
 
 	map.addLayer(vectorLayer);
@@ -272,6 +275,13 @@ function drawCircle(){
 
 function saveDrawings(){
 	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
 
 	var layers = map.getLayers();
 
@@ -290,17 +300,22 @@ function saveDrawings(){
 				if(feature.getId() == undefined){
 
 					var GeoJSONFeature = parser.writeFeatureObject(feature);
+					console.log(feature.getGeometry().getType());
+					if(feature.getGeometry().getType() == 'Circle'){
 
-					var circularPolygon = ol.geom.Polygon.fromCircle(feature.getGeometry());
+						var circularPolygon = ol.geom.Polygon.fromCircle(feature.getGeometry());
 
-					var geoJSONCircularPolygon = parser.writeGeometryObject(circularPolygon);
+						var geoJSONCircularPolygon = parser.writeGeometryObject(circularPolygon);
 
+						GeoJSONFeature.properties = {name: 'Feature Circle ' + ol.proj.toLonLat(feature.getGeometry().getFirstCoordinate())};
+
+						GeoJSONFeature.geometry = geoJSONCircularPolygon;
+
+					}else{
+						GeoJSONFeature.properties = {name: 'Feature Polygon ' + ol.proj.toLonLat(feature.getGeometry().getFirstCoordinate())};
+					}
+					
 					console.log(GeoJSONFeature);
-					console.log(feature.getGeometry().getProperties());
-
-					GeoJSONFeature.properties = {name: 'Feature Circle ' + i};
-
-					GeoJSONFeature.geometry = geoJSONCircularPolygon;
 
 					$.ajax({
 						method: "POST",
@@ -329,6 +344,29 @@ function saveDrawings(){
 
 	})
 
+}
+
+function clearDrawings(){
+
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw){
+			map.removeInteraction(interaction);
+		}
+	});
+
+	var layers = map.getLayers();
+	var drawingLayers = [];
+	layers.forEach(function(layer, index, array){
+		if(layer.get('layerType') == 'Drawing')
+			drawingLayers.push(layer);
+	});
+
+	for(var i = 0; i < drawingLayers.length; i++)
+		map.removeLayer(drawingLayers[i]);
 }
 
 function createMapWidget(mapWidgetID, options){
@@ -492,7 +530,7 @@ function createMapWidget(mapWidgetID, options){
 		var options = opt_options || {};
 
 		var button = document.createElement('button');
-		button.innerHTML = '<i class="fa fa-circle-o"></i>';
+		button.innerHTML = '<img src="/static/visualizer/img/drawcircle.png">';
 		button.title = 'Draw circle';
 
 		var this_ = this;
@@ -517,12 +555,41 @@ function createMapWidget(mapWidgetID, options){
 	};
 	ol.inherits(DrawCircle, ol.control.Control);
 
+	var ClearDrawings = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<img src="/static/visualizer/img/erasedrawing.png">';
+		button.title = 'Clear drawings';
+		var this_ = this;
+
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			clearDrawings();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			clearDrawings();
+		}, false);
+
+		var element = document.createElement('div');
+		element.className = 'clear-drawings ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(ClearDrawings, ol.control.Control);
+
 	var SaveDrawings = function(opt_options){
 
 		var options = opt_options || {};
 
 		var button = document.createElement('button');
-		button.innerHTML = '<i class="fa fa-save"></i>';
+		button.innerHTML = '<img src="/static/visualizer/img/savedrawing.png">';
 		button.title = 'Save drawings';
 		var this_ = this;
 
@@ -567,6 +634,7 @@ function createMapWidget(mapWidgetID, options){
             new DrawPolygon(),
             new DrawSquare(),
             new DrawCircle(),
+            new ClearDrawings(),
             new SaveDrawings(),
             // new ol.control.MousePosition({
             // 	coordinateFormat: function (coordinates){
@@ -581,7 +649,8 @@ function createMapWidget(mapWidgetID, options){
             // new ol.control.OverviewMap()
         ],
         interactions: ol.interaction.defaults({
-        	mouseWheelZoom: false
+        	mouseWheelZoom: false, 
+        	dragPan: false
         }).extend([
             new ol.interaction.Select({
                 layers: [new ol.layer.Vector()]
