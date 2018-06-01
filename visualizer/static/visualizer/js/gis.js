@@ -852,7 +852,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		var featureArea = feature.getGeometry().getArea();
 
 		if (response.paw.value != null){
-			if (response.paw.value < 30){
+			if (response.paw.value <= 30){
 				color = [254,180,186,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
@@ -874,7 +874,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		    			features: [featureId]
 					});
 				}
-			}else if(response.paw.value > 30 && response.paw.value < 70){
+			}else if(response.paw.value > 30 && response.paw.value <= 70){
 				color = [255,255,187,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
@@ -896,7 +896,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		    			features: [featureId]
 					});
 				}
-			}else if(response.paw.value > 70 && response.paw.value < 100){
+			}else if(response.paw.value > 70 && response.paw.value <= 100){
 				color = [186,255,202,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
