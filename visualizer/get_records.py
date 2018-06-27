@@ -2266,7 +2266,7 @@ def get_degree_days_data(widget_data, user):
 		data = load_data(s_temp[1], s_temp[2]+'-'+s_temp[3], s_temp[0], dt_reset, dt_to)
 		raw_data = [{
 			'date': rec['date'],
-			'value': convert_sca(float(rec['value']), s_temp[2], 'temp') if rec['data'] is not None else rec['data']} for rec in data] 
+			'value': convert_sca(float(rec['value']), s_temp[2], 'temp') if rec['value'] is not None else rec['value']} for rec in data] 
 		daily_avg = get_daily_avg(raw_data)
 		degree_days_acc = calculate_degree_days(daily_avg, threshold, RESET_DATE)
 		dd_data = [{'date': degrees['date'], 'value':degrees['value']} for degrees in degree_days_acc if dt_from <= parse_date_d(degrees['date']) <= dt_to]
