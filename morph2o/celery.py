@@ -26,11 +26,11 @@ app.conf.beat_schedule = {
 #     },
     'hourly-async-download': {
         'task': 'visualizer.tasks.async_download',
-        'schedule': 1500.0
+        'schedule': 660.0
     },
     'hourly-async-update':{
         'task': 'visualizer.tasks.async_update',
-        'schedule': 2100.0
+        'schedule': 960.0
     },
 }
 #app.autodiscover_tasks()
