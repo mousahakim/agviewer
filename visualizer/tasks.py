@@ -519,10 +519,10 @@ def get_data_fc(station,min_date=None, max_date=None):
 	
 	# temporary solution to allow initial
 	# download of data for newly added stations
-	if min_date is None and max_date is None:
+	# if min_date is None and max_date is None:
 		#if no min/max date provided 
 		#download last 10k records
-		path = '/data/'+station+'/raw/last/10000'
+		# path = '/data/'+station+'/raw/last/10000'
 	
 	# dt_to = calendar.timegm((prev_records.last().date + timedelta(hours=2)).timetuple())
 	# path = '/data/'+station+'/hourly/from/'+str(dt_from)+'/to/'+str(dt_to)
