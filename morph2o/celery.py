@@ -4,7 +4,6 @@ from datetime import timedelta
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'morph2o.settings')
@@ -27,11 +26,11 @@ app.conf.beat_schedule = {
 #     },
     'hourly-async-download': {
         'task': 'visualizer.tasks.async_download',
-        'schedule': crontab(minute='*/15')
+        'schedule': 660.0
     },
     'hourly-async-update':{
         'task': 'visualizer.tasks.async_update',
-        'schedule': crontab(minute='2,17,32,47')
+        'schedule': 960.0
     },
 }
 #app.autodiscover_tasks()
