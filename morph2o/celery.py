@@ -31,7 +31,7 @@ app.conf.beat_schedule = {
     },
     'hourly-async-update':{
         'task': 'visualizer.tasks.async_update',
-        'schedule': crontab(minute='3,18,33,48')
+        'schedule': crontab(minute='2,17,32,47')
     },
 }
 #app.autodiscover_tasks()
