@@ -87,15 +87,15 @@ def update_stat_widget(widget_id):
 						elif key in ['dew_point', 'evapo']:
 							#if empty move on
 
-							if data['value'] is None:
+							if value['value'] is None:
 								continue
-							if len(data['value']) < 1:
+							if len(value['value']) < 1:
 								continue
 
 							duration = data.date_to - data.date_from
 
-							data.date_from = parse_date(data['value'][-1]['date']) - duration
-							data.date_to = parse_date(data['value'][-1]['date'])
+							data.date_from = parse_date(value['value'][-1]['date']) - duration
+							data.date_to = parse_date(value['value'][-1]['date'])
 							data.save()
 
 						#no chart calculation for degree days, chill hours and portions
