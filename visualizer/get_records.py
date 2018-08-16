@@ -1998,10 +1998,10 @@ def get_dew_point_data(widget_data, user):
 					daily_dp.extend([{'date':start_day, 'value':dew_point(t_avg[start_day], rh_avg[start_day])}])
 				start +=HOUR
 	print 'daily_dp returning'
-	try:
-		daily_dp[0].update({'lineColor':line_color, 'type':chart_type})
-	except IndexError as e:
-		print e
+	# try:
+	daily_dp[0].update({'lineColor':line_color, 'type':chart_type})
+	# except IndexError as e:
+	# 	print e
 	return daily_dp
 
 
