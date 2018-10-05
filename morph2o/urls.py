@@ -23,6 +23,7 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
 urlpatterns = [
    url(r'^$', views.index, name='index'),
+   url(r'^cms', include('cms.urls')),
    url(r'^admin/', include(admin.site.urls)),
    url(r'^visualizer/', views.index, name='index1'),
    url(r'^accounts/login/$', auth_views.login, {'authentication_form': ANAuthenticationForm, 'extra_context':{'next': '/'}}, name='login'),
@@ -79,7 +80,7 @@ urlpatterns = [
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns += i18n_patterns(
-    url(r'^cms/', include('cms.urls')),
-  )
+# urlpatterns += i18n_patterns(
+#     url(r'^cms/', include('cms.urls')),
+#   )
 

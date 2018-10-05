@@ -43,8 +43,7 @@ function getFileList(){
         //update file select
         $('select#file-select').empty();
         $.each(fileList, function (index, file){
-        	var fileName = file.fields.file.split('/')[file.fields.file.split('/').length-1];
-        	$('select#file-select').append('<option value="'+file.pk+'" url="'+file.fields.file+'">'+fileName+'</option>');
+        	$('select#file-select').append('<option value="'+file.fid+'" url="'+file.url+'">'+file.name+'</option>');
         });
     }).fail(function(msg){
         alert('Failed to retreive files');
@@ -116,7 +115,7 @@ function importFeatures(){
 }
 
 var downloadMapAsPNG = function(){
-	console.log(lastInvokerWidget.attr('id'));
+	// console.log(lastInvokerWidget.attr('id'));
 	var canvas = lastInvokerWidget.find('canvas').get(0);
 	canvas.toBlob(function(blob){
 		saveAs(blob, 'map.png');
@@ -179,7 +178,7 @@ var downloadMapAsKML = function(){
 	$(kml).find('Document').prepend(kmlStyle);
 
 	$(kml).find('styleUrl').replaceWith('<styleUrl>#PolyStyle</styleUrl>');
-	console.log(kml);
+	// console.log(kml);
 
 	var kmlString = (new XMLSerializer()).serializeToString(kml);
 	// console.log(typeof kmlString);
@@ -191,15 +190,183 @@ var downloadMapAsKML = function(){
 };
 
 function drawPolygon(){
-	alert('drawing polygon');
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source,
+		layerType: 'Drawing'
+	});
+
+	map.addLayer(vectorLayer);
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Polygon'
+	});
+
+	map.addInteraction(draw);
 }
 
 function drawSquare(){
-	alert('drawing square');
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source,
+		layerType: 'Drawing'
+	});
+
+	map.addLayer(vectorLayer);
+
+	var geomFunction = ol.interaction.Draw.createBox();
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Circle',
+		geometryFunction: geomFunction
+	});
+
+	map.addInteraction(draw);
+}
+
+function drawCircle(){
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var source = new ol.source.Vector();
+
+	var vectorLayer = new ol.layer.Vector({
+		source: source,
+		layerType: 'Drawing'
+	});
+
+	map.addLayer(vectorLayer);
+
+	var draw = new ol.interaction.Draw({
+		source: source, 
+		type: 'Circle',
+	});
+
+	map.addInteraction(draw);
 }
 
 function saveDrawings(){
-	console.log($(this).closest('div.gis-container').attr('id'));
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw)
+			map.removeInteraction(interaction);
+	});
+
+	var layers = map.getLayers();
+
+	var parser = new ol.format.GeoJSON();
+
+	var mapWidgetId = map.getTarget();
+
+	layers.forEach(function(layer, index, array){
+
+		if(layer instanceof ol.layer.Vector){
+
+			var features = layer.getSource().getFeatures();
+
+			features.forEach(function(feature, i, a){
+
+				if(feature.getId() == undefined){
+
+					var GeoJSONFeature = parser.writeFeatureObject(feature);
+					console.log(feature.getGeometry().getType());
+					if(feature.getGeometry().getType() == 'Circle'){
+
+						var circularPolygon = ol.geom.Polygon.fromCircle(feature.getGeometry());
+
+						var geoJSONCircularPolygon = parser.writeGeometryObject(circularPolygon);
+
+						GeoJSONFeature.properties = {name: 'Feature Circle ' + ol.proj.toLonLat(feature.getGeometry().getFirstCoordinate())};
+
+						GeoJSONFeature.geometry = geoJSONCircularPolygon;
+
+					}else{
+						GeoJSONFeature.properties = {name: 'Feature Polygon ' + ol.proj.toLonLat(feature.getGeometry().getFirstCoordinate())};
+					}
+					
+					console.log(GeoJSONFeature);
+
+					$.ajax({
+						method: "POST",
+						url: 'save-feature',
+						dataType: 'json',
+						data: JSON.stringify({
+							widget: mapWidgetId,
+							feature: GeoJSONFeature
+						})
+				    }).done(function(response) {
+
+				    	//set feature id
+				    	feature.setId(response.fid);
+
+				    }).fail(function(msg){
+
+				        alert('Failed to save features to database.');
+
+				    });
+
+				}
+
+			});
+
+		}
+
+	})
+
+}
+
+function clearDrawings(){
+
+	var map = lastInvokerWidget.data('map');
+
+	var interactions = map.getInteractions();
+
+	interactions.forEach(function(interaction, index, array){
+		if(interaction instanceof ol.interaction.Draw){
+			map.removeInteraction(interaction);
+		}
+	});
+
+	var layers = map.getLayers();
+	var drawingLayers = [];
+	layers.forEach(function(layer, index, array){
+		if(layer.get('layerType') == 'Drawing')
+			drawingLayers.push(layer);
+	});
+
+	for(var i = 0; i < drawingLayers.length; i++)
+		map.removeLayer(drawingLayers[i]);
 }
 
 function createMapWidget(mapWidgetID, options){
@@ -308,8 +475,14 @@ function createMapWidget(mapWidgetID, options){
 
 		var this_ = this;
 
-		button.addEventListener('click', drawPolygon, false);
-		button.addEventListener('touchstart', drawPolygon, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawPolygon();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawPolygon();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'draw-polygon ol-unselectable ol-control';
@@ -332,8 +505,14 @@ function createMapWidget(mapWidgetID, options){
 
 		var this_ = this;
 
-		button.addEventListener('click', drawSquare, false);
-		button.addEventListener('touchstart', drawSquare, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawSquare();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawSquare();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'draw-square ol-unselectable ol-control';
@@ -346,17 +525,82 @@ function createMapWidget(mapWidgetID, options){
 	};
 	ol.inherits(DrawSquare, ol.control.Control);
 
+	var DrawCircle = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<img src="/static/visualizer/img/drawcircle.png">';
+		button.title = 'Draw circle';
+
+		var this_ = this;
+
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawCircle();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			drawCircle();
+		}, false);
+
+		var element = document.createElement('div');
+		element.className = 'draw-circle ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(DrawCircle, ol.control.Control);
+
+	var ClearDrawings = function(opt_options){
+
+		var options = opt_options || {};
+
+		var button = document.createElement('button');
+		button.innerHTML = '<img src="/static/visualizer/img/erasedrawing.png">';
+		button.title = 'Clear drawings';
+		var this_ = this;
+
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			clearDrawings();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			clearDrawings();
+		}, false);
+
+		var element = document.createElement('div');
+		element.className = 'clear-drawings ol-unselectable ol-control';
+		element.appendChild(button);
+
+		ol.control.Control.call(this, {
+			element: element, 
+			target: options.target
+		});
+	};
+	ol.inherits(ClearDrawings, ol.control.Control);
+
 	var SaveDrawings = function(opt_options){
 
 		var options = opt_options || {};
 
 		var button = document.createElement('button');
-		button.innerHTML = '<i class="fa fa-save"></i>';
+		button.innerHTML = '<img src="/static/visualizer/img/savedrawing.png">';
 		button.title = 'Save drawings';
 		var this_ = this;
 
-		button.addEventListener('click', saveDrawings, false);
-		button.addEventListener('touchstart', saveDrawings, false);
+		button.addEventListener('click', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			saveDrawings();
+		}, false);
+		button.addEventListener('touchstart', function(){
+			lastInvokerWidget = $(this.closest('div.gis-container'));
+			saveDrawings();
+		}, false);
 
 		var element = document.createElement('div');
 		element.className = 'save-drawings ol-unselectable ol-control';
@@ -389,6 +633,8 @@ function createMapWidget(mapWidgetID, options){
             new DownloadMap(),
             new DrawPolygon(),
             new DrawSquare(),
+            new DrawCircle(),
+            new ClearDrawings(),
             new SaveDrawings(),
             // new ol.control.MousePosition({
             // 	coordinateFormat: function (coordinates){
@@ -403,7 +649,8 @@ function createMapWidget(mapWidgetID, options){
             // new ol.control.OverviewMap()
         ],
         interactions: ol.interaction.defaults({
-        	mouseWheelZoom: false
+        	mouseWheelZoom: false, 
+        	dragPan: false
         }).extend([
             new ol.interaction.Select({
                 layers: [new ol.layer.Vector()]
@@ -415,44 +662,58 @@ function createMapWidget(mapWidgetID, options){
         }), 
     });
     //change text size on zoom change
-    map.getView().on('propertychange', function (e) {
+    // map.getView().on('propertychange', function (e) {
 
-    	if(e.key == 'resolution'){
-    		var layers = map.getLayers();
+    // 	if(e.key == 'resolution'){
+    // 		var layers = map.getLayers();
 
-    		layers.forEach(function (layer, index, array) {
+    // 		layers.forEach(function (layer, index, array) {
 
-    			if(layer instanceof ol.layer.Vector){
+    // 			if(layer instanceof ol.layer.Vector){
 
-    				var features = layer.getSource().getFeatures();
-    				var fontSize = map.getView().getZoom() - 7;
-    				
-    				features.forEach(function (feature, index, array) {
-    					if(feature.getStyle() != null)
-    						feature.getStyle().getText().setFont(fontSize + 'px Hind Madurai');
-    				});
-    			}
-    		});
-    	}
-    });
+    // 				var features = layer.getSource().getFeatures();
+    // 				var fontSize = 10;
+    // 				if (window.matchMedia("(min-width: 300px)").matches) {
+				// 		/* the viewport is at least 400 pixels wide */
+				// 		fontSize = 10;
+				// 	} else if (window.matchMedia("(min-width: 370px)").matches) {
+				// 		fontSize = 12;
+				// 	} else if (window.matchMedia("(min-width: 400px)").matches) {
+				// 		fontSize = 14;
+				// 	} else if (window.matchMedia("(min-width: 700px)").matches) {
+				// 		fontSize = 16;
+				// 	} else if (window.matchMedia("(min-width: 1000px)").matches) {
+				// 		fontSize = 18;
+				// 	} else if (window.matchMedia("(min-width: 1400px)").matches) {
+				// 		fontSize = 20;
+				// 	}
+				// 	console.log('font: ',fontSize);
+    // 				features.forEach(function (feature, index, array) {
+    // 					if(feature.getStyle() != null)
+    // 						feature.getStyle().getText().setFont(fontSize + 'px Hind Madurai');
+    // 				});
+    // 			}
+    // 		});
+    // 	}
+    // });
     //bring popover to front when feature is click on
-    map.on('click', function(e){
-    	map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
-    		if (feature == null)
-    			return;
-    		var overlays = map.getOverlays();
-    		overlays.forEach(function(overlay, index, array) {
-    			var position = overlay.getPosition();
-    			if(feature.getGeometry().intersectsCoordinate(position)){
-    				//decrease z-index of all popovers with 'popover-front' class
-    				$('.popover').removeClass("popover-front");
-    				//increase z-index of clicked feature's popover.
-    				//popover element is generated next to overlay's element.
-    				$(overlay.getElement()).next('div.popover').addClass("popover-front");
-    			}
-    		})
-    	});
-    });
+    // map.on('click', function(e){
+    // 	map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
+    // 		if (feature == null)
+    // 			return;
+    // 		var overlays = map.getOverlays();
+    // 		overlays.forEach(function(overlay, index, array) {
+    // 			var position = overlay.getPosition();
+    // 			if(feature.getGeometry().intersectsCoordinate(position)){
+    // 				//decrease z-index of all popovers with 'popover-front' class
+    // 				$('.popover').removeClass("popover-front");
+    // 				//increase z-index of clicked feature's popover.
+    // 				//popover element is generated next to overlay's element.
+    // 				$(overlay.getElement()).next('div.popover').addClass("popover-front");
+    // 			}
+    // 		})
+    // 	});
+    // });
     //associate map with element
     $('#'+mapWidgetID).data('map',map);
     //create pie chart
@@ -466,8 +727,11 @@ function createMapWidget(mapWidgetID, options){
 		"outlineAlpha": 0.5,
 		"outlineThickness": 2,
 		"labelRadius": -10,
-		"radius": 40,
-		"dataProvider"  : []
+		"radius": '40%',
+		"dataProvider"  : [], 
+		// "responsive": {
+	 //    	"enabled": true
+	 //  	}
 	});
 	//associate chart with element
 	$('#pieChart-'+mapWidgetID).data('pieChart', chart);
@@ -588,7 +852,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		var featureArea = feature.getGeometry().getArea();
 
 		if (response.paw.value != null){
-			if (response.paw.value < 30){
+			if (response.paw.value <= 30){
 				color = [254,180,186,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
@@ -610,7 +874,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		    			features: [featureId]
 					});
 				}
-			}else if(response.paw.value > 30 && response.paw.value < 70){
+			}else if(response.paw.value > 30 && response.paw.value <= 70){
 				color = [255,255,187,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
@@ -632,7 +896,7 @@ function loadMapFeatureStats(featureId, mapWidget){
 		    			features: [featureId]
 					});
 				}
-			}else if(response.paw.value > 70 && response.paw.value < 100){
+			}else if(response.paw.value > 70 && response.paw.value <= 100){
 				color = [186,255,202,0.9]
 				var rangeExists = false;
 				for (var i in dataProvider){
@@ -709,7 +973,26 @@ function loadMapFeatureStats(featureId, mapWidget){
 		if (statsText == null)
 			statsText = '';
 
-		var fontSize = map.getView().getZoom() - 7;
+		var fontSize = 10;
+		if (window.matchMedia("(min-width: 300px)").matches) {
+			/* the viewport is at least 400 pixels wide */
+			fontSize = 10;
+		}
+
+		if (window.matchMedia("(min-width: 700px)").matches) {
+
+			fontSize = 12;
+		}
+
+		if (window.matchMedia("(min-width: 1400px)").matches) {
+
+			fontSize = 14;
+		}
+
+		if (window.matchMedia("(min-width: 2000px)").matches) {
+
+			fontSize = 18;
+		}
 
 		style = new ol.style.Style({
 			fill: new ol.style.Fill({
@@ -867,12 +1150,31 @@ function getDataWidgetList(){
 }
 
 function styleMap(map){
-	var zoom = map.getView().getZoom();
-	var font_size = zoom * 10; // arbitrary value
+	var fontSize = 10; // arbitrary value
+	if (window.matchMedia("(min-width: 300px)").matches) {
+		/* the viewport is at least 400 pixels wide */
+		fontSize = 10;
+	}
+
+	if (window.matchMedia("(min-width: 700px)").matches) {
+
+		fontSize = 12;
+	}
+
+	if (window.matchMedia("(min-width: 1400px)").matches) {
+
+		fontSize = 14;
+	}
+
+	if (window.matchMedia("(min-width: 2000px)").matches) {
+
+		fontSize = 18;
+	}
+	
 	return [
 		new ol.style.Style({
 		  text: new ol.style.Text({
-		    font: font_size + 'px Calibri,sans-serif'
+		    font: fontSize + 'px Calibri,sans-serif'
 		  })
 		})
 	];

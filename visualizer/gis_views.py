@@ -105,12 +105,21 @@ def change_map_widget(request):
 def get_file_list(request):
 	""" Retrieve user's list of files
 	"""
+	def get_object_props(obj):
+		return {
+			'fid': obj.fid.hex,
+			'user': obj.user.username,
+			'name': obj.file.name.split('/')[-1],
+			'url': obj.file.url
+		}
+
 	try:
 		files = File.objects.filter(user=request.user)
-		file_list = serializers.serialize('json', files)
+		file_list = [get_object_props(obj) for obj in files]
 	except Exception as e:
 		print e
-	return HttpResponse(file_list)
+	print file_list
+	return HttpResponse(json.dumps(file_list))
 
 def upload(request):
 	""" Upload user file
@@ -280,8 +289,8 @@ def get_feature_stats(request):
 	try:
 		params = json.loads(request.body)
 		feature = Feature.objects.get(fid=params['fid'])
-		#update stat before returning value
-		# update_feature_stat(feature.fid)
+		# update stat before returning value
+		update_feature_stat(feature.fid)
 
 		feature_stat_set = feature.featurestat_set.all()
 		response_data = {

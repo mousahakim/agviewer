@@ -41,30 +41,67 @@ def update_stat_widget(widget_id):
 	if dataset.exists():
 
 		for data in dataset:
-			
-			print 'date_from before: ',data.date_from
-			print 'date_to before: ', data.date_to
-			print 'duration: ', data.date_to - data.date_from
 
-			try:
-				station = data.sensor.split('-')[1]
-			except Exception as e:
-				print e
-				return
+			if data.sensor is not None:
 
-			last_record = StationData.objects.filter(station_id=station).last()
-			if last_record is None:
-				return
-			duration = data.date_to - data.date_from
-			data.date_to = last_record.date
-			data.date_from = last_record.date - duration
-			
-			data.save()
+				try:
+					station = data.sensor.split('-')[1]
+				except Exception as e:
+					print e
+					return
+				last_record = StationData.objects.filter(station_id=station).last()
+				if last_record is None:
+					return
+				duration = data.date_to - data.date_from
+				data.date_to = last_record.date
+				data.date_from = last_record.date - duration
+				
+				data.save()
 
-			print '------'
-			print 'duration after: ', duration
-			print 'date_from after: ',data.date_from
-			print 'date_to after: ',data.date_to
+			elif data.chart is not None:
+
+				for key, value in data.chart.widget['data'].iteritems():
+					#skip non-data items
+					if key in ['title', 'range', 'calc']:
+						continue
+
+					if value is not None:
+						#if empty move on
+						if value['value'] is None:
+							continue
+						if len(value['value']) < 1:
+							continue
+
+						duration = data.date_to - data.date_from
+
+						if key in ['raw_sensors', 'ex_ec', 'paw', 'voltage']:
+							#if empty move on
+
+							if len(value['value'][0]) < 1:
+								continue
+
+							data.date_from = parse_date(value['value'][0][-1]['date']) - duration
+							data.date_to = parse_date(value['value'][0][-1]['date'])
+							data.save()
+
+						elif key in ['dew_point', 'evapo']:
+							#if empty move on
+
+							if value['value'] is None:
+								continue
+							if len(value['value']) < 1:
+								continue
+
+							duration = data.date_to - data.date_from
+
+							data.date_from = parse_date(value['value'][-1]['date']) - duration
+							data.date_to = parse_date(value['value'][-1]['date'])
+							data.save()
+
+						#no chart calculation for degree days, chill hours and portions
+						else: 
+							continue
+
 			set_stat_widget(data.id)
 
 @shared_task
@@ -88,17 +125,17 @@ def update_widget(widget, username):
 		print 'KeyError', e
 		return
 
-	from visualizer.utils import parse_date
-	try:
-		date_from = parse_date(widget['data']['range']['to'])
-		date_to = parse_date(widget['data']['range']['from'])
-	except KeyError as e:
-		print 'KeyError', e
-		return
-	duration = date_from - date_to
+	# from visualizer.utils import parse_date
+	# try:
+	# 	date_from = parse_date(widget['data']['range']['to'])
+	# 	date_to = parse_date(widget['data']['range']['from'])
+	# except KeyError as e:
+	# 	print 'KeyError', e
+	# 	return
+	# duration = date_from - date_to
 	current_time = datetime.now()
 	try:
-		widget['data']['range']['from'] = date_to_string(current_time - duration)
+		widget['data']['range']['from'] = date_to_string(current_time - timedelta(weeks=2))
 		widget['data']['range']['to'] = date_to_string(current_time)
 	except KeyError as e:
 		print 'KeyError', e
@@ -479,7 +516,13 @@ def get_data_fc(station,min_date=None, max_date=None):
 		path = '/data/'+station+'/raw/from/'+str(dt_from)+'/to/'+str(dt_to)
 	else:
 		path = '/data/'+station+'/raw/from/'+str(dt_from)	
-	# test
+	
+	# temporary solution to allow initial
+	# download of data for newly added stations
+	# if min_date is None and max_date is None:
+		#if no min/max date provided 
+		#download last 10k records
+		# path = '/data/'+station+'/raw/last/10000'
 	
 	# dt_to = calendar.timegm((prev_records.last().date + timedelta(hours=2)).timetuple())
 	# path = '/data/'+station+'/hourly/from/'+str(dt_from)+'/to/'+str(dt_to)
@@ -733,55 +776,86 @@ def monitor(widget, username):
 			return
 
 		if widget['data']['raw_sensors'] is not None:
-			w_values = widget['data']['raw_sensors']['value']
+			try:
+				w_values = widget['data']['raw_sensors']['value']
 
-			for values in w_values:
-				sensor = values[0]['label_id']
-				db = ''
-				try:
-					db = sensor.split('-')[0]
-				except KeyError as e:
-					print e
-					return
-				extract = None
-				if db == 'dg':
-					extract = values[0]['axis_id']
-				alerts = Alert.has_alerts(user, sensor, None)
-
-				for v in values:
-					#do not evaluate null value
+				for values in w_values:
+					sensor = values[0]['label_id']
+					db = ''
 					try:
-						if v['value'] is None:
-							continue
+						db = sensor.split('-')[0]
 					except KeyError as e:
-						continue
+						print e
+						return
+					extract = None
+					if db == 'dg':
+						extract = values[0]['axis_id']
+					alerts = Alert.has_alerts(user, sensor, None)
 
-					for a in alerts:
-						event = {
-							'value': v['value'],
-							'date': v['date'],
-							'widget_id': widget['id'],
-							'sensor': [sensor],
-							'extract': extract,
-						}
-						alert = Alert.alert_from_model_obj(a)
-						# print alert.alert_dict
-						if db == 'dg':
-							if extract is not None and alert.alert_dict['extract'] is not None and extract != alert.alert_dict['extract']:
+					for v in values:
+						#do not evaluate null value
+						try:
+							if v['value'] is None:
 								continue
-						alert.watch(event, sensor, None)
+						except KeyError as e:
+							continue
 
+						for a in alerts:
+							event = {
+								'value': v['value'],
+								'date': v['date'],
+								'widget_id': widget['id'],
+								'sensor': [sensor],
+								'extract': extract,
+							}
+							alert = Alert.alert_from_model_obj(a)
+							# print alert.alert_dict
+							if db == 'dg':
+								if extract is not None and alert.alert_dict['extract'] is not None and extract != alert.alert_dict['extract']:
+									continue
+							alert.watch(event, sensor, None)
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "Raw sensors calc activated but no values provided: " + e.message
 
 		if widget['data']['paw'] is not None:
-			w_sensors = widget['data']['paw']['params']['sensors']
-			w_paw_avg = widget['data']['paw']['params']['avg']
-			w_values = widget['data']['paw']['value']
+			try:				
+				w_sensors = widget['data']['paw']['params']['sensors']
+				w_paw_avg = widget['data']['paw']['params']['avg']
+				w_values = widget['data']['paw']['value']
 
-			for values in w_values:
-				sensor = values[0]['sensor'] if not w_paw_avg else None
-				alerts = Alert.has_alerts(user, None, 'paw')
+				for values in w_values:
+					sensor = values[0]['sensor'] if not w_paw_avg else None
+					alerts = Alert.has_alerts(user, None, 'paw')
 
-				for v in values:
+					for v in values:
+						#do not evaluate null value
+						try:
+							if v['value'] is None:
+								continue
+						except KeyError as e:
+							continue
+
+						for a in alerts:
+							event = {
+								'value': v['value'],
+								'date': v['date'],
+								'widget_id': widget['id'],
+								'sensor': [sensor] if not w_paw_avg else w_sensors
+							}
+							alert = Alert.alert_from_model_obj(a)
+							alert.watch(event, None, 'paw')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "PAW calc activated but no values provided: " + e.message
+
+		if widget['data']['chilling_portions'] is not None:
+			try:
+				w_sensor = widget['data']['chilling_portions']['params']['sensors']
+				w_values = widget['data']['chilling_portions']['value']
+				alerts = Alert.has_alerts(user, None, 'chilling_portions')
+
+				for v in w_values:
 					#do not evaluate null value
 					try:
 						if v['value'] is None:
@@ -794,165 +868,166 @@ def monitor(widget, username):
 							'value': v['value'],
 							'date': v['date'],
 							'widget_id': widget['id'],
-							'sensor': [sensor] if not w_paw_avg else w_sensors
+							'sensor': [w_sensor]
 						}
 						alert = Alert.alert_from_model_obj(a)
-						alert.watch(event, None, 'paw')
+						alert.watch(event, None, 'chilling_portions')
 
-		if widget['data']['chilling_portions'] is not None:
-			w_sensor = widget['data']['chilling_portions']['params']['sensors']
-			w_values = widget['data']['chilling_portions']['value']
-			alerts = Alert.has_alerts(user, None, 'chilling_portions')
-
-			for v in w_values:
-				#do not evaluate null value
-				try:
-					if v['value'] is None:
-						continue
-				except KeyError as e:
-					continue
-
-				for a in alerts:
-					event = {
-						'value': v['value'],
-						'date': v['date'],
-						'widget_id': widget['id'],
-						'sensor': [w_sensor]
-					}
-					alert = Alert.alert_from_model_obj(a)
-					alert.watch(event, None, 'chilling_portions')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "Chill portions calc activated but no values provided: " + e.message
 
 		if widget['data']['degree_days'] is not None:
-			w_sensor = widget['data']['degree_days']['params']['sensors']
-			w_values = widget['data']['degree_days']['value']
-			alerts = Alert.has_alerts(user, None, 'degree_days')
+			try:
+				w_sensor = widget['data']['degree_days']['params']['sensors']
+				w_values = widget['data']['degree_days']['value']
+				alerts = Alert.has_alerts(user, None, 'degree_days')
 
-			for v in w_values:
-				#do not evaluate null value
-				try:
-					if v['value'] is None:
+				for v in w_values:
+					#do not evaluate null value
+					try:
+						if v['value'] is None:
+							continue
+					except KeyError as e:
 						continue
-				except KeyError as e:
-					continue
 
-				for a in alerts:
-					event = {
-						'value': v['value'],
-						'date': v['date'],
-						'widget_id': widget['id'],
-						'sensor': [w_sensor]
-					}
-					alert = Alert.alert_from_model_obj(a)
-					alert.watch(event, None, 'degree_days')
+					for a in alerts:
+						event = {
+							'value': v['value'],
+							'date': v['date'],
+							'widget_id': widget['id'],
+							'sensor': [w_sensor]
+						}
+						alert = Alert.alert_from_model_obj(a)
+						alert.watch(event, None, 'degree_days')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "Degree days calc activated but no values provided: " + e.message
 
 		if widget['data']['chilling_hours'] is not None:
-			w_sensor = widget['data']['chilling_hours']['params']['sensors']
-			w_values = widget['data']['chilling_hours']['value']
-			alerts = Alert.has_alerts(user, None, 'chilling_hours')
+			try:
+				w_sensor = widget['data']['chilling_hours']['params']['sensors']
+				w_values = widget['data']['chilling_hours']['value']
+				alerts = Alert.has_alerts(user, None, 'chilling_hours')
 
-			for v in w_values:
-				#do not evaluate null value
-				try:
-					if v['value'] is None:
+				for v in w_values:
+					#do not evaluate null value
+					try:
+						if v['value'] is None:
+							continue
+					except KeyError as e:
 						continue
-				except KeyError as e:
-					continue
 
-				for a in alerts:
-					event = {
-						'value': v['value'],
-						'date': v['date'],
-						'widget_id': widget['id'],
-						'sensor': [w_sensor]
-					}
-					alert = Alert.alert_from_model_obj(a)
-					alert.watch(event, None, 'chilling_hours')
+					for a in alerts:
+						event = {
+							'value': v['value'],
+							'date': v['date'],
+							'widget_id': widget['id'],
+							'sensor': [w_sensor]
+						}
+						alert = Alert.alert_from_model_obj(a)
+						alert.watch(event, None, 'chilling_hours')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "Chill hours calc activated but no values provided: " + e.message
 
 		if widget['data']['evapo'] is not None:
-			w_sensor_temp = widget['data']['evapo']['params']['temp']
-			w_sensor_rh = widget['data']['evapo']['params']['rh']
-			w_sensor_sr = widget['data']['evapo']['params']['sr']
-			w_sensor_ws = widget['data']['evapo']['params']['ws']
-			w_sensors = [w_sensor_temp, w_sensor_rh, w_sensor_sr, w_sensor_ws]
-			w_values = widget['data']['evapo']['value']
-			alerts = Alert.has_alerts(user, None, 'evapo')
+			try:
+				w_sensor_temp = widget['data']['evapo']['params']['temp']
+				w_sensor_rh = widget['data']['evapo']['params']['rh']
+				w_sensor_sr = widget['data']['evapo']['params']['sr']
+				w_sensor_ws = widget['data']['evapo']['params']['ws']
+				w_sensors = [w_sensor_temp, w_sensor_rh, w_sensor_sr, w_sensor_ws]
+				w_values = widget['data']['evapo']['value']
+				alerts = Alert.has_alerts(user, None, 'evapo')
 
-			for v in w_values:
-				#do not evaluate null value
-				try:
-					if v['value'] is None:
+				for v in w_values:
+					#do not evaluate null value
+					try:
+						if v['value'] is None:
+							continue
+					except KeyError as e:
 						continue
-				except KeyError as e:
-					continue
 
-				for a in alerts:
-					event = {
-						'value': v['value'],
-						'date': v['date'],
-						'widget_id': widget['id'],
-						'sensor': w_sensors
-					}
-					alert = Alert.alert_from_model_obj(a)
-					alert.watch(event, None, 'evapo')
+					for a in alerts:
+						event = {
+							'value': v['value'],
+							'date': v['date'],
+							'widget_id': widget['id'],
+							'sensor': w_sensors
+						}
+						alert = Alert.alert_from_model_obj(a)
+						alert.watch(event, None, 'evapo')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "ETo calc activated but no values provided: " + e.message
 
 		if widget['data']['dew_point'] is not None:
 			# print 'monitoring dew point widget'
-			w_sensor_temp = widget['data']['dew_point']['params']['temp']
-			w_sensor_rh = widget['data']['dew_point']['params']['rh']
-			w_sensors = [w_sensor_temp, w_sensor_rh]
-			w_values = widget['data']['dew_point']['value']
-			alerts = Alert.has_alerts(user, None, 'dew_point')
+			try:	
+				w_sensor_temp = widget['data']['dew_point']['params']['temp']
+				w_sensor_rh = widget['data']['dew_point']['params']['rh']
+				w_sensors = [w_sensor_temp, w_sensor_rh]
+				w_values = widget['data']['dew_point']['value']
+				alerts = Alert.has_alerts(user, None, 'dew_point')
 
-			for v in w_values:
-				#do not evaluate null value
-				try:
-					if v['value'] is None:
-						continue
-				except KeyError as e:
-					continue
-
-				for a in alerts:
-					event = {
-						'value': v['value'],
-						'date': v['date'],
-						'widget_id': widget['id'],
-						'sensor': w_sensors
-					}
-					alert = Alert.alert_from_model_obj(a)
-					alert.watch(event, None, 'dew_point')
-
-		if widget['data']['ex_ec'] is not None:
-			w_all_sensors = {}
-			w_values = widget['data']['ex_ec']['value']
-			alerts = Alert.has_alerts(user, None, 'ex_ec')
-			for sensor in widget['data']['ex_ec']['params']['sensors']:
-				# sensor['label'] maynot be unique in which case this needs to be fixed
-				w_all_sensors.update({sensor['label']:sensor['sensors']})
-
-			for values in w_values:
-				try:
-					graph_sensors = w_all_sensors[values[0]['label']]
-				except KeyError as e:
-					print e
-					graph_sensors = []
-				
-				for v in values:
+				for v in w_values:
 					#do not evaluate null value
 					try:
 						if v['value'] is None:
 							continue
 					except KeyError as e:
 						continue
-						
+
 					for a in alerts:
 						event = {
 							'value': v['value'],
 							'date': v['date'],
 							'widget_id': widget['id'],
-							'sensor': graph_sensors
+							'sensor': w_sensors
 						}
 						alert = Alert.alert_from_model_obj(a)
-						alert.watch(event, None, 'ex_ec')
+						alert.watch(event, None, 'dew_point')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "Dew point calc activated but no values provided: " + e.message
+
+		if widget['data']['ex_ec'] is not None:
+			try:
+				w_all_sensors = {}
+				w_values = widget['data']['ex_ec']['value']
+				alerts = Alert.has_alerts(user, None, 'ex_ec')
+				for sensor in widget['data']['ex_ec']['params']['sensors']:
+					# sensor['label'] maynot be unique in which case this needs to be fixed
+					w_all_sensors.update({sensor['label']:sensor['sensors']})
+
+				for values in w_values:
+					try:
+						graph_sensors = w_all_sensors[values[0]['label']]
+					except KeyError as e:
+						print e
+						graph_sensors = []
+					
+					for v in values:
+						#do not evaluate null value
+						try:
+							if v['value'] is None:
+								continue
+						except KeyError as e:
+							continue
+							
+						for a in alerts:
+							event = {
+								'value': v['value'],
+								'date': v['date'],
+								'widget_id': widget['id'],
+								'sensor': graph_sensors
+							}
+							alert = Alert.alert_from_model_obj(a)
+							alert.watch(event, None, 'ex_ec')
+			except KeyError as e:
+				#catch activated calcs that are unpopulated -- to be fixed in the interface
+				print "EX EC calc activated but no values provided: " + e.message
 
 
 
