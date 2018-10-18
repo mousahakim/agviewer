@@ -130,11 +130,21 @@ class Files(models.Model):
 
 
 class StationData(models.Model):
+	created = models.DateTimeField(editable=False)
+	modified = models.DateTimeField()
 	station_id = models.CharField(max_length=100, db_index=True)
 	database = models.CharField(max_length=3, db_index=True)
 	date = models.DateTimeField(db_index=True)
 	mrid = models.IntegerField()
 	data = JSONField()
+
+	def save(self, *args, **kwargs):
+		'''on save update timestamps '''
+		if not self.id:
+			self.created =timezone.now()
+		self.modified = timezone.now()
+		return super(StationData, self).save(*args, **kwargs)
+
 	class Meta:
 		ordering = ['date']
 		index_together = ['date','station_id', 'database']
@@ -192,6 +202,8 @@ class Alerts(models.Model):
 		index_together = ['sensors', 'logic', 'threshold']
 
 class AlertEvents(models.Model):
+	created = models.DateTimeField(editable=False)
+	modified = models.DateTimeField()
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	alert = models.ForeignKey(Alerts, on_delete=models.CASCADE)
 	read = models.BooleanField()
@@ -207,6 +219,14 @@ class AlertEvents(models.Model):
 	notify = models.BooleanField()
 	t_notify = models.DateTimeField()
 	snoozed = models.BooleanField(default=False)
+
+	def save(self, *args, **kwargs):
+		'''on save update timestamps '''
+		if not self.id:
+			self.created =timezone.now()
+		self.modified = timezone.now()
+		return super(AlertEvents, self).save(*args, **kwargs)
+
 	class Meta:
 		ordering = ['t_notify']
 		unique_together = (('user', 'alert', 'widget', 't_notify', 'sensor'))
