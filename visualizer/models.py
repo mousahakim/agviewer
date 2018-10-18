@@ -5,6 +5,7 @@ from django.conf import settings
 from django.dispatch import receiver
 from jsonfield import JSONField
 from django.core.validators import RegexValidator
+from django.utils import timezone
 #from django.contrib.auth.models import User
 # Create your models here.
 class Ambient(models.Model):
@@ -225,11 +226,19 @@ class SMTPConfig(models.Model):
 	esmtp = models.BooleanField()
 
 class EmailNotification(models.Model):
+	created = models.DateTimeField(editable=False)
+	modified = models.DateTimeField()
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	subject = models.CharField(max_length=100)
 	content = models.CharField(max_length=500)
 	success = models.BooleanField()
 	error = models.CharField(max_length=100, default=' ')
+	def save(self, *args, **kwargs):
+		'''on save update timestamps '''
+		if not self.id:
+			self.created =timezone.now()
+		self.modified = timezone.now()
+		return super(EmailNotification, self).save(*args, **kwargs)
 
 class SMSNotification(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
