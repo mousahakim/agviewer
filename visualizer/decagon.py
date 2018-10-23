@@ -247,6 +247,18 @@ def convert_sca(value, code, extract, unit=None):
 			elif t_raw > 900:
 				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
 				
+	elif code == '107':
+		value = int(value)
+		wp_raw = value & 65535#
+		t_raw = rshift(value, 16) & 1023
+		if extract == 'wp': # water potential
+			return (10**(0.0001*wp_raw)) / -10.20408 #
+		elif extract == 'temp':
+			if t_raw <= 900:
+				return (t_raw - 400) / 10 #
+			elif t_raw > 900:
+				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+
 	elif code == '108':
 		value = int(value)
 		wp_raw = value & 65535#
@@ -526,15 +538,6 @@ def convert(value, code):
 			print e, value
 			return {'RT-1 Temp':None}
 		return {'RT-1 Temp':25.01914 + x * (-22.8437 + x * (1.532076 + (-0.08372 * x )))}
-	elif code == '255':
-		value = int(value)
-		wp_raw = value & 65535#
-		t_raw = rshift(value, 16) & 1023
-		if t_raw <= 900:
-			temp = (t_raw - 400) / 10
-		else: 
-			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
-		return {'Teros21 Water Potential':(10**(0.0001*wp_raw)) / -10.20408, 'Teros21 Temp': temp}
 		
 	elif code == '249':
 		return {'10HS Soil Moist':100*(1.17*10**-9 * value**3 - 3.95*10**-6 * value**2 + 4.90*10**-3 * value - 1.92)}
@@ -564,6 +567,16 @@ def convert(value, code):
 		else: 
 			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
 		return {'MPS-2 Water Potential':10**(0.0001*wp_raw) / -10.20408, 'MPS-2 Temp': temp}
+
+	elif code == '107':
+		value = int(value)
+		wp_raw = value & 65535#
+		t_raw = rshift(value, 16) & 1023
+		if t_raw <= 900:
+			temp = (t_raw - 400) / 10
+		else: 
+			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
+		return {'Teros21 Water Potential':(10**(0.0001*wp_raw)) / -10.20408, 'Teros21 Temp': temp}
 
 	elif code == '108':
 		value = int(value)
