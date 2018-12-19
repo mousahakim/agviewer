@@ -2727,7 +2727,6 @@ def get_data_decagon(device, user, devicepass):
 	prev_records = StationData.objects.filter(station_id=device)
 	if prev_records.exists():
 		mrid = prev_records.last().mrid
-	try:
 		dg_acc = AppUser.objects.get(user=user)
 		params = {
 			'email': dg_acc.dg_username,
@@ -2738,6 +2737,21 @@ def get_data_decagon(device, user, devicepass):
 			'mrid': mrid,
 			'User-Agent': 'AgViewer_1.0'
 		}
+	else:
+		# 3 months ago in linux epoch seconds
+		time = int(((datetime.now() - timedelta(days=90)) - datetime(1970,1,1)).total_seconds())
+		params = {
+			'email': dg_acc.dg_username,
+			'userpass': dg_acc.dg_password,
+			'deviceid': device,
+			'devicepass': devicepass,
+			'report': 1,
+			'time': time,
+			'User-Agent': 'AgViewer_1.0'
+		}
+
+	try:
+		
 		url = 'http://api.ech2odata.com/morph2ola/dxd.cgi'
 		response = requests.post(url, data=params)
 		if response.status_code == 200:
