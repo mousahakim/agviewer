@@ -1,4 +1,4 @@
-import json, requests, time, datetime
+import json, requests, time
 from django.http import HttpResponse
 from models import *
 from django.contrib.auth.decorators import login_required
@@ -12,8 +12,8 @@ from colour import Color
 # from visualizer.general import Alert
 
 # globals
-DAY = datetime.timedelta(days=1)
-HOUR = datetime.timedelta(hours=1)
+DAY = timedelta(days=1)
+HOUR = timedelta(hours=1)
 
 
 @login_required
@@ -219,7 +219,7 @@ def set_stat_widget(widget_data_id):
 			sensor = widget_data.sensor.split('-')[2] +'-'+ widget_data.sensor.split('-')[3]
 
 		data = StationData.objects.filter(station_id=station).last()
-		present = datetime.datetime.now() - timedelta(hours=3)
+		present = datetime.now() - timedelta(hours=3)
 		stale = False
 		if data is not None:
 			if db == 'fc':
@@ -1947,7 +1947,7 @@ def get_eto_data(widget_data, user):
 
 def get_dew_point_data(widget_data, user):
 	print 'Calculating dew point ...'
-	HOUR = datetime.timedelta(hours=1)
+	HOUR = timedelta(hours=1)
 	daily_dp = []
 	params = widget_data['data']['dew_point']['params'] #(user, db, station, dt_from, dt_to)
 	dt_from = parse_date(widget_data['data']['range']['from'])
@@ -2727,7 +2727,6 @@ def get_data_decagon(device, user, devicepass):
 	prev_records = StationData.objects.filter(station_id=device)
 	if prev_records.exists():
 		mrid = prev_records.last().mrid
-	try:
 		dg_acc = AppUser.objects.get(user=user)
 		params = {
 			'email': dg_acc.dg_username,
@@ -2738,6 +2737,21 @@ def get_data_decagon(device, user, devicepass):
 			'mrid': mrid,
 			'User-Agent': 'AgViewer_1.0'
 		}
+	else:
+		# 3 months ago in linux epoch seconds
+		time = int(((datetime.now() - timedelta(days=90)) - datetime(1970,1,1)).total_seconds())
+		params = {
+			'email': dg_acc.dg_username,
+			'userpass': dg_acc.dg_password,
+			'deviceid': device,
+			'devicepass': devicepass,
+			'report': 1,
+			'time': time,
+			'User-Agent': 'AgViewer_1.0'
+		}
+
+	try:
+		
 		url = 'http://api.ech2odata.com/morph2ola/dxd.cgi'
 		response = requests.post(url, data=params)
 		if response.status_code == 200:
