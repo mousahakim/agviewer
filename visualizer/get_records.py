@@ -2726,9 +2726,9 @@ def get_data_decagon(device, user, devicepass):
 	print 'downloading decagon data...'
 	mrid = 0
 	prev_records = StationData.objects.filter(station_id=device)
+	dg_acc = AppUser.objects.get(user=user)
 	if prev_records.exists():
 		mrid = prev_records.last().mrid
-		dg_acc = AppUser.objects.get(user=user)
 		params = {
 			'email': dg_acc.dg_username,
 			'userpass': dg_acc.dg_password,
