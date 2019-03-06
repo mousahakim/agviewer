@@ -246,6 +246,26 @@ def convert_sca(value, code, extract, unit=None):
 				return (t_raw - 400) / 10 #
 			elif t_raw > 900:
 				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+
+	elif code == '104' or code == '103':
+		value = int(value)
+		rc_raw = value & 4095 #
+		t_raw = rshift(value, 22)
+		ec_raw = rshift(value, 12) & 1023 #
+
+		if t_raw <= 900:
+			temp = (t_raw - 400) / 10 #
+		else: 
+			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+
+		if extract == 'temp':
+			return temp
+		elif extract == 'ec':
+			return 10**(ec_raw/215) /1000
+		elif extract == 'rc':
+			return 3.879*10**-4 * rc_raw - 0.6956
+		else:
+			return 10**(ec_raw/215) /1000
 				
 	elif code == '107':
 		value = int(value)
@@ -567,6 +587,22 @@ def convert(value, code):
 		else: 
 			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10
 		return {'MPS-2 Water Potential':10**(0.0001*wp_raw) / -10.20408, 'MPS-2 Temp': temp}
+
+	elif code == '104' or code == '103':
+		value = int(value)
+		rc_raw = value & 4095 #
+		t_raw = rshift(value, 22)
+		ec_raw = rshift(value, 12) & 1023 #
+
+		if t_raw <= 900:
+			temp = (t_raw - 400) / 10 #
+		else: 
+			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+
+		return {
+			'Teros1x Rc':3.879*10**-4 * rc_raw - 0.6956,
+			'Teros1x Temp': temp,
+			'Teros1x EC':10**(ec_raw/215) /1000}
 
 	elif code == '107':
 		value = int(value)
