@@ -161,6 +161,10 @@ def convert_sca(value, code, extract, unit=None):
 			return variable_a
 		variable_a = red/nir
 		return variable_a
+
+	elif code == '238':
+		value = float(value)
+		return 1.895*10**-1 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154
 	elif code == '241':
 		if float(value) != 0.0:
 			return 100*(3.62*10**-4 * float(value) - 0.554) #
@@ -528,6 +532,14 @@ def convert(value, code):
 			return variable_a
 		variable_a = red/nir
 		return {'NDVI Variable_a': variable_a}
+	elif code == '238':
+		value = float(value)
+		if value is None or value == 0:
+			return value
+
+		return {
+			'Teros10 VWC': 1.895*10**-1 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154
+		}
 	elif code == '241':
 		if float(value) != 0.0:
 			return {'GS1 Moisture':100*(3.62*10**-4 * float(value) - 0.554)}
