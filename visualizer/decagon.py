@@ -164,7 +164,7 @@ def convert_sca(value, code, extract, unit=None):
 
 	elif code == '238':
 		value = float(value)
-		return 1.895*10**-10 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154
+		return (1.895*10**-10 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154) * 100
 	elif code == '241':
 		if float(value) != 0.0:
 			return 100*(3.62*10**-4 * float(value) - 0.554) #
@@ -538,7 +538,7 @@ def convert(value, code):
 			return value
 
 		return {
-			'Teros10 VWC': 1.895*10**-10 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154
+			'Teros10 VWC': (1.895*10**-10 * value**3 - 1.222*10**-6 * value**2 + 2.855*10**-3 * value -2.154) * 100
 		}
 	elif code == '241':
 		if float(value) != 0.0:
