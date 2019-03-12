@@ -304,8 +304,11 @@ class Alert:
 			 					print 'creating new event success'
 			 					print alert_event.t_notify
 			 					# async_alert.delay(event_id)
-			 				except (IntegrityError, AlertEvents.DoesNotExist) as e:
+			 				except AlertEvents.DoesNotExist as e:
 			 					print 'alert event already exists.'
+			 					print e
+			 					return
+			 				except IntegrityError as e:
 			 					print e
 			 					return
 			 			else:
