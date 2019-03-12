@@ -812,6 +812,7 @@ def monitor(widget, username):
 							# print alert.alert_dict
 							if db == 'dg':
 								if extract is not None and alert.alert_dict['extract'] is not None and extract != alert.alert_dict['extract']:
+									print 'yes what you suspected'
 									continue
 							alert.watch(event, sensor, None)
 			except KeyError as e:
