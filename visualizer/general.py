@@ -272,7 +272,7 @@ class Alert:
 			#evaluate only if there is an existing none snoozed event
 			if last_not_snoozed_event is not None:
 				#if time greater than self.snooze_time has passed mark event.snoozed = False
-				if parse_date(event['date']) - last_not_snoozed_event.t_notify <= timedelta(hours=alert['snooze_time']):
+				if parse_date(event['date']) - last_not_snoozed_event.t_notify < timedelta(hours=alert['snooze_time']):
 					snoozed = True
 
 		#update event params
@@ -298,7 +298,7 @@ class Alert:
 			 				try:
 			 					alert_event = AlertEvents.objects.get(event_id=event_id)
 			 					alert_event.t_notify = parse_date(event['date'])
-			 					alert_event.notify = False
+			 					alert_event.notify = True
 			 					alert_event.snoozed = snoozed
 			 					alert_event.save()
 			 					print 'creating new event success'
