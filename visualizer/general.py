@@ -279,6 +279,7 @@ class Alert:
 		event.update({'calc': calc, 'snoozed':snoozed})
 
 		if calc is not None and calc == alert['calc'] or sensor is not None and sensor in alert['sensors']:
+			print 'nothing is right'
 			#prevent re-evaluation of data
 			if last_notified_event is not None:
 				if parse_date(event['date']) <= last_notified_event.t_notify:
