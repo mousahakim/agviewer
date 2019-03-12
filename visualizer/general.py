@@ -291,7 +291,9 @@ class Alert:
 			 		#if t_beyond is zero notify immediately
 			 		print float(event['value']), float(alert['threshold'])
 			 		if alerts_obj.t_beyond == 0:
+			 			print 't_beyond is 0'
 			 			if last_event is None:
+			 				print 'creating new event'
 			 				event_id = self.save_event(event)
 			 				try:
 			 					alert_event = AlertEvents.objects.get(event_id=event_id)
@@ -299,6 +301,7 @@ class Alert:
 			 					alert_event.notify = False
 			 					alert_event.snoozed = snoozed
 			 					alert_event.save()
+			 					print 'creating new event success'
 			 					# async_alert.delay(event_id)
 			 				except (IntegrityError, AlertEvents.DoesNotExist) as e:
 			 					print 'alert event already exists.'
@@ -306,6 +309,7 @@ class Alert:
 			 					return
 			 			else:
 			 				try:
+			 					print 'editing old event'
 				 				last_event.t_notify = parse_date(event['date'])
 				 				last_event.notify = True
 				 				last_event.snoozed = snoozed
@@ -314,6 +318,7 @@ class Alert:
 			 					if snoozed:
 			 						return
 				 				async_alert.delay(last_event.event_id)
+				 				print 'editing old event success'
 				 			except IntegrityError as e:
 				 				print 'alert event already exists.'
 			 					print e
