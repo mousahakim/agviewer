@@ -778,7 +778,7 @@ def monitor(widget, username):
 		if widget['data']['raw_sensors'] is not None:
 			try:
 				w_values = widget['data']['raw_sensors']['value']
-				print 'getting values'
+				# print 'getting values'
 
 				for values in w_values:
 					sensor = values[0]['label_id']
@@ -794,7 +794,7 @@ def monitor(widget, username):
 					alerts = Alert.has_alerts(user, sensor, None)
 
 					for v in values:
-						print 'looking at alerts'
+						# print 'looking at alerts'
 						#do not evaluate null value
 						try:
 							if v['value'] is None:

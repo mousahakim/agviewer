@@ -249,7 +249,7 @@ class Alert:
 		"""
 
 		alert = self.alert_dict
-		print 'in watch'
+		# print 'in watch'
 		#get the last event for this alert
 		try:
 			alerts_obj = Alerts.objects.get(uid=alert['uid'])
@@ -279,13 +279,13 @@ class Alert:
 		event.update({'calc': calc, 'snoozed':snoozed})
 
 		if calc is not None and calc == alert['calc'] or sensor is not None and sensor in alert['sensors']:
-			print 'nothing is right'
+			# print 'nothing is right'
 			#prevent re-evaluation of data
 			if last_notified_event is not None:
 				if parse_date(event['date']) <= last_notified_event.t_notify:
 					return
 			if alert['logic'] == 'lt':
-				# print event['value'], alert['threshold']
+				print event['value'], alert['threshold']
 				#if value is beyond threshold
 				if float(event['value']) < float(alert['threshold']):
 			 		#if t_beyond is zero notify immediately
