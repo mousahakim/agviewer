@@ -286,6 +286,7 @@ class Alert:
 			if alert['logic'] == 'lt':
 				#if value is beyond threshold
 				if float(event['value']) < float(alert['threshold']):
+					print 'threshold hit'
 			 		#if t_beyond is zero notify immediately
 			 		if alerts_obj.t_beyond == 0:
 			 			if last_event is None:
