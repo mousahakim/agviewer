@@ -249,7 +249,7 @@ class Alert:
 		"""
 
 		alert = self.alert_dict
-		# print alert
+		print 'in watch'
 		#get the last event for this alert
 		try:
 			alerts_obj = Alerts.objects.get(uid=alert['uid'])
@@ -288,6 +288,7 @@ class Alert:
 				#if value is beyond threshold
 				if float(event['value']) < float(alert['threshold']):
 			 		#if t_beyond is zero notify immediately
+			 		print float(event['value']), float(alert['threshold'])
 			 		if alerts_obj.t_beyond == 0:
 			 			if last_event is None:
 			 				event_id = self.save_event(event)
