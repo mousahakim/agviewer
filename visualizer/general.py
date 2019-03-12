@@ -284,9 +284,9 @@ class Alert:
 				if parse_date(event['date']) <= last_notified_event.t_notify:
 					return
 			if alert['logic'] == 'lt':
+				print event['value'] alert['threshold']
 				#if value is beyond threshold
 				if float(event['value']) < float(alert['threshold']):
-					print 'threshold hit'
 			 		#if t_beyond is zero notify immediately
 			 		if alerts_obj.t_beyond == 0:
 			 			if last_event is None:
