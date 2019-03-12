@@ -222,7 +222,8 @@ def paw(fc, wp, paw_fields, sm_data, avg):
 
 				paw_lst.extend([{'date':key, 'value':paw_val}])
 			paw_lst_srt = sorted(paw_lst, key=lambda k: k['date'])
-			paw_lst_srt[0].update({'sensor':k})
+			if len(paw_lst_srt) > 0:
+				paw_lst_srt[0].update({'sensor':k})
 			paw_set.extend([paw_lst_srt])
 		return paw_set
 	return None 
