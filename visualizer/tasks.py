@@ -778,6 +778,7 @@ def monitor(widget, username):
 		if widget['data']['raw_sensors'] is not None:
 			try:
 				w_values = widget['data']['raw_sensors']['value']
+				print 'getting values'
 
 				for values in w_values:
 					sensor = values[0]['label_id']
@@ -793,6 +794,7 @@ def monitor(widget, username):
 					alerts = Alert.has_alerts(user, sensor, None)
 
 					for v in values:
+						print 'looking at alerts'
 						#do not evaluate null value
 						try:
 							if v['value'] is None:
@@ -812,6 +814,7 @@ def monitor(widget, username):
 							# print alert.alert_dict
 							if db == 'dg':
 								if extract is not None and alert.alert_dict['extract'] is not None and extract != alert.alert_dict['extract']:
+									print 'yes what you suspected'
 									continue
 							alert.watch(event, sensor, None)
 			except KeyError as e:

@@ -249,7 +249,7 @@ class Alert:
 		"""
 
 		alert = self.alert_dict
-		# print alert
+		print alert
 		#get the last event for this alert
 		try:
 			alerts_obj = Alerts.objects.get(uid=alert['uid'])
