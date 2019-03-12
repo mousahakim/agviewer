@@ -302,6 +302,7 @@ class Alert:
 			 					alert_event.snoozed = snoozed
 			 					alert_event.save()
 			 					print 'creating new event success'
+			 					print alert_event.t_notify
 			 					# async_alert.delay(event_id)
 			 				except (IntegrityError, AlertEvents.DoesNotExist) as e:
 			 					print 'alert event already exists.'
