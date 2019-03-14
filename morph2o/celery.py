@@ -27,11 +27,11 @@ app.conf.beat_schedule = {
 #     },
     'hourly-async-download': {
         'task': 'visualizer.tasks.async_download',
-        'schedule': crontab(minute='*/15')
+        'schedule': crontab(minute='2', hour='*/2')
     },
     'hourly-async-update':{
         'task': 'visualizer.tasks.async_update',
-        'schedule': crontab(minute='2,17,32,47')
+        'schedule': crontab(minute='10', hour='*/2')
     },
 }
 #app.autodiscover_tasks()
