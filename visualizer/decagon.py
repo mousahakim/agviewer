@@ -158,10 +158,11 @@ def convert_sca(value, code, extract, unit=None):
 
 	elif code == '220':
 
-		value = int(value)
-
 		if value is None:
 			return None
+			
+		value = int(value)
+
 		if value == 0:
 			return 0
 
@@ -761,13 +762,14 @@ def convert(value, code):
 
 	elif code == '220':
 
-		value = int(value)
-
 		if value is None:
 			return {
 				'PT100 Pressure': None,
 				'PT100 Minutes': None
 			}
+
+		value = int(value)
+
 		if value == 0:
 			return {
 				'PT100 Pressure': 0,
