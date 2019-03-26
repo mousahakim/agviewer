@@ -88,7 +88,7 @@ def convert_sca(value, code, extract, unit=None):
 			elif t_raw > 900:
 				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
 		elif extract == 'ec':
-			return (10**ec_raw/190) / 1000
+			return (10**(ec_raw/190)) / 1000
 
 
 	elif code == '110':
@@ -520,7 +520,7 @@ def convert(value, code):
 		return {
 			'CDT/G3 Drain': dept_raw,
 			'CDT/G3 Temp': temp,
-			'CDT/G3 EC': (10**ec_raw/190) / 1000
+			'CDT/G3 EC': (10**(ec_raw/190)) / 1000
 		}
 
 	elif code == '110':
