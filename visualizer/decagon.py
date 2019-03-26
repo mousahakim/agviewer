@@ -176,7 +176,7 @@ def convert_sca(value, code, extract, unit=None):
 		if extract == 'minutes':
 			return minutes_raw
 
-		return 100 * (100 * ((psig_raw * (3000/4096)) - 500)/2500)*0.069
+		return (100 * ((psig_raw * (3000/4096)) - 500)/2500)*0.0691
 
 	elif code == '222':
 		if value is None:
