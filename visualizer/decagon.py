@@ -765,7 +765,7 @@ def convert(value, code):
 		if value is None:
 			return {
 				'PT100 Pressure': None,
-				'PT100 Minutes': None
+				# 'PT100 Minutes': None
 			}
 
 		value = int(value)
@@ -773,7 +773,7 @@ def convert(value, code):
 		if value == 0:
 			return {
 				'PT100 Pressure': 0,
-				'PT100 Minutes': 0
+				# 'PT100 Minutes': 0
 			}
 
 		psig_raw = rshift(value, 1) & 32767
@@ -781,7 +781,7 @@ def convert(value, code):
 
 		return {
 			'PT100 Pressure': 100 * ((psig_raw * (3000/4096)) - 500)/2500,
-			'PT100 Minutes': minutes_raw
+			# 'PT100 Minutes': minutes_raw
 		}
 
 	elif code == '221':
