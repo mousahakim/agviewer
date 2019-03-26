@@ -89,6 +89,8 @@ def convert_sca(value, code, extract, unit=None):
 				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
 		elif extract == 'ec':
 			return (10**(ec_raw/190)) / 1000
+		else:
+			return dept_raw
 
 
 	elif code == '110':
@@ -160,7 +162,7 @@ def convert_sca(value, code, extract, unit=None):
 
 		if value is None:
 			return None
-			
+
 		value = int(value)
 
 		if value == 0:
