@@ -68,6 +68,29 @@ def convert_sca(value, code, extract, unit=None):
 			else: 
 				temp = ((900 + 5 * (g_raw - 900)) - 400 ) / 10 #
 			return temp
+
+	elif code == '101' or code == '117':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+
+		dept_raw = value & 4095 #
+		t_raw = rshift(value, 22)
+		ec_raw = rshift(value, 12) & 1023 #
+
+		if extract == 'dept':
+			return dept_raw #* (103.3/506.7) 
+		elif extract == 'temp':
+			if t_raw <= 900:
+				return (t_raw - 400) / 10 #
+			elif t_raw > 900:
+				return ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+		elif extract == 'ec':
+			return (10**ec_raw/190) / 1000
+
+
 	elif code == '110':
 		if value is None:
 			return None
@@ -132,6 +155,26 @@ def convert_sca(value, code, extract, unit=None):
 		ndvi = (variable_a*nir - red)/(variable_a*nir+red)
 		return ndvi
 	#LWS leaf wetness
+
+	elif code == '220':
+
+		value = int(value)
+
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+
+		psig_raw = rshift(value, 1) & 32767
+		minutes_raw = rshift(value, 16) & 32767
+
+		if extract == 'pressure':
+			return 100 * ((psig_raw * (3000/4096)) - 500)/2500
+		if extract == 'minutes':
+			return minutes_raw
+
+		return 100 * ((psig_raw * (3000/4096)) - 500)/2500
+
 	elif code == '222':
 		if value is None:
 			return None
@@ -448,6 +491,30 @@ def convert(value, code):
 			# 'DS-2 Sonic Anemometer Wind Gusts': g_raw,
 			# 'DS-2 Sonic Anemometer Temp': temp
 		}
+
+	elif code == '101' or code == '117':
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+		value = int(value)
+
+		dept_raw = value & 4095 #
+		t_raw = rshift(value, 22)
+		ec_raw = rshift(value, 12) & 1023 #
+
+		temp = None
+
+		if t_raw <= 900:
+			temp = (t_raw - 400) / 10 #
+		elif t_raw > 900:
+			temp = ((900 + 5 * (t_raw - 900)) - 400 ) / 10 #
+		return {
+			'CDT/G3 Drain': dept_raw,
+			'CDT/G3 Temp': temp,
+			'CDT/G3 EC': (10**ec_raw/190) / 1000
+		}
+
 	elif code == '110':
 		if value is None:
 			return None
@@ -683,6 +750,24 @@ def convert(value, code):
 			'EHT Temp':0.040 * t_raw - 39.55,
 			'EHT RH':0.01 * (-4.0 + (rh_raw * (0.648 - 0.00072 * rh_raw) + ((0.040*rh_raw-39.55) - 25.0) * (0.01 + 0.00128 * rh_raw))),
 			'EHT VP': vp_raw / 75}
+
+	elif code == '220':
+
+		value = int(value)
+
+		if value is None:
+			return None
+		if value == 0:
+			return 0
+
+		psig_raw = rshift(value, 1) & 32767
+		minutes_raw = rshift(value, 16) & 32767
+
+		return {
+			'PT100 Pressure': 100 * ((psig_raw * (3000/4096)) - 500)/2500,
+			'PT100 Minutes': minutes_raw
+		}
+
 	elif code == '221':
 		print value
 		return {'PS-1': float(value)}
