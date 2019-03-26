@@ -69,7 +69,7 @@ def convert_sca(value, code, extract, unit=None):
 				temp = ((900 + 5 * (g_raw - 900)) - 400 ) / 10 #
 			return temp
 
-	elif code == '101' or code == '117':
+	elif code == '101':
 		if value is None:
 			return None
 		if value == 0:
@@ -492,11 +492,19 @@ def convert(value, code):
 			# 'DS-2 Sonic Anemometer Temp': temp
 		}
 
-	elif code == '101' or code == '117':
+	elif code == '101':
 		if value is None:
-			return None
+			return {
+				'CDT/G3 Drain': None,
+				'CDT/G3 Temp': None,
+				'CDT/G3 EC': None
+			}
 		if value == 0:
-			return 0
+			return {
+				'CDT/G3 Drain': 0,
+				'CDT/G3 Temp': 0,
+				'CDT/G3 EC': 0
+			}
 		value = int(value)
 
 		dept_raw = value & 4095 #
@@ -756,9 +764,15 @@ def convert(value, code):
 		value = int(value)
 
 		if value is None:
-			return None
+			return {
+				'PT100 Pressure': None,
+				'PT100 Minutes': None
+			}
 		if value == 0:
-			return 0
+			return {
+				'PT100 Pressure': 0,
+				'PT100 Minutes': 0
+			}
 
 		psig_raw = rshift(value, 1) & 32767
 		minutes_raw = rshift(value, 16) & 32767
