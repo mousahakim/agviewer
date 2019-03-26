@@ -172,11 +172,11 @@ def convert_sca(value, code, extract, unit=None):
 		minutes_raw = rshift(value, 16) & 32767
 
 		if extract == 'pressure':
-			return 100 * ((psig_raw * (3000/4096)) - 500)/2500
+			return (100 * ((psig_raw * (3000/4096)) - 500)/2500)*0.069
 		if extract == 'minutes':
 			return minutes_raw
 
-		return 100 * ((psig_raw * (3000/4096)) - 500)/2500
+		return 100 * (100 * ((psig_raw * (3000/4096)) - 500)/2500)*0.069
 
 	elif code == '222':
 		if value is None:
@@ -782,7 +782,7 @@ def convert(value, code):
 		minutes_raw = rshift(value, 16) & 32767
 
 		return {
-			'PT100 Pressure': 100 * ((psig_raw * (3000/4096)) - 500)/2500,
+			'PT100 Pressure': (100 * ((psig_raw * (3000/4096)) - 500)/2500)*0.069,
 			# 'PT100 Minutes': minutes_raw
 		}
 
