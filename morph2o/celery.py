@@ -1,23 +1,27 @@
 from __future__ import absolute_import, unicode_literals
 from datetime import timedelta
 #from visualizer import tasks
-import os
+import os, django
 
 from celery import Celery
-from celery.schedules import crontab
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'morph2o.settings')
 
+
+django.setup()
 #from django.conf import settings  # noqa
 
 #settings.configure()
-app = Celery('morph2o', broker='pyamqp://')
+# Using RabbitMQ
+# app = Celery('morph2o', broker='pyamqp://admin:Rah3lajan@10.0.0.151:5672', task_ignore_result=True, task_time_limit=20)
+# Using Redis
+app = Celery('morph2o', broker='redis://10.0.0.100:6379/0', task_ignore_result=True, task_time_limit=60)
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-#app.conf.update(
-#	CELERY_RESULT_BACKEND='django-db',)
+# app.conf.update(
+# 	CELERY_RESULT_BACKEND='django-db',)
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks()
 app.conf.beat_schedule = {
@@ -27,11 +31,11 @@ app.conf.beat_schedule = {
 #     },
     'hourly-async-download': {
         'task': 'visualizer.tasks.async_download',
-        'schedule': crontab(minute='2', hour='*/2')
+        'schedule': 900.0
     },
     'hourly-async-update':{
         'task': 'visualizer.tasks.async_update',
-        'schedule': crontab(minute='10', hour='*/2')
+        'schedule': 900.0
     },
 }
 #app.autodiscover_tasks()
