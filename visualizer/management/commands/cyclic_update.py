@@ -115,7 +115,7 @@ class Command(BaseCommand):
 
 		if all_running_tasks:
 
-			task_descriptions = self.client.describe_tasks(cluster=CLUSTER, tasks=all_running_tasks['taskArns'])
+			task_descriptions = self.client.describe_tasks(cluster=self.CLUSTER, tasks=all_running_tasks['taskArns'])
 
 		else:
 			print ' no running tasks'
@@ -136,7 +136,7 @@ class Command(BaseCommand):
 
 		for arn in idle_task_arns:
 
-			self.client.stop_task(cluster=CLUSTER, task=arn, reason='task is idle')
+			self.client.stop_task(cluster=self.CLUSTER, task=arn, reason='task is idle')
 
 
 		self.stdout.write('{} idle tasks stopped'.format(len(idle_task_arns)))
