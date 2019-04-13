@@ -2,6 +2,7 @@ import boto3, redis, time
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from visualizer.tasks import async_download, async_update
+from celery import Celery
 
 
 class Command(BaseCommand):
@@ -19,7 +20,25 @@ class Command(BaseCommand):
 
 	SERVICE_NAME = 'agview1_service'
 
+	CELERY_APP = Celery('morph2o', broker='redis://10.0.0.100:6379/0', task_ignore_result=True)
+
 	client = boto3.client('ecs')
+
+
+	def get_active_celery_worker_count(self):
+
+		workers = self.CELERY_APP.control.inspect().active()
+
+		if not workers:
+			return 0
+
+		count = 0
+
+		for k, v in workers.items():
+
+			count += len(v)
+
+		return count
 
 
 	def get_redis_queue_lenght(self, host='localhost', port=6379, db=0, queue='celery'):
@@ -59,15 +78,90 @@ class Command(BaseCommand):
 
 		return True
 
+	def stop_idle_tasks(self):
+
+		workers = self.CELERY_APP.control.inspect().active()
+
+		#return if there's no connected celery worker
+		if not workers:
+			return
+
+		idle_worker_ips = []
+
+		for k, v in workers.items():
+
+			if v:
+				try:
+
+					dns_address = k.split('@')[1]
+					ip_srt = dns_address.split('.')[0]
+					ip_lst = ip_srt.split('-')[0]
+					ip_lst.pop(0)
+					ip_address = '.'.join(ip_lst)
+					idle_worker_ips.append(ip_address)
+				except:
+					continue
+
+		#return if there's no idle worker
+		if not idle_worker_ips:
+			return
+
+		all_running_tasks = self.client.list_tasks(cluster=self.CLUSTER,\
+		 serviceName=self.SERVICE_NAME, desiredStatus='RUNNING')
+
+
+		if all_running_tasks:
+
+			task_descriptions = self.client.describe_tasks(cluster=CLUSTER, tasks=all_running_tasks['taskArns'])
+
+		else:
+			return
+
+		idle_task_arns = []
+
+		for task in task_descriptions['tasks']:
+
+			try:
+				if task['containers'][0]['networkInterfaces'][0]['privateIpv4Address'] in idle_worker_ips:
+
+					idle_task_arns.append(task['taskArn'])
+
+			except:
+				continue
+
+
+		for arn in idle_task_arns:
+
+			self.client.stop_task(cluster=CLUSTER, task=arn, reason='task is idle')
+
+
+		self.stdout.write('{} idle tasks stopped'.format(len(idle_task_arns)))
+
+
+
+
+
+
 
 	def stop_tasks(self):
 
+		#wait for queue size to become 0
 		while self.get_redis_queue_lenght() > 0:
 
 			self.stdout.write('Queue Lenght is {}'.format(self.get_redis_queue_lenght()))
 			time.sleep(5)
 
+		#waiting for active tasks to finish
+		self.stdout.write('Waiting for active tasks to finish')
+		while self.get_active_celery_worker_count() > 0:
+			#stop idle tasks
+			self.stop_idle_tasks()
+
+			self.stdout.write('{} tasks are active'.format(self.get_active_celery_worker_count()))
+			time.sleep(5)
+
 		#update desired count to 0
+		self.stdout.write('All tasks finished. Setting desired count to 0')
 		service_update_response = self.client.update_service(cluster=self.CLUSTER, desiredCount=0,\
 			networkConfiguration=self.NET_CONFIG, service=self.SERVICE_NAME)
 		
