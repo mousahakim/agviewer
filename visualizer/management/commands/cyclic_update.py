@@ -84,13 +84,14 @@ class Command(BaseCommand):
 
 		#return if there's no connected celery worker
 		if not workers:
+			print 'no active workers'
 			return
 
 		idle_worker_ips = []
 
 		for k, v in workers.items():
 
-			if v:
+			if len(v) == 0:
 				try:
 
 					dns_address = k.split('@')[1]
@@ -104,6 +105,7 @@ class Command(BaseCommand):
 
 		#return if there's no idle worker
 		if not idle_worker_ips:
+			print 'no active worker ips'
 			return
 
 		all_running_tasks = self.client.list_tasks(cluster=self.CLUSTER,\
@@ -115,6 +117,7 @@ class Command(BaseCommand):
 			task_descriptions = self.client.describe_tasks(cluster=CLUSTER, tasks=all_running_tasks['taskArns'])
 
 		else:
+			print ' no running tasks'
 			return
 
 		idle_task_arns = []
