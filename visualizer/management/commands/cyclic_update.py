@@ -127,30 +127,30 @@ class Command(BaseCommand):
 
 			for task in task_descriptions['tasks']:
 
-				if task['containers'][0]['networkInterfaces'][0]['privateIpv4Address'] in idle_worker_ips:
+				try:
+					if task['containers'][0]['networkInterfaces'][0]['privateIpv4Address'] in idle_worker_ips:
 
-					idle_task_arns.append(task['taskArn'])
+						idle_task_arns.append(task['taskArn'])
+
+				except Exception as e:
+					print 'failed to get task description', e
+					continue
 
 		except Exception as e:
 			print 'could not retrieve task description', e
-			continue
 
-		try:
+		
 
-			for arn in idle_task_arns:
+		for arn in idle_task_arns:
+			try:
 
 				self.client.stop_task(cluster=self.CLUSTER, task=arn, reason='task is idle')
 
-		except Exception as e:
-			print 'error stopping tasks', e
+			except Exception as e:
+				print 'error stopping tasks', e
 
 
 		self.stdout.write('{} idle tasks stopped'.format(len(idle_task_arns)))
-
-
-
-
-
 
 
 	def stop_tasks(self):
