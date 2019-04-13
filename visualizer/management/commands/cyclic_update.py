@@ -100,7 +100,8 @@ class Command(BaseCommand):
 					ip_lst.pop(0)
 					ip_address = '.'.join(ip_lst)
 					idle_worker_ips.append(ip_address)
-				except:
+				except Exception as e:
+					print e
 					continue
 
 		#return if there's no idle worker
