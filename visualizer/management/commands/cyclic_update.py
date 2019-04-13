@@ -96,7 +96,7 @@ class Command(BaseCommand):
 
 					dns_address = k.split('@')[1]
 					ip_srt = dns_address.split('.')[0]
-					ip_lst = ip_srt.split('-')[0]
+					ip_lst = ip_srt.split('-')
 					ip_lst.pop(0)
 					ip_address = '.'.join(ip_lst)
 					idle_worker_ips.append(ip_address)
