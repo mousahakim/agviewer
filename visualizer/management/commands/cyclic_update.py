@@ -165,7 +165,7 @@ class Command(BaseCommand):
 		self.stdout.write('Waiting for active tasks to finish')
 		while self.get_active_celery_worker_count() > 0:
 			#stop idle tasks
-			self.stop_idle_tasks()
+			# self.stop_idle_tasks()
 
 			self.stdout.write('{} tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
@@ -201,7 +201,7 @@ class Command(BaseCommand):
 		self.stdout.write('{} Update started'.format(datetime.now().isoformat(' ')))
 
 		#start tasks
-		self.run_tasks(50)
+		self.run_tasks(51)
 
 		#download new data
 		async_download()
