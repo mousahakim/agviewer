@@ -469,7 +469,7 @@ def get_data_dg(device):
 				item_date = parse_date_s(json.loads(item)['date'])
 				now = datetime.now()
 
-				if item_date.year > now.year or item_date.month > now.month or item_date.day > now.day + 1:
+				if item_date.year > now.year:
 					print 'bad timestamped record dropped. Timestamp: ', item_date
 					continue
 				try:
