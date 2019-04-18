@@ -438,6 +438,7 @@ def update_sensor_lst(station_id):
 
 def get_data_dg(device):
 	from visualizer.models import Stations, AppUser, StationData
+	import pytz
 	print 'downloading decagon data...'
 	mrid = 0
 	mydevice = Stations.objects.filter(station=device)
@@ -463,12 +464,20 @@ def get_data_dg(device):
 		if response.status_code == 200:
 			data = parse_dxd(response.text)
 			if data is None:
-				return False		
+				return False
+
+			tz = pytz.timezone('Chile/Continental')
+
 			for item in data:
-				if parse_date_s(json.loads(item)['date']).year > datetime.now().year:
+				item_date = parse_date_s(json.loads(item)['date'])
+				item_date_clt = item_date.replace(tzinfo=tz)
+				now_clt = tz.normalize(datetime.now().replace(tzinfo=pytz.utc))
+
+				if item_date_clt > now_clt:
+					print 'bad timestamped record dropped. Timestamp: ', item_date
 					continue
 				try:
-					record = StationData(station_id=device, database='dg', mrid=get_rid(response.text), date=parse_date_s(json.loads(item)['date']), data=json.loads(item))
+					record = StationData(station_id=device, database='dg', mrid=get_rid(response.text), date=item_date, data=json.loads(item))
 					record.save()
 				except IntegrityError as e:
 					continue
