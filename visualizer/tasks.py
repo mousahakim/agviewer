@@ -438,7 +438,6 @@ def update_sensor_lst(station_id):
 
 def get_data_dg(device):
 	from visualizer.models import Stations, AppUser, StationData
-	import pytz
 	print 'downloading decagon data...'
 	mrid = 0
 	mydevice = Stations.objects.filter(station=device)
@@ -470,10 +469,9 @@ def get_data_dg(device):
 
 			for item in data:
 				item_date = parse_date_s(json.loads(item)['date'])
-				item_date_clt = item_date.replace(tzinfo=tz)
-				now_clt = tz.normalize(datetime.now().replace(tzinfo=pytz.utc))
+				now = datetime.now()
 
-				if item_date_clt > now_clt:
+				if item_date.year > now.year or item_date.month > now.month or item_date.day > now.day + 1:
 					print 'bad timestamped record dropped. Timestamp: ', item_date
 					continue
 				try:
