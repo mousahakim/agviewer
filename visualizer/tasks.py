@@ -465,8 +465,6 @@ def get_data_dg(device):
 			if data is None:
 				return False
 
-			tz = pytz.timezone('Chile/Continental')
-
 			for item in data:
 				item_date = parse_date_s(json.loads(item)['date'])
 				now = datetime.now()
