@@ -1697,7 +1697,7 @@ def make_list(data, code):
 		return {'ECRN-50.Perc.vol.[ml]': get_hourly_sum(data, 5)}
 	#Flow Meter
 	if code == '183':
-		accum_data = get_hourly_sum(data,1)
+		accum_data = get_quarterly_sum(data,1)
 		return {
 			'Flow.Meter.[L/s]': [{'date': rec['date'],
 			'value':convert_sca(int(rec['value']), code, 'flow')} for rec in accum_data]
