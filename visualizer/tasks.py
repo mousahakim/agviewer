@@ -123,6 +123,7 @@ def update_widget(widget, username):
 			return
 	except KeyError as e:
 		if e.message == 'type':
+			widget.update({'type': 'stat'})
 			new_widget = set_widget(widget, user)
 			stat_widget = Widgets.objects.filter(widget_id=widget['id'], user=user)
 			if stat_widget.exists():
