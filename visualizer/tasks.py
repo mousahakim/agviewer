@@ -122,12 +122,8 @@ def update_widget(widget, username):
 				stat_widget.update(widget=new_widget)
 			return
 	except KeyError as e:
-		if e.message == 'type':
-			new_widget = set_widget(widget, user)
-			stat_widget = Widgets.objects.filter(widget_id=widget['id'], user=user)
-			if stat_widget.exists():
-				stat_widget.update(widget=new_widget)
-			return
+		# print 'KeyError', e
+		return
 
 	# from visualizer.utils import parse_date
 	# try:
