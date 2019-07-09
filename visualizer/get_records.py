@@ -1208,7 +1208,7 @@ def get_cportions_acc(user, db, station, sensor):
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
 	# print raw_data
-	cportions_data = calculate_cportions(raw_data, RESET_DATE)
+	cportions_data = calculate_cportions(get_hourly_avg(raw_data, 0, 1), RESET_DATE)
 	return int(cportions_data[len(cportions_data)-1]['accumulation'])
 
 

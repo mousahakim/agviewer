@@ -274,7 +274,7 @@ def chill_portions(temp, prev):
 	else:
 		delt = xi * inter_e
 
-	prev_portions = prev['portions']
+	prev_portions = round(prev['portions'])
 	# print {'xi':xi, 'inter_e':inter_e, 'delt':delt, 'portions':prev_portions+delt, 'accumulation':prev_portions+delt}
 	return {'xi':xi, 'inter_e':inter_e, 'delt':delt, 'portions':prev_portions+delt, 'accumulation':prev_portions+delt}
 
