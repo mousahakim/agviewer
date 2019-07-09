@@ -2077,8 +2077,8 @@ def calculate_cportions(raw_data, RESET_DATE):
 	prev_portions = {'xi':0.0, 'inter_e':0.0, 'delt':0.0, 'portions':0.0, 'accumulation':0.0}	
 	print raw_data
 	for data in raw_data:
-		# if parse_date(data['date']).minute != 0:
-		# 	continue
+		if parse_date(data['date']).minute != 0:
+			continue
 		if parse_date(data['date']).month == int(RESET_DATE.split('-')[0]) and parse_date(data['date']).day == 1 and parse_date(data['date']).hour == 8:
 			prev_portions = {'xi':0.0, 'inter_e':0.0, 'delt':0.0, 'portions':0.0, 'accumulation':0.0}
 		value = float(data['value']) if data['value'] is not None else 0
