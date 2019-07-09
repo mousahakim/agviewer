@@ -2052,7 +2052,7 @@ def get_cportions_data(widget_data, user):
 			return []
 		raw_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_reset, dt_to)
 		cportions = calculate_cportions(get_hourly_avg(raw_data, 0, 1), RESET_DATE)
-		cp_data = [{'date':portions['date'], 'value':portions['accumulation']} for portions in cportions if dt_from <= parse_date_s(portions['date']) <= dt_to]
+		cp_data = [{'date':portions['date'], 'value':portions['accumulation']} for portions in cportions if dt_from <= parse_date(portions['date']) <= dt_to]
 		cp_data[0].update({'lineColor':line_color, 'type':chart_type})
 		return cp_data
 
@@ -2077,8 +2077,8 @@ def calculate_cportions(raw_data, RESET_DATE):
 	prev_portions = {'xi':0.0, 'inter_e':0.0, 'delt':0.0, 'portions':0.0, 'accumulation':0.0}	
 	print raw_data
 	for data in raw_data:
-		if parse_date(data['date']).minute != 0:
-			continue
+		# if parse_date(data['date']).minute != 0:
+		# 	continue
 		if parse_date(data['date']).month == int(RESET_DATE.split('-')[0]) and parse_date(data['date']).day == 1 and parse_date(data['date']).hour == 8:
 			prev_portions = {'xi':0.0, 'inter_e':0.0, 'delt':0.0, 'portions':0.0, 'accumulation':0.0}
 		value = float(data['value']) if data['value'] is not None else 0
