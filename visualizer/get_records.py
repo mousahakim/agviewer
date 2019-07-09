@@ -1152,7 +1152,7 @@ def stat_cportions_acc(user, db, station, sensor):
 	# return int(cportions_data[len(cportions_data)-1]['accumulation'])
 	return {
 		'success': True,
-		'value': int(cportions_data[len(cportions_data)-1]['accumulation']),
+		'value': round(cportions_data[-1]['accumulation']),
 		'message': '',
 		'date_to': raw_data[-1]['date'],
 		'unit': ''
