@@ -2083,6 +2083,7 @@ def calculate_cportions(raw_data, RESET_DATE):
 		value = float(data['value']) if data['value'] is not None else 0
 		portions = chill_portions(value, prev_portions)
 		portions.update({'date': data['date']})
+		print portions
 		cportions.extend([portions])
 		prev_portions = portions
 	return cportions
