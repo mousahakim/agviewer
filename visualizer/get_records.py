@@ -2051,7 +2051,7 @@ def get_cportions_data(widget_data, user):
 			print 'No data found in the local database.'
 			return []
 		raw_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_reset, dt_to)
-		cportions = calculate_cportions(raw_data, RESET_DATE)
+		cportions = calculate_cportions(get_hourly_avg(raw_data, 0, 1), RESET_DATE)
 		cp_data = [{'date':portions['date'], 'value':portions['accumulation']} for portions in cportions if dt_from <= parse_date_s(portions['date']) <= dt_to]
 		cp_data[0].update({'lineColor':line_color, 'type':chart_type})
 		return cp_data
