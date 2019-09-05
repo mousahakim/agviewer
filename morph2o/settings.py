@@ -120,7 +120,7 @@ DATABASES = {
         'NAME': 'morph2odb',
 		'USER': 'morph2odbuser',
 		'PASSWORD': 'Rah3lajan',
-		'HOST': '10.0.0.100',
+		'HOST': 'localhost',
 		'PORT': '',
     }
 }
