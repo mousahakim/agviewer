@@ -197,7 +197,7 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 
-		t1 = time.perf_counter()
+		t1 = time.time()
 
 		self.stdout.write('{} Update started'.format(datetime.now().isoformat(' ')))
 
@@ -221,7 +221,7 @@ class Command(BaseCommand):
 			self.stdout.write('{} tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
 
-		t2 = time.perf_counter()
+		t2 = time.time()
 		self.stdout.write(self.style.SUCCESS('Download completed in {} minutes.'.format((t2-t1)/60)))
 		#update all widgets
 		async_update()
@@ -244,7 +244,7 @@ class Command(BaseCommand):
 			self.stdout.write('{} tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
 
-		t2 = time.perf_counter()
+		t2 = time.time()
 		self.stdout.write(self.style.SUCCESS('Update completed in {} minutes.'.format((t2-t1)/60)))
 		self.stdout.write(self.style.SUCCESS('Time: {}'.format(datetime.now().isoformat(' '))))
 
