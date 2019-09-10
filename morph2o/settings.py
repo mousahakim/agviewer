@@ -120,8 +120,8 @@ DATABASES = {
         'NAME': 'morph2odb',
 		'USER': 'morph2odbuser',
 		'PASSWORD': 'Rah3lajan',
-		'HOST': 'localhost',
-		'PORT': '',
+		'HOST': 'agv1dbcluster-instance-1.cofnjjblf5pf.us-west-2.rds.amazonaws.com',
+		'PORT': '5432',
     }
 }
 
