@@ -1,5 +1,23 @@
 
 
+def delete_data(code, min, max, min_value, data):
+
+    data = data.filter(date__gt=min, date__lt=max)
+
+    for d in data:
+
+        values = d.data
+
+        if code in values:
+            if values[code] is None:
+                continue
+
+            if values[code] < min_value:
+                values[code] = None
+                d.data = values
+                d.save()
+
+
 def copy_data(src_station, des_station, src_sensor, des_sensor):
 
     from visualizer.models import StationData
@@ -34,3 +52,31 @@ def copy_data(src_station, des_station, src_sensor, des_sensor):
             count+=1
 
     print('records inserted: ', count)
+
+
+
+def clone_widget(widget):
+
+    w = {}
+
+    w.update({
+        'user': widget.user,
+        'index': widget.index,
+        'widget_type': widget.widget_type,
+        'dashboard': widget.dashboard,
+        'expand': widget.expand
+        })
+
+    for k, v in widget.widget['data'].items():
+        if k in ['title', 'calc', 'range']:
+            continue
+
+        if v:
+            for i, value in enumerate(v['value']):
+                if value:
+                    v['value'][i] = value[:1]
+
+    w.update({'widget': widget.widget})
+
+    return w
+
