@@ -84,7 +84,7 @@ def serialize_stats(stat):
     return []
 
 def serializer_user_data(username):
-    from visualizer.models import Widgets
+    from visualizer.models import Widgets, Stations
 
     data = {
         'charts': [],
@@ -93,11 +93,15 @@ def serializer_user_data(username):
     charts = Widgets.objects.filter(widget_type='main-chart', user__username=username)
 
     for chart in charts:
-        data['charts'].append(clone_widget(chart))
+        data['charts'].append(serialize_widget(chart))
 
     dashboards = Dashboard.objects.filter(user__username=username)
 
     data['dashboards'] = list(dashboards.values_list('name', flat=True))
+
+    data['stations'] = Stations.objects.filter(user__username=username).values('station', 'code', 'database')
+
+    return data
 
 
 
