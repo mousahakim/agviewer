@@ -99,7 +99,7 @@ def serialize_user_data(username):
 
     data['dashboards'] = list(dashboards.values_list('name', flat=True))
 
-    data['stations'] = list(Stations.objects.filter(user__username=username).values('station', 'code', 'database'))
+    data['stations'] = list(Stations.objects.filter(user__username=username).values('station','name', 'code', 'database'))
 
     return data
 
