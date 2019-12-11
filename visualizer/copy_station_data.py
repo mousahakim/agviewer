@@ -83,8 +83,8 @@ def serialize_widget(widget):
 def serialize_stats(stat):
     return []
 
-def serializer_user_data(username):
-    from visualizer.models import Widgets, Stations
+def serialize_user_data(username):
+    from visualizer.models import Widgets, Stations, Dashboard
 
     data = {
         'charts': [],
@@ -99,7 +99,7 @@ def serializer_user_data(username):
 
     data['dashboards'] = list(dashboards.values_list('name', flat=True))
 
-    data['stations'] = Stations.objects.filter(user__username=username).values('station', 'code', 'database')
+    data['stations'] = list(Stations.objects.filter(user__username=username).values('station', 'code', 'database'))
 
     return data
 
