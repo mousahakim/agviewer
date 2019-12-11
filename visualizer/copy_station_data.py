@@ -55,15 +55,15 @@ def copy_data(src_station, des_station, src_sensor, des_sensor):
 
 
 
-def clone_widget(widget):
+def serialize_widget(widget):
 
     w = {}
 
     w.update({
-        'user': widget.user,
+        'user': widget.user.username,
         'index': widget.index,
         'widget_type': widget.widget_type,
-        'dashboard': widget.dashboard,
+        'dashboard': widget.dashboard.name,
         'expand': widget.expand
         })
 
@@ -79,4 +79,26 @@ def clone_widget(widget):
     w.update({'widget': widget.widget})
 
     return w
+
+def serialize_stats(stat):
+    return []
+
+def serializer_user_data(username):
+    from visualizer.models import Widgets
+
+    data = {
+        'charts': [],
+    }
+
+    charts = Widgets.objects.filter(widget_type='main-chart', user__username=username)
+
+    for chart in charts:
+        data['charts'].append(clone_widget(chart))
+
+    dashboards = Dashboard.objects.filter(user__username=username)
+
+    data['dashboards'] = list(dashboards.values_list('name', flat=True))
+
+
+
 
