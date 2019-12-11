@@ -72,9 +72,12 @@ def serialize_widget(widget):
             continue
 
         if v:
-            for i, value in enumerate(v['value']):
-                if value:
-                    v['value'][i] = value[:1]
+            if k in ['raw_sensors', 'paw', 'voltage', 'ex_ec']:
+                for i, value in enumerate(v['value']):
+                    if value:
+                        v['value'][i] = value[:1]
+            else:
+                v['value'] = v['value'][:1]
 
     w.update({'widget': widget.widget})
 
@@ -99,7 +102,7 @@ def serialize_user_data(username):
 
     data['dashboards'] = list(dashboards.values_list('name', flat=True))
 
-    data['stations'] = list(Stations.objects.filter(user__username=username).values('station', 'code', 'database'))
+    data['stations'] = list(Stations.objects.filter(user__username=username).values('station','name', 'code', 'database'))
 
     return data
 
