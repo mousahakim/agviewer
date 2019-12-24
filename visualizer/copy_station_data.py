@@ -139,7 +139,7 @@ def serialize_readable_widget(widget):
                         },
                         'aggr': g[0]['suffix'],
                         'graph_type': g[0]['type'],
-                        'value_on_bar': g[0]['valueOnBar'],
+                        'value_on_bar': g[0]['valueOnBar'] if 'valueOnBar' in g[0] else False,
                         'color': g[0]['lineColor'],
                         'axis_name': g[0]['axis_name'],
                         'axis_id': g[0]['axis_id'],
