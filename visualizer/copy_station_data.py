@@ -144,11 +144,11 @@ def serialize_readable_widget(widget):
                         'axis_name': g[0]['axis_name'],
                         'axis_id': g[0]['axis_id'],
                         'label': v['params']['labels'],
-                        'axis': v['params']['axis']
+                        'axis': v['params']['axes']
                     }
                     calc['graphs'].append(graph)
             elif k == 'ex_ec':
-                calc.updat({
+                calc.update({
                     'axis': v['params']['axes']
                 })
 
