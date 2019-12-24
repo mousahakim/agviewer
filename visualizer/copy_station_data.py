@@ -83,6 +83,86 @@ def serialize_widget(widget):
 
     return w
 
+
+def serialize_readable_widget(widget):
+
+    w = {}
+
+    w.update({
+        'chart_name': widget.widget['title'],
+        'index': widget.index,
+        'widget_type': widget.widget_type,
+        'dashboard': widget.dashboard.name,
+        'maximized': widget.expand,
+        'calculations': []
+    })
+
+    for k, v in widget.widget['data'].items():
+
+        if k in ['title', 'calc', 'range']:
+            continue
+
+        calc = {
+            'type': k
+            'graphs': []
+        }
+
+        if v:
+
+            if k == 'paw':
+                calc.update({
+                    'axis': v['params']['axes'],
+                })
+                for sensor, g in v['params']['pawFields'].items():
+                    sensor_parts = sensor.split('-')
+                    graph = {
+                        'sensor': {
+                            'station': sensor_parts[1],
+                            'sensor_code': sensor_parts[2],
+                            'port_or_channel': sensor_parts[3] 
+                        }
+                    }
+                    graph.update(g)
+                    calc['graphs'].append(graph)
+
+            elif k == 'raw_sensors':
+                calc.update({
+                    'axis': v['params']['axes'],
+                })
+                for g in v['value']:
+                    sensor_parts = g[0]['label_id'].split('-')
+                    graph = {
+                        'sensor': {
+                            'station': sensor_parts[1],
+                            'sensor_code': sensor_parts[2],
+                            'port_or_channel': sensor_parts[3] 
+                        },
+                        'aggr': g[0]['suffix'],
+                        'graph_type': g[0]['type'],
+                        'value_on_bar': g[0]['valueOnBar'],
+                        'color': g[0]['lineColor'],
+                        'axis_name': g[0]['axis_name'],
+                        'axis_id': g[0]['axis_id'],
+                        'label': v['params']['labels'],
+                        'axis': v['params']['axis']
+                    }
+                    calc['graphs'].append(graph)
+            elif k == 'ex_ec':
+                calc.updat({
+                    'axis': v['params']['axes']
+                })
+
+                for g in v['params']['sensors']:
+                        
+                    g['sensors'] = [{'station': s.split('-')[1], 'sensor_code': s.split('-')[2], 'port_or_channel': s.plit('-')[3]} for s in g['sensors']]
+
+                    calc['graphs'].append(g)
+
+        w['calculations'].append(calc)
+        
+    return w
+
+
 def serialize_stats(stat):
     return []
 
@@ -96,7 +176,7 @@ def serialize_user_data(username):
     charts = Widgets.objects.filter(widget_type='main-chart', user__username=username)
 
     for chart in charts:
-        data['charts'].append(serialize_widget(chart))
+        data['charts'].append(serialize_readable_widget(chart))
 
     dashboards = Dashboard.objects.filter(user__username=username)
 
