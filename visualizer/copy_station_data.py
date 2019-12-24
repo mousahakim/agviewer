@@ -158,7 +158,7 @@ def serialize_readable_widget(widget):
 
                     calc['graphs'].append(g)
 
-        w['calculations'].append(calc)
+            w['calculations'].append(calc)
         
     return w
 
