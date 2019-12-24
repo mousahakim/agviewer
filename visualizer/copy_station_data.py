@@ -154,7 +154,7 @@ def serialize_readable_widget(widget):
 
                 for g in v['params']['sensors']:
                         
-                    g['sensors'] = [{'station': s.split('-')[1], 'sensor_code': s.split('-')[2], 'port_or_channel': s.plit('-')[3]} for s in g['sensors']]
+                    g['sensors'] = [{'station': s.split('-')[1], 'sensor_code': s.split('-')[2], 'port_or_channel': s.split('-')[3]} for s in g['sensors']]
 
                     calc['graphs'].append(g)
 
