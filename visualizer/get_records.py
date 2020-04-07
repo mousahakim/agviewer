@@ -18,7 +18,7 @@ HOUR = timedelta(hours=1)
 
 @login_required
 def get_widget(request):
-	print 'get_records.get_widget called'
+	# print 'get_records.get_widget called'
 	if request.is_ajax():
 		if request.method == 'POST':
 			post_data = json.loads(request.body)
@@ -65,7 +65,7 @@ def set_widget(widget_dict, user):
 					elif v['params']['data'] == 'temp_min1h':
 						widget_dict['data']['calc']['value'] = temp_min1h(v['params']['db'], v['params']['station_id'], v['params']['sensor'])
 		except KeyError as e:
-			print 'KeyError in set_widget', e
+			# print 'KeyError in set_widget', e
 			# print widget_dict
 			return widget_dict
 
@@ -325,7 +325,7 @@ def has_data(data_lst):
 
 
 def get_temp_data(user, db, station, dt_from, dt_to):
-	print 'getting Temperature data'
+	# print 'getting Temperature data'
 	fc_sensors = ['0', '16385', '506', '20484', '20486', '20483', '21777']
 	dg_sensors = ['252-1', '252-3', '241-1'] # update this!
 	appuser = AppUser.objects.get(user=user)
@@ -345,7 +345,7 @@ def get_temp_data(user, db, station, dt_from, dt_to):
 		sensors = [k for k, v in station_data[0].data.iteritems()]
 		for sensor in sensors:
 			if sensor in dg_sensors:
-				print True
+				# print True
 				data_list = load_data(station, sensor, db, dt_from, dt_to)
 				if has_data(data_list):
 					data_lst = [{
@@ -455,7 +455,7 @@ def min_max_avg(function, sensor, extract, chart, dt_from, dt_to):
 					#split sensor_code to get decagon sensor code
 					value_lst.extend([convert_sca(int(record['value']), sensor_code, extract)])
 				except Exception as e:
-					print e.message
+					# print e.message
 					continue
 
 	if chart is not None:
@@ -663,14 +663,14 @@ def sum_for_stat(sensor, extract, chart, dt_from, dt_to):
 				try:
 					value_lst.extend([float(record['value'])])
 				except Exception as e:
-					print e.message
+					# print e.message
 					continue
 			else:
 				try: 
 					#split sensor_code to get decagon sensor code
 					value_lst.extend([convert_sca(int(record['value']), sensor_code, extract)])
 				except Exception as e:
-					print e.message
+					# print e.message
 					continue
 
 		# print value_lst
@@ -842,7 +842,8 @@ def stat_degree_days_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.ddays['dd_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 	
 	#set dt_from to previous year
@@ -854,7 +855,8 @@ def stat_degree_days_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		threshold = int(settings.ddays['dd_threshold'])
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	if dt_from < min_entry:
 		dt_from = min_entry
@@ -872,7 +874,8 @@ def stat_degree_days_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	temp_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -886,7 +889,8 @@ def stat_degree_days_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -914,7 +918,8 @@ def get_degree_days_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.ddays['dd_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 	
 	#set dt_from to previous year
@@ -926,7 +931,8 @@ def get_degree_days_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		threshold = int(settings.ddays['dd_threshold'])
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	if dt_from < min_entry:
 		dt_from = min_entry
@@ -940,7 +946,8 @@ def get_degree_days_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	temp_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -954,7 +961,8 @@ def get_degree_days_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -976,7 +984,8 @@ def stat_chill_hours_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.chours['ch_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 
 	#set dt_from to previous year
@@ -988,11 +997,12 @@ def stat_chill_hours_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		threshold = int(settings.chours['ch_threshold'])
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	if dt_from < min_entry:
 		dt_from = min_entry
-	print dt_from
+	# print dt_from
 	records = entries.filter(date__range=(dt_from, max_entry)).values('data')
 	if not records.exists():
 		return {
@@ -1008,7 +1018,8 @@ def stat_chill_hours_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':float(json.loads(rec['data'])[sensor] if json.loads(rec['data'])[sensor] is not None else 0)} for rec in records]
@@ -1020,7 +1031,8 @@ def stat_chill_hours_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -1046,7 +1058,8 @@ def chilling_hours_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.chours['ch_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 
 	#set dt_from to previous year
@@ -1058,11 +1071,12 @@ def chilling_hours_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		threshold = int(settings.chours['ch_threshold'])
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	if dt_from < min_entry:
 		dt_from = min_entry
-	print dt_from
+	# print dt_from
 	records = entries.filter(date__range=(dt_from, max_entry)).values('data')
 	if not records.exists():
 		return '--'
@@ -1073,7 +1087,8 @@ def chilling_hours_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':float(json.loads(rec['data'])[sensor] if json.loads(rec['data'])[sensor] is not None else 0)} for rec in records]
@@ -1085,7 +1100,8 @@ def chilling_hours_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				temp_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# temp_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -1113,7 +1129,8 @@ def stat_cportions_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.cportions['cp_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 
 	#set dt_from to previous year
@@ -1121,7 +1138,7 @@ def stat_cportions_acc(user, db, station, sensor):
 		YEAR = str(int(YEAR)-1)
 		dt_from = parse_date(YEAR +'-'+RESET_DATE)	
 
-	print dt_from
+	# print dt_from
 	records = entries.filter(date__range=(dt_from, max_entry)).values('data')
 	raw_data = []
 	if db == 'fc':
@@ -1130,7 +1147,8 @@ def stat_cportions_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	raw_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -1143,7 +1161,8 @@ def stat_cportions_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# raw_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -1173,7 +1192,8 @@ def get_cportions_acc(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.cportions['cp_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 
 	#set dt_from to previous year
@@ -1181,7 +1201,7 @@ def get_cportions_acc(user, db, station, sensor):
 		YEAR = str(int(YEAR)-1)
 		dt_from = parse_date(YEAR +'-'+RESET_DATE)	
 
-	print dt_from
+	# print dt_from
 	records = entries.filter(date__range=(dt_from, max_entry)).values('data')
 	raw_data = []
 	if db == 'fc':
@@ -1190,7 +1210,8 @@ def get_cportions_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	raw_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -1203,7 +1224,8 @@ def get_cportions_acc(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		# raw_data = [{
 		# 	'date': json.loads(rec['data'])['date'],
 		# 	'value':convert_sca(float(json.loads(rec['data'])[sensor] and json.loads(rec['data'])[sensor] or 0),code,extract)} for rec in records]
@@ -1227,7 +1249,8 @@ def get_rain_accumulation(user, db, station, sensor):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.arain['ar_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	dt_from = parse_date(YEAR +'-'+RESET_DATE)
 
 	#set dt_from to previous year
@@ -1247,7 +1270,8 @@ def get_rain_accumulation(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	raw_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -1260,9 +1284,10 @@ def get_rain_accumulation(user, db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		if code == '187':
-			print 'ecrn 100 accumulation'
+			# print 'ecrn 100 accumulation'
 			# ecrn 100 accumulation
 			raw_data_acc = get_hourly_sum(raw_data, 0.2)
 			raw_data = raw_data_acc
@@ -1299,7 +1324,8 @@ def get_rain_accumulation_24h(db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': value }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 	# if db == 'fc':
 	# 	raw_data = [{
 	# 		'date': json.loads(rec['data'])['date'],
@@ -1312,9 +1338,10 @@ def get_rain_accumulation_24h(db, station, sensor):
 				value = float(json.loads(rec['data'])[sensor]) if json.loads(rec['data'])[sensor] is not None else None
 				raw_data.extend([{'date': json.loads(rec['data'])['date'], 'value': convert_sca(value, code, extract) }])
 			except KeyError as e:
-				print e
+				# print e
+				pass
 		if code == '187':
-			print 'ecrn 100 accumulation'
+			# print 'ecrn 100 accumulation'
 			# ecrn 100 accumulation
 			raw_data_acc = get_hourly_sum(raw_data, 0.2)
 			raw_data = raw_data_acc
@@ -1352,12 +1379,14 @@ def get_raw_data(widget_data, user):
 				settings = Settings.objects.get(user=user)
 				chart_type = settings.sensor_graph[sensors[0]]
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 			try:
 				settings = Settings.objects.get(user=user)
 				line_color = settings.sensor_color[sensors[0]]
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 			sens = sensors[0].split('-')
 			station = Stations.objects.filter(user=user, station=sens[1])
 			if station.exists():
@@ -1376,7 +1405,8 @@ def get_raw_data(widget_data, user):
 				try:
 					axis_code = sens[2].split('_')[-2]
 				except IndexError as e:
-					print e
+					# print e
+					pass
 					axis_code = sens[2].split('_')[-1]
 
 				try:
@@ -1386,7 +1416,8 @@ def get_raw_data(widget_data, user):
 					if sensor_code.axis_code != '':
 						axis_code = sensor_code.axis_code
 				except SensorCodes.DoesNotExist as e:
-					print e
+					# print e
+					pass
 				sensor_data = load_data(sens[1], sens[2], sens[0], dt_from, dt_to)
 				
 				# #watch for alert events
@@ -1445,7 +1476,8 @@ def get_raw_data(widget_data, user):
 								'valueOnBar':True})
 						daily_avg.extend([daily_accum])
 				except IndexError as e:
-					print e
+					# print e
+					pass
 
 			elif sens[0] == 'dg':
 				axis_name = ''
@@ -1457,7 +1489,8 @@ def get_raw_data(widget_data, user):
 					if sensor_code.axis_code != '':
 						axis_code = sensor_code.axis_code
 				except SensorCodes.DoesNotExist as e:
-					print e
+					# print e
+					pass
 				sensor_data = load_data(sens[1], sens[2]+'-'+sens[3], sens[0], dt_from, dt_to)
 				
 				#if no data return emptry list (handle gracefully)
@@ -1519,12 +1552,14 @@ def get_raw_data(widget_data, user):
 					settings = Settings.objects.get(user=user)
 					chart_type = settings.sensor_graph[v]
 				except (KeyError, Settings.DoesNotExist):
-					print 'KeyError or DoesNotExist'
+					# print 'KeyError or DoesNotExist'
+					pass
 				try:
 					settings = Settings.objects.get(user=user)
 					line_color = settings.sensor_color[v]
 				except (KeyError, Settings.DoesNotExist):
-					print 'KeyError or DoesNotExist'
+					# print 'KeyError or DoesNotExist'
+					pass
 
 				station = Stations.objects.filter(user=user, station=sens[1])
 				if station.exists():
@@ -1538,7 +1573,8 @@ def get_raw_data(widget_data, user):
 					try:
 						axis_code = sens[2].split('_')[-2]
 					except IndexError as e:
-						print e
+						# print e
+						pass
 						axis_code = sens[2].split('_')[-1]
 
 					try:
@@ -1548,7 +1584,8 @@ def get_raw_data(widget_data, user):
 						if sensor_code.axis_code != '':
 							axis_code = sensor_code.axis_code
 					except SensorCodes.DoesNotExist as e:
-						print e
+						# print e
+						pass
 					sensor_data = load_data(sens[1], sens[2], sens[0], dt_from, dt_to)
 
 					#watch for alert events
@@ -1591,7 +1628,7 @@ def get_raw_data(widget_data, user):
 					leaf_wetness_codes = [rec.sensor_id for rec in leaf_wetness_sensors]
 					try:
 						if sens[2].split('_')[-2] in leaf_wetness_codes:
-							print 'calculating leaf wetness daily accum'
+							# print 'calculating leaf wetness daily accum'
 							lighter_color = Color(line_color)
 							if line_color != '':
 								# print lighter_color.luminance
@@ -1613,7 +1650,8 @@ def get_raw_data(widget_data, user):
 									'valueOnBar':True})
 							daily_avg.extend([daily_accum])
 					except IndexError as e:
-						print e
+						# print e
+						pass
 
 				elif sens[0] == 'dg':
 					axis_code = sens[2]
@@ -1625,7 +1663,8 @@ def get_raw_data(widget_data, user):
 						if sensor_code.axis_code != '':
 							axis_code = sensor_code.axis_code
 					except SensorCodes.DoesNotExist as e:
-						print e
+						# print e
+						pass
 					sensor_data = load_data(sens[1], sens[2]+'-'+sens[3], sens[0], dt_from, dt_to)
 
 					#if no data return emptry list (handle gracefully)
@@ -1747,7 +1786,8 @@ def get_paw_data(widget_data, user):
 		wp = params['wp']
 		paw_fields = params['pawFields']
 	except KeyError:
-		print 'KeyError'
+		# print 'KeyError'
+		pass
 	line_color = '#00fff7'
 	chart_type = 'line'
 	if params.has_key('sensors'):
@@ -1758,12 +1798,14 @@ def get_paw_data(widget_data, user):
 				settings = Settings.objects.get(user=user)
 				chart_type = settings.calc_graph['paw_avg']
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 			try:
 				settings = Settings.objects.get(user=user)
 				line_color = settings.calc_color['paw_avg']
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 
 			for i, sensor in enumerate(sensors):
 				sens = sensor.split('-')
@@ -1781,12 +1823,14 @@ def get_paw_data(widget_data, user):
 				settings = Settings.objects.get(user=user)
 				chart_type = settings.calc_graph['paw']
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 			try:
 				settings = Settings.objects.get(user=user)
 				line_color = settings.calc_color['paw']
 			except (KeyError, Settings.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 
 			sens = sensors[0].split('-')
 			if sens[0] == 'fc':
@@ -1832,7 +1876,8 @@ def get_paw_data(widget_data, user):
 					name = station.sensors[sens[2]+'-'+sens[3]] + ' (PAW)'
 				line_color = settings.sensor_color[lst[0]['sensor']]
 			except (KeyError, Settings.DoesNotExist, Stations.DoesNotExist):
-				print 'KeyError or DoesNotExist'
+				# print 'KeyError or DoesNotExist'
+				pass
 			lst[0].update({'lineColor':line_color, 'type':chart_type, 'name':name})
 			#watch for alert events
 			# for p_val in lst:
@@ -1852,7 +1897,7 @@ def get_paw_data(widget_data, user):
 
 
 def get_eto_data(widget_data, user):
-	print 'calculating eto'
+	# print 'calculating eto'
 	global DAY
 	daily_eto = []
 	params = widget_data['data']['evapo']['params'] #(user, db, station, dt_from, dt_to)
@@ -1866,12 +1911,14 @@ def get_eto_data(widget_data, user):
 			settings = Settings.objects.get(user=user)
 			chart_type = settings.calc_graph['eto']
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
+			pass
 		try:
 			settings = Settings.objects.get(user=user)
 			line_color = settings.calc_color['eto']
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
+			pass
 
 		if s_temp[0] == 'fc':
 			temp_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_from, dt_to)
@@ -1946,7 +1993,7 @@ def get_eto_data(widget_data, user):
 
 
 def get_dew_point_data(widget_data, user):
-	print 'Calculating dew point ...'
+	# print 'Calculating dew point ...'
 	HOUR = timedelta(hours=1)
 	daily_dp = []
 	params = widget_data['data']['dew_point']['params'] #(user, db, station, dt_from, dt_to)
@@ -1962,12 +2009,14 @@ def get_dew_point_data(widget_data, user):
 			settings = Settings.objects.get(user=user)
 			chart_type = settings.calc_graph['dew_point']
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
+			pass
 		try:
 			settings = Settings.objects.get(user=user)
 			line_color = settings.calc_color['dew_point']
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
+			pass
 
 		if s_temp[0] == 'fc':
 			temp_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_from, dt_to)
@@ -1997,16 +2046,16 @@ def get_dew_point_data(widget_data, user):
 				if t_avg.has_key(start_day) and rh_avg.has_key(start_day):
 					daily_dp.extend([{'date':start_day, 'value':dew_point(t_avg[start_day], rh_avg[start_day])}])
 				start +=HOUR
-	print 'daily_dp returning'
+	# print 'daily_dp returning'
 	# try:
 	daily_dp[0].update({'lineColor':line_color, 'type':chart_type})
 	# except IndexError as e:
-	# 	print e
+	# print e
 	return daily_dp
 
 
 def get_cportions_data(widget_data, user):
-	print 'Calculating chilling portions '
+	# print 'Calculating chilling portions '
 	daily_chip = []
 	params = widget_data['data']['chilling_portions']['params']
 	dt_from = parse_date(widget_data['data']['range']['from'])
@@ -2019,7 +2068,8 @@ def get_cportions_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.cportions['cp_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	dt_reset = parse_date(YEAR+'-'+RESET_DATE)
 
@@ -2037,18 +2087,20 @@ def get_cportions_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		chart_type = settings.calc_graph['chilling_portions']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 	try:
 		settings = Settings.objects.get(user=user)
 		line_color = settings.calc_color['chilling_portions']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 
 	if s_temp[0] == 'fc':
-		print 'Retrieving fieldclimate data from local database...'
+		# print 'Retrieving fieldclimate data from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		raw_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_reset, dt_to)
 		cportions = calculate_cportions(get_hourly_avg(raw_data, 0, 1), RESET_DATE)
@@ -2057,10 +2109,10 @@ def get_cportions_data(widget_data, user):
 		return cp_data
 
 	elif s_temp[0] == 'dg':
-		print 'Retrieving decagon data from local database...'
+		# print 'Retrieving decagon data from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		data = load_data(s_temp[1], s_temp[2]+'-'+s_temp[3], s_temp[0], dt_reset, dt_to)
 		raw_data = [{
@@ -2108,7 +2160,7 @@ def get_chill_hours_data(widget_data, user):
 			settings = Settings.objects.get(user=user)
 			threshold = int(settings.chours['ch_threshold'])
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
 			threshold = 7
 	else:
 		threshold = int(threshold)
@@ -2117,7 +2169,8 @@ def get_chill_hours_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.chours['ch_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 	
 	dt_reset = parse_date(YEAR+'-'+RESET_DATE)
 
@@ -2130,19 +2183,21 @@ def get_chill_hours_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		chart_type = settings.calc_graph['chilling_hours']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 	try:
 		settings = Settings.objects.get(user=user)
 		line_color = settings.calc_color['chilling_hours']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 	# print RESET_DATE
 	# print threshold
 	if s_temp[0] == 'fc':
-		print 'Retrieving fieldclimate data from local database...'
+		# print 'Retrieving fieldclimate data from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		raw_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_reset, dt_to)
 		chill_hours_acc = calculate_chill_hours(raw_data, threshold, RESET_DATE)
@@ -2150,10 +2205,10 @@ def get_chill_hours_data(widget_data, user):
 		ch_data[0].update({'lineColor': line_color, 'type':chart_type})
 		return ch_data
 	elif s_temp[0] == 'dg':
-		print 'Retrieving decagon data for chiling hours calculation from local database...'
+		# print 'Retrieving decagon data for chiling hours calculation from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		data = load_data(s_temp[1], s_temp[2]+'-'+s_temp[3], s_temp[0], dt_reset, dt_to)
 		raw_data = [{
@@ -2209,7 +2264,7 @@ def get_degree_days_data(widget_data, user):
 	YEAR = str(dt_from.year)
 	if not params.has_key('sensors'):
 		return False
-	print 'has key sensors: True'
+	# print 'has key sensors: True'
 	s_temp = params['sensors'].split('-')
 
 	if threshold == '':
@@ -2217,7 +2272,7 @@ def get_degree_days_data(widget_data, user):
 			settings = Settings.objects.get(user=user)
 			threshold = int(settings.ddays['dd_threshold'])
 		except (KeyError, Settings.DoesNotExist):
-			print 'KeyError or DoesNotExist'
+			# print 'KeyError or DoesNotExist'
 			threshold = 10
 	else:
 		threshold = int(threshold)
@@ -2226,7 +2281,8 @@ def get_degree_days_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		RESET_DATE = settings.ddays['dd_reset_dt'] + '-01 08:00'
 	except (KeyError, Settings.DoesNotExist):
-		print ' KeyError or Settings.DoesNotExist'
+		# print ' KeyError or Settings.DoesNotExist'
+		pass
 
 	dt_reset = parse_date(YEAR+'-'+RESET_DATE)
 
@@ -2239,22 +2295,24 @@ def get_degree_days_data(widget_data, user):
 		settings = Settings.objects.get(user=user)
 		chart_type = settings.calc_graph['degree_days']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 	try:
 		settings = Settings.objects.get(user=user)
 		line_color = settings.calc_color['degree_days']
 	except (KeyError, Settings.DoesNotExist):
-		print 'KeyError or DoesNotExist'
+		# print 'KeyError or DoesNotExist'
+		pass
 
 	if s_temp[0] == 'fc':
-		print 'Retrieving fieldclimate data for degree days calculation from local database...'
+		# print 'Retrieving fieldclimate data for degree days calculation from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		
 		raw_data = load_data(s_temp[1], s_temp[2], s_temp[0], dt_reset, dt_to)
-		print RESET_DATE
+		# print RESET_DATE
 		daily_avg = get_daily_avg(raw_data)
 		degree_days_acc = calculate_degree_days(daily_avg, threshold, RESET_DATE)
 		dd_data = [{
@@ -2263,10 +2321,10 @@ def get_degree_days_data(widget_data, user):
 		dd_data[0].update({'lineColor': line_color, 'type':chart_type})
 		return dd_data
 	elif s_temp[0] == 'dg':
-		print 'Retrieving decagon data for degree days calculation from local database...'
+		# print 'Retrieving decagon data for degree days calculation from local database...'
 		entries = StationData.objects.filter(station_id=s_temp[1], database=s_temp[0])
 		if not entries.exists():
-			print 'No data found in the local database.'
+			# print 'No data found in the local database.'
 			return []
 		data = load_data(s_temp[1], s_temp[2]+'-'+s_temp[3], s_temp[0], dt_reset, dt_to)
 		raw_data = [{
@@ -2422,7 +2480,7 @@ def get_voltage_data(widget, user):
 				fn = Expression(equation, ['x'])
 				s_value = fn(value)
 			except Exception as e:
-				print e
+				# print e
 				voltage_data.extend([{'date': date, 'value': None}])
 			voltage_data.extend([{'date': date, 'value': s_value}])
 			# print voltage_data
@@ -2457,7 +2515,7 @@ def load_data(station_id, sensor, database, dt_from, dt_to):
 				'date':json.loads(rec['data'])['date'],
 				'value':json.loads(rec['data'])[sensor]}])
 		except KeyError as e:
-			print e
+			# print e
 			data.extend([{
 				'date':json.loads(rec['data'])['date'],
 				'value':None}])
@@ -2544,7 +2602,7 @@ def add_fc_station(user, data):
 
 	MAX_RETRY = 3
 	path = '/station/'+data['station_id']+'/'+data['password']
-	print path
+	# print path
 	headers = make_headers('POST', path)
 	url = 'https://api.fieldclimate.com'
 	schema = json.dumps({"custom_name": data['alias']})
@@ -2554,12 +2612,12 @@ def add_fc_station(user, data):
 		try:
 			response = requests.post(url + path, headers=headers, data=schema, verify=False) # very=false: this needs to be fixed
 		except requests.exceptions.RequestException as e:
-			print e 
-			print 'Retrying in 3 seconds...'
+			# print e 
+			# print 'Retrying in 3 seconds...'
 			time.sleep(3)
 			continue
 		if response.status_code != 200:
-			print 'Server returned http ', response.status_code
+			# print 'Server returned http ', response.status_code
 			# print response.text
 			if response.status_code == 409:
 				station = Stations.objects.filter(station=data['station_id'])
@@ -2574,7 +2632,7 @@ def add_fc_station(user, data):
 								sensors=station[0].sensors, inactive_sensors=station[0].inactive_sensors)
 							new_station.save()
 						except (ValueError, IntegrityError) as e:
-							print e
+							# print e
 							data['success'] = False
 							data['message'] = 'Invalid parameters.'
 							return data
@@ -2590,7 +2648,7 @@ def add_fc_station(user, data):
 									sensors={}, inactive_sensors={})
 								new_station.save()
 							except (ValueError, IntegrityError) as e:
-								print e
+								# print e
 								data['success'] = False
 								data['message'] = 'Invalid parameters.'
 								return data
@@ -2615,7 +2673,7 @@ def add_fc_station(user, data):
 								sensors={}, inactive_sensors={})
 							new_station.save()
 						except (ValueError, IntegrityError) as e:
-							print e
+							# print e
 							data['success'] = False
 							data['message'] = 'Invalid parameters.'
 							return data
@@ -2635,7 +2693,7 @@ def add_fc_station(user, data):
 			time.sleep(3)
 			continue
 		else:
-			print 'station successfully added.', json.loads(response.text)
+			# print 'station successfully added.', json.loads(response.text)
 			return json.loads(response.text)
 			station = Stations.objects.filter(station=data['station_id'])
 			if station.exists():
@@ -2649,7 +2707,7 @@ def add_fc_station(user, data):
 							sensors=station[0].sensors, inactive_sensors=station[0].inactive_sensors)
 						new_station.save()
 					except (ValueError, IntegrityError) as e:
-						print e
+						# print e
 						data['success'] = False
 						data['message'] = 'Invalid parameters.'
 						return data
@@ -2662,7 +2720,7 @@ def add_fc_station(user, data):
 						sensors={}, inactive_sensors={})
 					new_station.save()
 				except (ValueError, IntegrityError) as e:
-					print e
+					# print e
 					data['success'] = False
 					data['message'] = 'Invalid parameters.'
 					return data
@@ -2682,7 +2740,7 @@ def add_fc_station(user, data):
 
 
 def add_dg_station(user, data):
-	print 'Adding decagon station ...'
+	# print 'Adding decagon station ...'
 
 	if Stations.objects.filter(user=user, station=data['station_id']).exists():
 		data['success'] = False
@@ -2702,11 +2760,12 @@ def add_dg_station(user, data):
 		url = 'http://api.ech2odata.com/morph2ola/dxd.cgi'
 		response = requests.post(url, data=params)
 	except requests.exceptions.RequestException as e:
-		print e
+		# print e
+		pass
 
 	if response.status_code == 200:
 		success = get_data_decagon(data['station_id'], user, data['password'])
-		print 'success: ', success
+		# print 'success: ', success
 		data['success'] = success
 		if success:
 			data['message'] = 'Station successfully added. Please refresh page.'
@@ -2728,7 +2787,7 @@ def list_files(user):
 
 def get_data_decagon(device, user, devicepass):
 	# from datetime import datetime
-	print 'downloading decagon data...'
+	# print 'downloading decagon data...'
 	mrid = 0
 	prev_records = StationData.objects.filter(station_id=device)
 	dg_acc = AppUser.objects.get(user=user)
@@ -2775,13 +2834,14 @@ def get_data_decagon(device, user, devicepass):
 				station = Stations(user=user, station=station_info['station'], name=station_info['name'], database='dg', code=devicepass, sensors=station_info['sensors'])
 				station.save()
 	except requests.exceptions.RequestException as e:
-		print e
+		# print e
+		pass
 	
 	
 	return True
 
 def download_station_data(station, database, user):
-	print 'first time download started.'
+	# print 'first time download started.'
 	if database == 'fc':
 		success = get_data_fc(station)
 		return success
@@ -2791,7 +2851,7 @@ def download_station_data(station, database, user):
 	return False
 		
 def update_fc_stations(user, station, code): # edit 1 for new sensors code
-	print 'updating stations ...'
+	# print 'updating stations ...'
 	appuser = AppUser.objects.get(user=user)
 
 	sensor_codes =[sensor.sensor_id for sensor in SensorCodes.objects.all()]
@@ -2808,15 +2868,15 @@ def update_fc_stations(user, station, code): # edit 1 for new sensors code
 				 	"row_count": 1
 				 	})
 		except requests.exceptions.RequestException as e:
-			print e 
+			# print e 
 			return False
-		print 'response1 returned: ', response1.status_code
+		# print 'response1 returned: ', response1.status_code
 		for sensor in json.loads(response1.text)['ReturnDataSet'][0]:
-			print 'looping through senosrs'
+			# print 'looping through senosrs'
 			if sensor == 'f_date' or sensor == 'f_log_int':
 				continue
 			if sensor.split('_')[len(sensor.split('_'))-2] in sensor_codes:
-				print 'sensor in SensorCodes'
+				# print 'sensor in SensorCodes'
 				sensor_name = SensorCodes.objects.get(sensor_id=sensor.split('_')[len(sensor.split('_'))-2]).sensor_name and SensorCodes.objects.get(sensor_id=sensor.split('_')[len(sensor.split('_'))-2]).sensor_name or sensor
 				if sensor.split('_')[1] in minmax:
 					sensor_name = sensor_name+' ['+sensor.split('_')[len(sensor.split('_'))-2]+' '+sensor.split('_')[1]+']'
@@ -2824,7 +2884,7 @@ def update_fc_stations(user, station, code): # edit 1 for new sensors code
 					sensor_name = sensor_name+' ['+sensor.split('_')[len(sensor.split('_'))-2]+']'
 				sensors.update({sensor:sensor_name})
 			else:
-				print 'getting sensor list from FC'
+				# print 'getting sensor list from FC'
 				try:
 					url2 = "http://fieldclimate.com/api/CIDIStationSensors/Get"
 					data2 = {
@@ -2834,9 +2894,10 @@ def update_fc_stations(user, station, code): # edit 1 for new sensors code
 						}
 					response2 = requests.post(url2, data2)
 				except requests.exceptions.RequestException as e:
-					print e
+					# print e
+					pass
 
-				print 'response2 returned: ', response2.status_code
+				# print 'response2 returned: ', response2.status_code
 				for rec in json.loads(response2.text)['ReturnDataSet']:
 					if rec['f_sensor_code'] == sensor:
 						if sensor.split('_')[1] in minmax:
@@ -2860,13 +2921,14 @@ def update_fc_stations(user, station, code): # edit 1 for new sensors code
 
 def get_unit(user, station, sensor):
 	unit = ''
-	print 'error here 1'
+	# print 'error here 1'
 	try:
 		sensor = Units.objects.get(user=user, sensor_id=sensor)
 		return sensor.sensor_unit
-		print 'error here 2'
+		# print 'error here 2'
 	except Units.DoesNotExist:
-		print 'Unit DoesNotExist.'
+		# print 'Unit DoesNotExist.'
+		pass
 	try:
 		appuser = AppUser.objects.get(user=user)
 		url = "http://fieldclimate.com/api/CIDIStationSensors/Get"
@@ -2877,7 +2939,8 @@ def get_unit(user, station, sensor):
 			}
 		response = requests.post(url, data)
 	except requests.exceptions.RequestException as e:
-		print e
+		# print e
+		pass
 
 	try:
 		sensors_info = json.loads(response)['ReturnDataSet']
@@ -2887,7 +2950,7 @@ def get_unit(user, station, sensor):
 			if item['f_sensor_code'] == sensor:
 				unit = item['f_unit']
 		return unit
-		print unit
+		# print unit
 	except KeyError:
 		raise e
 

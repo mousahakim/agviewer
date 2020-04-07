@@ -14,7 +14,7 @@ from memory_profiler import profile
 
 @shared_task
 def async_update():
-	print 'creating async widget update tasks'
+	# print 'creating async widget update tasks'
 	from visualizer.models import Widgets
 	widgets = Widgets.objects.all()
 
@@ -33,7 +33,7 @@ def update_stat_widget(widget_id):
 	try:
 		widget = Widgets.objects.get(widget_id=widget_id)
 	except Widgets.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	dataset = widget.dataset.all()
@@ -47,7 +47,7 @@ def update_stat_widget(widget_id):
 				try:
 					station = data.sensor.split('-')[1]
 				except Exception as e:
-					print e
+					# print e
 					return
 				last_record = StationData.objects.filter(station_id=station).last()
 				if last_record is None:
@@ -112,7 +112,7 @@ def update_widget(widget, username):
 	try:
 		user = User.objects.get(username=username)
 	except User.DoesNotExist as e:
-		print e
+		# print e
 		return
 	try:
 		if widget['type'] == 'stat':
@@ -138,7 +138,7 @@ def update_widget(widget, username):
 		widget['data']['range']['from'] = date_to_string(current_time - timedelta(weeks=2))
 		widget['data']['range']['to'] = date_to_string(current_time)
 	except KeyError as e:
-		print 'KeyError', e
+		# print 'KeyError', e
 		return
 
 	new_widget = set_widget(widget, user)
@@ -147,7 +147,7 @@ def update_widget(widget, username):
 		if widget_in_db.exists():
 			widget_in_db.update(widget=new_widget)
 	except KeyError as e:
-		print 'KeyError', e
+		# print 'KeyError', e
 		return
 	new_widget = None
 	monitor.delay(widget, username)
@@ -159,7 +159,7 @@ def async_alert(event_id):
 	try:
 		event = AlertEvents.objects.get(event_id=event_id)
 	except AlertEvents.DoesNotExist as e:
-		print e
+		# print e
 		return
 	
 	if event.alert.email_alert and not event.sent:
@@ -176,13 +176,13 @@ def send_sms(event_id):
 	try:
 		event = AlertEvents.objects.get(event_id=event_id)
 	except AlertEvents.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	try:
 		appuser = AppUser.objects.get(user=event.user)
 	except AppUser.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	if appuser.phone_number is None or appuser.phone_number == '':
@@ -192,7 +192,7 @@ def send_sms(event_id):
 		widget = Widgets.objects.get(widget_id=event.widget)
 		widget_title = widget.widget['title']
 	except Widgets.DoesNotExist as e:
-		print e
+		# print e
 		widget_title = 'Non-existing widget'
 
 	user = event.user
@@ -222,8 +222,9 @@ def send_sms(event_id):
 		event.sent = True
 		event.save()
 	except ValueError as e:
-		print e
-		print 'failed to save sms notification'	
+		# print e
+		# print 'failed to save sms notification'	
+		pass
 
 
 def send_email(event_id):
@@ -233,13 +234,13 @@ def send_email(event_id):
 	try:
 		event = AlertEvents.objects.get(event_id=event_id)
 	except AlertEvents.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	try:
 		appuser = AppUser.objects.get(user=event.user)
 	except AppUser.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	if appuser.email_add is None or appuser.email_add == '':
@@ -248,14 +249,14 @@ def send_email(event_id):
 	try:
 		configs = SMTPConfig.objects.get(use_this=True)
 	except SMTPConfig.DoesNotExist as e:
-		print e
+		# print e
 		return
 
 	try:
 		widget = Widgets.objects.get(widget_id=event.widget)
 		widget_title = widget.widget['title']
 	except Widgets.DoesNotExist as e:
-		print e
+		# print e
 		widget_title = 'Non-existing widget'
 
 	user = event.user
@@ -273,9 +274,9 @@ def send_email(event_id):
 	message = """From: %s\nTo: %s\nSubject: %s\n\n%s
 	""" % (from_, ", ".join(to), subject, body)
 
-	print from_
-	print to
-	print message
+	# print from_
+	# print to
+	# print message
 
 	try:
 		if configs.tls:
@@ -288,12 +289,13 @@ def send_email(event_id):
 			server.login(configs.username, configs.password)
 			server.sendmail(from_, to, message)
 			server.close()
-			print 'email sent successfully.'
+			# print 'email sent successfully.'
 			try:
 				email_noti = EmailNotification(user=user, subject=subject, content=body, success=True)
 				email_noti.save()
 			except:
-				print 'failed to save email notification'
+				# print 'failed to save email notification'
+				pass
 		elif configs.ssl:
 			server = smtplib.SMTP_SSL(configs.server_address, configs.port)
 			if configs.esmtp:
@@ -310,26 +312,28 @@ def send_email(event_id):
 			server.close()
 			event.sent = True
 			event.save()
-			print 'email sent successfully.'
+			# print 'email sent successfully.'
 			try:
 				email_noti = EmailNotification(user=user, subject=subject, content=body, success=True, error='email sent successfully')
 				email_noti.save()
 			except ValueError as e:
-				print e
-				print 'failed to save email notification'
+				# print e
+				# print 'failed to save email notification'
+				pass
 	except smtplib.SMTPException as e:
-		print e
-		print 'failed to send email.'
+		# print e
+		# print 'failed to send email.'
 		try:
 			email_noti = EmailNotification(user=user, subject=subject, content=body, success=False, error='failed to send email')
 			email_noti.save()
 		except:
-			print 'failed to save email notification'
+			# print 'failed to save email notification'
+			pass
 	
 
 @shared_task
 def async_download():
-	print 'creating async download tasks'
+	# print 'creating async download tasks'
 	from visualizer.models import Stations
 	dg_stations = list(set([st.station for st in Stations.objects.filter(database='dg')]))
 	fc_stations = list(set([st.station for st in Stations.objects.filter(database='fc')]))
@@ -342,13 +346,13 @@ def async_download():
 		for station in fc_stations:
 			download.delay(station=station, db='fc')
 
-	print '%d tasks created.' % (len(dg_stations)+len(fc_stations))
+	# print '%d tasks created.' % (len(dg_stations)+len(fc_stations))
 
 @shared_task
 def download(station=None, db=None):
 	
 	if station != None and db != None:
-		print 'Download started. ', datetime.now()
+		# print 'Download started. ', datetime.now()
 		if db == 'fc':
 			get_data_fc(station)
 			get_model_data_fc(station)
@@ -360,7 +364,7 @@ def download(station=None, db=None):
 		else:
 			return
         from visualizer.models import Stations
-	print 'Periodic download started. ', datetime.now()
+	# print 'Periodic download started. ', datetime.now()
 	dg_stations = list(set([st.station for st in Stations.objects.filter(database='dg')]))
 	fc_stations = list(set([st.station for st in Stations.objects.filter(database='fc')]))
 
@@ -381,7 +385,7 @@ def update_sensor_lst(station_id):
 
 	stations = Stations.objects.filter(station=station_id)
 	if not stations.exists():
-		print 'no station. exiting...'
+		# print 'no station. exiting...'
 		return
 
 	sensors = stations[0].sensors
@@ -393,23 +397,23 @@ def update_sensor_lst(station_id):
 	try:
 		response = requests.get('https://api.fieldclimate.com/v1' + path, headers=headers, verify=False)
 	except:
-		print 'cannot connect'
+		# print 'cannot connect'
 		return
-	print response.status_code
+	# print response.status_code
 	try:
 		sensor_lst = json.loads(response.text)['sensors']
 	except KeyError as e:
-		print e
+		# print e
 		return
 	# print sensor_lst
 	try:
 		data = json.loads(response.text)['data'][0]
 	except IndexError as e:
-		print 'No data retrieved', e
+		# print 'No data retrieved', e
 		return
 
 	if sensor_lst is None:
-		print 'failed to get sensor list. exiting...'
+		# print 'failed to get sensor list. exiting...'
 		return
 	for sensor in sensor_lst:
 		for val in sensor['aggr']:
@@ -438,14 +442,14 @@ def update_sensor_lst(station_id):
 
 def get_data_dg(device):
 	from visualizer.models import Stations, AppUser, StationData
-	print 'downloading decagon data...'
+	# print 'downloading decagon data...'
 	mrid = 0
 	mydevice = Stations.objects.filter(station=device)
 	if not mydevice.exists():
 		return False
 	prev_records = StationData.objects.filter(station_id=device)
 	if prev_records.exists():
-		print 'Some data exists'
+		# print 'Some data exists'
 		mrid = prev_records.last().mrid
 	try:
 		dg_acc = AppUser.objects.get(user=mydevice[0].user)
@@ -470,7 +474,7 @@ def get_data_dg(device):
 				now = datetime.now()
 
 				if item_date.year > now.year:
-					print 'bad timestamped record dropped. Timestamp: ', item_date
+					# print 'bad timestamped record dropped. Timestamp: ', item_date
 					continue
 				try:
 					record = StationData(station_id=device, database='dg', mrid=get_rid(response.text), date=item_date, data=json.loads(item))
@@ -492,7 +496,7 @@ def get_data_fc(station,min_date=None, max_date=None):
 	try:
 		user = AppUser.objects.get(user=User.objects.get(username='admin')) # this isn't needed!!
 	except (User.DoesNotExist, AppUser.DoesNotExist) as e:
-		print e, 'user does not exist.'
+		# print e, 'user does not exist.'
 		return
 
 	dt_from = ''
@@ -508,14 +512,14 @@ def get_data_fc(station,min_date=None, max_date=None):
 				dt_from = parse_date(minmax_date['min_date'])
 			dt_from = calendar.timegm(dt_from.timetuple())
 		else:
-			print 'cannot retrieve min/max data available.'
-			print 'requesting data 44 weeks from now.'
+			# print 'cannot retrieve min/max data available.'
+			# print 'requesting data 44 weeks from now.'
 			dt_from = calendar.timegm((datetime.now() - timedelta(weeks=44)).timetuple())
 
 	if min_date is not None:
 		dt_from = calendar.timegm(min_date.timetuple())
 
-	print 'downloading data since: ', datetime.fromtimestamp(dt_from).strftime('%Y-%m-%d %H:%M:%S')
+	# print 'downloading data since: ', datetime.fromtimestamp(dt_from).strftime('%Y-%m-%d %H:%M:%S')
 	if max_date is not None:
 		dt_to = calendar.timegm(max_date.timetuple())
 		path = '/data/'+station+'/raw/from/'+str(dt_from)+'/to/'+str(dt_to)
@@ -543,17 +547,17 @@ def get_data_fc(station,min_date=None, max_date=None):
 			# verify=false: this needs to be fixed
 			response = requests.get(url + path, headers=headers, verify=False) 
 		except requests.exceptions.RequestException as e:
-			print e 
-			print 'Retrying in a seconds...'
+			# print e 
+			# print 'Retrying in a seconds...'
 			time.sleep(1)
 			continue
 		if response.status_code != 200:
-			print 'Server returned http ', response.status_code
-			print 'Retrying in a seconds...'
+			# print 'Server returned http ', response.status_code
+			# print 'Retrying in a seconds...'
 			time.sleep(1)
 			continue
 		else:
-			print 'Server returned http ', response.status_code
+			# print 'Server returned http ', response.status_code
 			break
 		response = None
 
@@ -580,13 +584,13 @@ def get_data_fc(station,min_date=None, max_date=None):
 						sensor_id = key_parts[0] + '_' + key_parts[-2] + '_' + key_parts[-1]
 						processed_record.update({sensor_id:val})
 					except Exception as e:
-						print e
+						# print e
 						continue
 			try:
 				new_record = StationData(station_id=station, database='fc', mrid=0, date=parse_date_s(record['date']).replace(second=0), data=processed_record)
 				new_record.save()
 			except IntegrityError as e:
-				print 'IntegrityError', e
+				# print 'IntegrityError', e
 				continue
 	except KeyError as e:
 		# print 'KeyError', e
@@ -644,9 +648,9 @@ def get_model_data_fc(station):
 			dt_from = calendar.timegm(record.date.timetuple())
 			break
 	if dt_from is None:
-		print 'No existing disease data found.'
+		# print 'No existing disease data found.'
 		dt_from = calendar.timegm(datetime.now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).timetuple())
-	print 'last model data', dt_from
+	# print 'last model data', dt_from
 	view = {
 		'name': 'eto',
 		'data': {
@@ -662,11 +666,11 @@ def get_model_data_fc(station):
 		response = requests.post(url + path, headers=headers, data=view, verify=False)
 	except requests.exceptions.RequestException as e:
 		#will not retry because it is retried every hour anyway
-		print e
+		# print e
 		return
 
 	if response.status_code != 200:
-		print response.text
+		# print response.text
 		return
 	model_data = json.loads(response.text)
 
@@ -674,7 +678,7 @@ def get_model_data_fc(station):
 	#also update station's sensor list if required
 	station_obj = Stations.objects.filter(station=station)
 	sensors = station_obj[0].sensors
-	print 'disease model data exists'
+	# print 'disease model data exists'
 	try:
 		for event in model_data:
 			record = StationData.objects.filter(station_id=station, database='fc', date=parse_date_s(event['date']).replace(second=0))
@@ -693,7 +697,8 @@ def get_model_data_fc(station):
 				# print new_data
 			else:
 				# this probably never happens
-				print 'No corresponding record exists. disease model data cannot be saved'
+				# print 'No corresponding record exists. disease model data cannot be saved'
+				pass
 	except KeyError as e:
 		# print 'KeyError', e
 		pass
@@ -777,7 +782,7 @@ def monitor(widget, username):
 		try:
 			user = User.objects.get(username=username)
 		except User.DoesNotExist as e:
-			print e
+			# print e
 			return
 
 		if widget['data']['raw_sensors'] is not None:
@@ -791,7 +796,7 @@ def monitor(widget, username):
 					try:
 						db = sensor.split('-')[0]
 					except KeyError as e:
-						print e
+						# print e
 						return
 					extract = None
 					if db == 'dg':
@@ -819,12 +824,13 @@ def monitor(widget, username):
 							# print alert.alert_dict
 							if db == 'dg':
 								if extract is not None and alert.alert_dict['extract'] is not None and extract != alert.alert_dict['extract']:
-									print 'yes what you suspected'
+									# print 'yes what you suspected'
 									continue
 							alert.watch(event, sensor, None)
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "Raw sensors calc activated but no values provided: " + e.message
+				# print "Raw sensors calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['paw'] is not None:
 			try:				
@@ -855,7 +861,8 @@ def monitor(widget, username):
 							alert.watch(event, None, 'paw')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "PAW calc activated but no values provided: " + e.message
+				# print "PAW calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['chilling_portions'] is not None:
 			try:
@@ -883,7 +890,8 @@ def monitor(widget, username):
 
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "Chill portions calc activated but no values provided: " + e.message
+				# print "Chill portions calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['degree_days'] is not None:
 			try:
@@ -910,7 +918,8 @@ def monitor(widget, username):
 						alert.watch(event, None, 'degree_days')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "Degree days calc activated but no values provided: " + e.message
+				# print "Degree days calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['chilling_hours'] is not None:
 			try:
@@ -937,7 +946,8 @@ def monitor(widget, username):
 						alert.watch(event, None, 'chilling_hours')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "Chill hours calc activated but no values provided: " + e.message
+				# print "Chill hours calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['evapo'] is not None:
 			try:
@@ -968,7 +978,8 @@ def monitor(widget, username):
 						alert.watch(event, None, 'evapo')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "ETo calc activated but no values provided: " + e.message
+				# print "ETo calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['dew_point'] is not None:
 			# print 'monitoring dew point widget'
@@ -998,7 +1009,8 @@ def monitor(widget, username):
 						alert.watch(event, None, 'dew_point')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "Dew point calc activated but no values provided: " + e.message
+				# print "Dew point calc activated but no values provided: " + e.message
+				pass
 
 		if widget['data']['ex_ec'] is not None:
 			try:
@@ -1013,7 +1025,7 @@ def monitor(widget, username):
 					try:
 						graph_sensors = w_all_sensors[values[0]['label']]
 					except KeyError as e:
-						print e
+						# print e
 						graph_sensors = []
 					
 					for v in values:
@@ -1035,7 +1047,8 @@ def monitor(widget, username):
 							alert.watch(event, None, 'ex_ec')
 			except KeyError as e:
 				#catch activated calcs that are unpopulated -- to be fixed in the interface
-				print "EX EC calc activated but no values provided: " + e.message
+				# print "EX EC calc activated but no values provided: " + e.message
+				pass
 
 
 

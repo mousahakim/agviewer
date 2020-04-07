@@ -474,7 +474,8 @@ def daily_avg(data, reset_hr, reset_min):
 					'date': parse_date(prev_rec['date']).strftime('%Y-%m-%d'),
 					'value': round(total/count, 2)}])
 			except ZeroDivisionError as e:
-				print e
+				# print e
+				pass
 			count = 0
 			total = 0
 			prev_rec = rec
@@ -487,7 +488,8 @@ def daily_avg(data, reset_hr, reset_min):
 				'date': parse_date(prev_rec['date']).strftime('%Y-%m-%d'),
 				'value': round(total/count, 2)}])
 		except ZeroDivisionError as e:
-			print e
+			# print e
+			pass
 	return daily_avg_val
 
 
