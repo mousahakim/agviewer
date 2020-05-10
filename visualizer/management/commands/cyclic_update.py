@@ -198,7 +198,9 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 
 		# if existing tasks in queue or active abort periodic update
-		if self.get_redis_queue_lenght() > 0 or self.get_active_celery_worker_count() > 0:
+		# redis not used as broker
+		# if self.get_redis_queue_lenght() > 0 or self.get_active_celery_worker_count() > 0:
+		if self.get_active_celery_worker_count() > 0:
 			self.stdout.write('Aborting periodic update due to existing tasks.')
 			return
 
@@ -214,17 +216,18 @@ class Command(BaseCommand):
 		async_download()
 
 		# wait for download to finish
-		while self.get_redis_queue_lenght() > 0:
+		# redis not used as broker
+		# while self.get_redis_queue_lenght() > 0:
 
-			self.stdout.write('{} tasks remain in queue.'.format(self.get_redis_queue_lenght()))
-			time.sleep(5)
+		# 	self.stdout.write('{} tasks remain in queue.'.format(self.get_redis_queue_lenght()))
+		# 	time.sleep(5)
 
 		#wait for active download tasks to finish
 		while self.get_active_celery_worker_count() > 0:
 			#stop idle tasks
 			# self.stop_idle_tasks()
 
-			self.stdout.write('{} tasks are active'.format(self.get_active_celery_worker_count()))
+			self.stdout.write('{} download tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
 
 		t2 = time.time()
@@ -232,11 +235,19 @@ class Command(BaseCommand):
 		#update all widgets
 		async_update()
 
+		#wait for active download tasks to finish
+		while self.get_active_celery_worker_count() > 0:
+			#stop idle tasks
+			# self.stop_idle_tasks()
+
+			self.stdout.write('{} update tasks are active'.format(self.get_active_celery_worker_count()))
+			time.sleep(5)
 
 		#stop tasks
 		#AWS ECS tasks are not used
 		# self.stop_tasks()
 
+		# report cyclic update completion
 		t2 = time.time()
 		self.stdout.write(self.style.SUCCESS('Update completed in {} minutes.'.format((t2-t1)/60)))
 		self.stdout.write(self.style.SUCCESS('Time: {}'.format(datetime.now().isoformat(' '))))
