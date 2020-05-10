@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
 	SERVICE_NAME = 'agview1_service'
 
-	CELERY_APP = Celery('morph2o', broker='redis://localhost:6379/0', task_ignore_result=True)
+	CELERY_APP = Celery('morph2o', broker='pyamqp://admin:Rah3lajan@localhost:5672/localvhost', task_ignore_result=True)
 
 	client = boto3.client('ecs')
 
