@@ -231,16 +231,6 @@ class Command(BaseCommand):
 			self.stdout.write('{} download tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
 
-		#download fieldclimate data this way to get model data
-		self.stdout.write('Downloading Fieldclimate stations data')
-		fc_stations = Stations.objects.filter(database='fc')
-
-		if fc_stations.exists():
-			for station in fc_stations:
-				try:
-					download(station.station, station.database)
-				except:
-					pass
 
 		t2 = time.time()
 		self.stdout.write(self.style.SUCCESS('Download completed in {} minutes.'.format((t2-t1)/60)))
@@ -258,6 +248,16 @@ class Command(BaseCommand):
 		#stop tasks
 		#AWS ECS tasks are not used
 		# self.stop_tasks()
+
+		#download fieldclimate data at hour 5 get model data
+		self.stdout.write('Downloading Fieldclimate stations data')
+		fc_stations = Stations.objects.filter(database='fc')
+		if fc_stations.exists() and datetime.now().hour == 5:
+			for station in fc_stations:
+				try:
+					download(station.station, station.database)
+				except:
+					pass
 
 		# report cyclic update completion
 		t2 = time.time()
