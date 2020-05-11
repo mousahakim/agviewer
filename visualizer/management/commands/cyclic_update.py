@@ -1,7 +1,8 @@
 import boto3, redis, time
 from datetime import datetime
 from django.core.management.base import BaseCommand
-from visualizer.tasks import async_download, async_update
+from visualizer.models import Stations
+from visualizer.tasks import async_download, async_update, download
 from celery import Celery
 
 
@@ -229,6 +230,17 @@ class Command(BaseCommand):
 
 			self.stdout.write('{} download tasks are active'.format(self.get_active_celery_worker_count()))
 			time.sleep(5)
+
+		#download fieldclimate data this way to get model data
+		self.stdout.write('Downloading Fieldclimate stations data')
+		fc_stations = Stations.objects.filter(database='fc')
+
+		if fc_stations.exists():
+			for station in fc_stations:
+				try:
+					download(station.station, station.database)
+				except:
+					pass
 
 		t2 = time.time()
 		self.stdout.write(self.style.SUCCESS('Download completed in {} minutes.'.format((t2-t1)/60)))
